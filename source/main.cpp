@@ -25,17 +25,22 @@ const unsigned int HEIGHT = 600;
     (GLSL version 420 corresponds to OpenGL version 4.2 for example).
  */
 
+
 /** 
     ------------- VERTEX SHADER -------------
     create a vec3 called aPos
     cast this to a vector of size 4
 */
-const char *vertexShaderSource = "#version 330 core\n"
+const char *vertexShaderSource ="#version 330 core\n"
     "layout (location = 0) in vec3 aPos;\n"
+    "layout (location = 1) in vec3 aColor;\n"
+    "out vec3 ourColor;\n"
     "void main()\n"
     "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+    "   gl_Position = vec4(aPos, 1.0);\n"
+    "   ourColor = aColor;\n"
     "}\0";
+
 
 /** 
     ------------- FRAGMENT SHADER -------------
@@ -44,9 +49,10 @@ const char *vertexShaderSource = "#version 330 core\n"
 */ 
 const char *fragmentShaderSource = "#version 330 core\n"
     "out vec4 FragColor;\n"
+    "in vec3 ourColor;\n"
     "void main()\n"
     "{\n"
-    "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+    "   FragColor = vec4(ourColor, 1.0f);\n"
     "}\n\0";
 
 int main() {
@@ -157,10 +163,11 @@ int main() {
     */
 
     float vertices[] = {
-        -0.5f, -0.5f, 0.0f, // left  
-         0.5f, -0.5f, 0.0f, // right 
-         0.0f,  0.5f, 0.0f  // top   
-    }; 
+        // positions         // colors
+        0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // bottom right
+        -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  // bottom left
+        0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // top 
+    };   
 
     /**
         NB. OpenGL works in 3D space we render a 2D triangle with each vertex having a z coordinate of 0.0.
@@ -176,22 +183,12 @@ int main() {
         VBO: manage this memory via so called vertex buffer objects (VBO) that can store a large number of vertices in the GPU's memory
     */
     unsigned int VBO, VAO;
-    glGenVertexArrays(1, &VAO);
-
     /**
+        ------------- VBO -------------
         advantage of using those buffer objects is that we can send large batches of data all at once 
         to the graphics card without having to send data a vertex a time
     */
     glGenBuffers(1, &VBO); //generate buffer, bufferID = 1
-
-    /**
-        bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
-        VAO: advantage that when configuring vertex attribute pointers you only have to make those calls once and 
-        whenever we want to draw the object, we can just bind the corresponding VAO
-    */
-    glBindVertexArray(VAO);
-    // If we fail to bind a VAO, OpenGL will most likely refuse to draw anything.
-
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO); 
     /**
@@ -207,18 +204,32 @@ int main() {
     */
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); // copies the previously defined vertex data into the buffer's memor
 
+
+    // ------------- VAO -------------
+    glGenVertexArrays(1, &VAO);
+
+    /**
+        bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
+        VAO: advantage that when configuring vertex attribute pointers you only have to make those calls once and 
+        whenever we want to draw the object, we can just bind the corresponding VAO
+    */
+    glBindVertexArray(VAO);
+    // If we fail to bind a VAO, OpenGL will most likely refuse to draw anything.
+
     /**
         void glVertexAttribPointer(GLuint index​, GLint size​, GLenum type​, GLboolean normalized​, GLsizei stride​, const GLvoid * pointer​);
         NB we specified the location of the position vertex attribute in the vertex shader with layout (example: location = 0). We want to pass data to this vertex attribute, we pass in 0 (since location = 0).
-        size = 3 since we want to pass 3 values (it is a vec3).
+        size = 6 since we want to pass 3 values (it is a vec3) and a colour for each vertex.
         stride and tells us the space between consecutive vertex attribute sets
         offset of where the position data begins in the buffer. Since the position data is at the start of the data array this value is just 0. 
     */
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0); // 32-bit (4 byte) floating point values, each position is composed of 3 of those values
+    //position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0); // 72-bit floating point values, each position is composed of 6 of those values (3 points + 3 colours (one for each vertex))
     glEnableVertexAttribArray(0);
 
-    // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
-    glBindBuffer(GL_ARRAY_BUFFER, 0); 
+    // color attribute
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3* sizeof(float)));
+    glEnableVertexAttribArray(1);
 
 
     /**
@@ -239,7 +250,7 @@ int main() {
             glfwSetWindowShouldClose(window, true);
 
         // render colours
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f); //black screen
         glClear(GL_COLOR_BUFFER_BIT);
 
         // draw
