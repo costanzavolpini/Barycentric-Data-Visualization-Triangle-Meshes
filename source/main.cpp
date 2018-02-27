@@ -52,15 +52,29 @@ const char *fragmentShaderSource = "#version 330 core\n"
     "in vec3 Coords;\n"
     "void main()\n"
     "{\n"
+        // ref: https://www.redblobgames.com/x/1730-terrain-shader-experiments/
         /**
-             MAX DIAGRAM - put colour closest to a vertex
+            MAX DIAGRAM - put colour closest to a vertex
             the region around a vertex is defined
             by connecting the triangle centres and edge midpoints of the triangles
-            and edges adjacent to a vertex
+            and edges adjacent to a vertex.
         */
-        "if (Coords.x > Coords.y && Coords.x > Coords.z)\n"
+        // "if (Coords.x > Coords.y && Coords.x > Coords.z)\n"
+        // "FragColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);\n" // red
+        // "else if(Coords.y > Coords.x && Coords.y > Coords.z)\n"
+        // "FragColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);\n" // green
+        // "else\n"
+        // "FragColor = vec4(0.0f, 0.0f, 1.0f, 1.0f);\n" // blue
+
+        /**
+            MIN DIAGRAM - colour on the points closest to an edge
+            the region around an edge is
+            defined by connecting the endpoints of the edge with the triangle
+            centres of the adjacent triangles. 
+        */
+        "if (Coords.x < Coords.y && Coords.x < Coords.z)\n"
         "FragColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);\n" // red
-        "else if(Coords.y > Coords.x && Coords.y > Coords.z)\n"
+        "else if(Coords.y < Coords.x && Coords.y < Coords.z)\n"
         "FragColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);\n" // green
         "else\n"
         "FragColor = vec4(0.0f, 0.0f, 1.0f, 1.0f);\n" // blue
