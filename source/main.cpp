@@ -52,10 +52,18 @@ const char *fragmentShaderSource = "#version 330 core\n"
     "in vec3 Coords;\n"
     "void main()\n"
     "{\n"
-        "if (Coords.x < 0.333)\n"
-        "FragColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);\n"
+        /**
+             MAX DIAGRAM - put colour closest to a vertex
+            the region around a vertex is defined
+            by connecting the triangle centres and edge midpoints of the triangles
+            and edges adjacent to a vertex
+        */
+        "if (Coords.x > Coords.y && Coords.x > Coords.z)\n"
+        "FragColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);\n" // red
+        "else if(Coords.y > Coords.x && Coords.y > Coords.z)\n"
+        "FragColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);\n" // green
         "else\n"
-        "FragColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);\n"
+        "FragColor = vec4(0.0f, 0.0f, 1.0f, 1.0f);\n" // blue
     "}\n\0";
 
 int main() {
