@@ -77,11 +77,11 @@ const char *fragmentShaderSource = "#version 330 core\n"
             and edges adjacent to a vertex.
         */
         // "if (Coords.x > Coords.y && Coords.x > Coords.z)\n"
-        // "FragColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);\n" // red
+            // "FragColor = vec4(0.0f, 0.0f, 1.0f, 1.0f);\n" // blue
         // "else if(Coords.y > Coords.x && Coords.y > Coords.z)\n"
         // "FragColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);\n" // green
         // "else\n"
-        // "FragColor = vec4(0.0f, 0.0f, 1.0f, 1.0f);\n" // blue
+        // "FragColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);\n" // red
 
         /**
             MIN DIAGRAM - colour on the points closest to an edge
