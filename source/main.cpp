@@ -6,16 +6,33 @@
 */
 
 #include <iostream>
+#include <fstream>
 #include "glad.h"
+#include "point3.h"
 #include <GLFW/glfw3.h>
+#include <vector>
 
 using namespace std;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+// List of pointers to all the lights
+// vector<Light*> lights;
+
+// List of pointers to all the objects
+// vector<Object*> objects;
+
+// List of vertices and triangles
+vector<Point3d> v;
+struct Triangle { int v[3]; };
+vector<Triangle> t;
+int num_vertices = 10;
+vector<int> v_counter(num_vertices);
+vector<Point3d> v_norm;
 
 // settings
 const unsigned int WIDTH = 800;
 const unsigned int HEIGHT = 600;
+
 
 /**
     Modern OpenGL requires that we at least set up a vertex and fragment shader if we want to do some rendering.
@@ -54,7 +71,7 @@ const char *fragmentShaderSource = "#version 330 core\n"
     "{\n"
         // ref: https://www.redblobgames.com/x/1730-terrain-shader-experiments/
         /**
-            MAX DIAGRAM - put colour closest to a vertex
+            MAX DIAGRAM (Nearest-Neighbor method) - put colour closest to a vertex
             the region around a vertex is defined
             by connecting the triangle centres and edge midpoints of the triangles
             and edges adjacent to a vertex.
@@ -187,13 +204,6 @@ int main() {
         from -1.0 to 1.0
     */
 
-    float vertices[] = {
-        // positions         // coordinates
-        0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // bottom right
-        -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  // bottom left
-        0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // top 
-    };   
-
     /**
         NB. OpenGL works in 3D space we render a 2D triangle with each vertex having a z coordinate of 0.0.
         This way the depth of the triangle remains the same making it look like it's 2D.
@@ -202,12 +212,120 @@ int main() {
         In this part we tell to OpenGl how it should interpret the vertex data in memory and how it should connect the vertex data to the vertex shader's attributes.
      */ 
 
+
+    // read .OFF files and initialize the scene
+
+/**
+    Read .OFF file
+*/ 
+ifstream in("model/horse.off");
+if (!in) {
+	cout<<"\nError reading file."<<endl;
+	exit(0);
+}
+string s;
+string offName = "OFF";
+getline(in,s);
+
+if (s.compare(0,offName.size(),offName)!=0) {
+    cout << "This is not a valid OFF file." << endl;
+	exit(0);
+}
+
+int i, num_triangles, dummy;
+in >> num_vertices >> num_triangles >> dummy;
+
+v.resize(num_vertices);
+for (i = 0; i < num_vertices; i++)
+	in >> v[i][0] >> v[i][1] >> v[i][2];
+
+t.resize(num_triangles);
+
+for (i = 0; i < num_triangles; i++)
+	in >> dummy >> t[i].v[0] >> t[i].v[1] >> t[i].v[2];
+
+in.close();
+
+
+// int v_counter[num_vertices] = {0};
+v_norm.resize(num_vertices);
+
+// vertices array
+float vertices[num_triangles * 18];
+
+int index = 0;
+
+
+// calculate the right normals
+for (int k = 0; k < num_triangles; k++) {    
+    Point3d v1 = v[t[k].v[0]];
+    Point3d v2 = v[t[k].v[1]];
+    Point3d v3 = v[t[k].v[2]];
+
+    // insert values in vertices
+    // first vertex
+    vertices[index] = v1.x();
+    vertices[index + 1] = v1.y();
+    vertices[index + 2] = v1.z();
+
+    vertices[index + 3] = 1.0f; // v1 red
+    vertices[index + 4] = 0.0f;
+    vertices[index + 5] = 0.0f;
+
+    // second vertex
+    vertices[index + 6] = v2.x();
+    vertices[index + 7] = v2.y();
+    vertices[index + 8] = v2.z();
+
+    vertices[index + 9] = 0.0f;
+    vertices[index + 10] = 1.0f; // v2 green
+    vertices[index + 11] = 0.0f;
+
+    // third vertex
+    vertices[index + 12] = v3.x();
+    vertices[index + 13] = v3.y();
+    vertices[index + 14] = v3.z();
+    
+    vertices[index + 15] = 0.0f;
+    vertices[index + 16] = 0.0f;
+    vertices[index + 17] = 1.0f; // v3 blue    
+
+    index += 18;
+
+    // normal of a triangle
+    Point3d n = (v2-v1)^(v3-v1);
+    n.normalize();
+
+    // find the norm for the first vertex
+    // v_norm[t[k].v[0]] += n;
+    // v_counter[t[k].v[0]]++;
+
+    // v_norm[t[k].v[1]] += n;
+    // v_counter[t[k].v[1]]++;
+
+    // v_norm[t[k].v[2]] += n;
+    // v_counter[t[k].v[2]]++;
+  }
+
+  index -= 1; // since we added before 18 but we have used only 17 elements
+
+
+    // // avarage of norms of adj triangle of a vertex (sum of triangle norms / number of triangles)
+    // for(int k = 0; k < num_vertices; k++){
+
+    //     if(v_counter[k] != 0){
+    //         v_norm[k] = v_norm[k] / v_counter[k];
+    //         v_norm[k].normalize();
+    //     }
+    // }
+
     /**
         Create memory on the GPU where we store the vertex data, configure how OpenGL should interpret the memory and 
         specify how to send the data to the graphics card.
         VBO: manage this memory via so called vertex buffer objects (VBO) that can store a large number of vertices in the GPU's memory
     */
     unsigned int VBO, VAO;
+
     /**
         ------------- VBO -------------
         advantage of using those buffer objects is that we can send large batches of data all at once 
@@ -228,8 +346,7 @@ int main() {
         GL_STREAM_DRAW: the data will change every time it is drawn.
     */
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); // copies the previously defined vertex data into the buffer's memor
-
-
+    
     // ------------- VAO -------------
     glGenVertexArrays(1, &VAO);
 
@@ -248,13 +365,16 @@ int main() {
         stride and tells us the space between consecutive vertex attribute sets
         offset of where the position data begins in the buffer. Since the position data is at the start of the data array this value is just 0. 
     */
-    //position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0); // 72-bit floating point values, each position is composed of 6 of those values (3 points + 3 colours (one for each vertex))
-    glEnableVertexAttribArray(0);
+    int max_num = 2; //sarebbe num_triangles
+    
+        //position attribute
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(0 * sizeof(float))); // 72-bit floating point values, each position is composed of 6 of those values (3 points + 3 colours (one for each vertex))
+        glEnableVertexAttribArray(0);
 
     // color attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3* sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+
 
 
     /**
@@ -263,6 +383,7 @@ int main() {
     */
     glBindVertexArray(0); 
 
+    cout<<"Scene initialized..."<<endl;
 
     /**
         application to keep drawing images and handling user input until the program has been explicitly told to stop
@@ -278,6 +399,7 @@ int main() {
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); //black screen
         glClear(GL_COLOR_BUFFER_BIT);
 
+
         // draw
         glUseProgram(shaderProgram);
 
@@ -289,7 +411,8 @@ int main() {
         */
 
         glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
+
 
         glfwSwapBuffers(window); // will swap the color buffer
         glfwPollEvents(); // function checks if any events are triggered (like keyboard input or mouse movement events) 
@@ -314,4 +437,3 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     */
     glViewport(0, 0, width, height);
 }
-
