@@ -90,11 +90,11 @@ const char *fragmentShaderSource = "#version 330 core\n"
             centres of the adjacent triangles. 
         */
         "if (Coords.x < Coords.y && Coords.x < Coords.z)\n"
-        "FragColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);\n" // red
+        "FragColor = vec4(0.0f, 0.0f, 1.0f, 1.0f);\n" // blue
         "else if(Coords.y < Coords.x && Coords.y < Coords.z)\n"
         "FragColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);\n" // green
         "else\n"
-        "FragColor = vec4(0.0f, 0.0f, 1.0f, 1.0f);\n" // blue
+        "FragColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);\n" // red
     "}\n\0";
 
 int main() {
