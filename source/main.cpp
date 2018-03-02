@@ -9,6 +9,8 @@
 #include <fstream>
 #include "glad.h"
 #include "point3.h"
+#include "camera.h"
+#include "shader.h"
 #include <GLFW/glfw3.h>
 #include <vector>
 
@@ -33,69 +35,11 @@ vector<Point3d> v_norm;
 const unsigned int WIDTH = 800;
 const unsigned int HEIGHT = 600;
 
+// camera
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+float lastX = WIDTH / 2.0f;
+float lastY = HEIGHT / 2.0f;
 
-/**
-    Modern OpenGL requires that we at least set up a vertex and fragment shader if we want to do some rendering.
-    Shader language GLSL (OpenGL Shading Language)
-    Each shader begins with a declaration of its version. 
-    Since OpenGL 3.3 and higher the version numbers of GLSL match the version of OpenGL 
-    (GLSL version 420 corresponds to OpenGL version 4.2 for example).
- */
-
-
-/** 
-    ------------- VERTEX SHADER -------------
-    create a vec3 called aPos
-    cast this to a vector of size 4
-*/
-const char *vertexShaderSource ="#version 330 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
-    "layout (location = 1) in vec3 aCoords;\n"
-    "out vec3 Coords;\n"
-    "void main()\n"
-    "{\n"
-    "   gl_Position = vec4(aPos, 1.0);\n"
-    "   Coords = aCoords;\n"
-    "}\0";
-
-
-/** 
-    ------------- FRAGMENT SHADER -------------
-    format RGBA
-    where alpha value is a value from 0.0 to 1.0 (1.0 being completely opaque).
-*/ 
-const char *fragmentShaderSource = "#version 330 core\n"
-    "out vec4 FragColor;\n"
-    "in vec3 Coords;\n"
-    "void main()\n"
-    "{\n"
-        // ref: https://www.redblobgames.com/x/1730-terrain-shader-experiments/
-        /**
-            MAX DIAGRAM (Nearest-Neighbor method) - put colour closest to a vertex
-            the region around a vertex is defined
-            by connecting the triangle centres and edge midpoints of the triangles
-            and edges adjacent to a vertex.
-        */
-        // "if (Coords.x > Coords.y && Coords.x > Coords.z)\n"
-            // "FragColor = vec4(0.0f, 0.0f, 1.0f, 1.0f);\n" // blue
-        // "else if(Coords.y > Coords.x && Coords.y > Coords.z)\n"
-        // "FragColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);\n" // green
-        // "else\n"
-        // "FragColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);\n" // red
-
-        /**
-            MIN DIAGRAM - colour on the points closest to an edge
-            the region around an edge is
-            defined by connecting the endpoints of the edge with the triangle
-            centres of the adjacent triangles. 
-        */
-        "if (Coords.x < Coords.y && Coords.x < Coords.z)\n"
-        "FragColor = vec4(0.0f, 0.0f, 1.0f, 1.0f);\n" // blue
-        "else if(Coords.y < Coords.x && Coords.y < Coords.z)\n"
-        "FragColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);\n" // green
-        "else\n"
-        "FragColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);\n" // red
-    "}\n\0";
 
 int main() {
     /**
@@ -140,172 +84,113 @@ int main() {
     // ------------- END GLAD -------------
 
     /**
-        ------------- SHADER PROGRAM -------------
-        The graphics pipeline can be divided into two large parts: the first transforms your 3D coordinates into 2D coordinates 
-        and the second part transforms the 2D coordinates into actual colored pixels.
-        The geometry shader takes as input a collection of vertices that form a primitive and has the ability 
-        to generate other shapes by emitting new vertices to form new (or other) primitive(s).
+        Modern OpenGL requires that we at least set up a vertex and fragment shader if we want to do some rendering.
+        Shader language GLSL (OpenGL Shading Language)
+        Each shader begins with a declaration of its version. 
+        Since OpenGL 3.3 and higher the version numbers of GLSL match the version of OpenGL 
+        (GLSL version 420 corresponds to OpenGL version 4.2 for example).
     */
-
-    // Vertex Shader: takes as input a single vertex and return normalized device coordinates
-    int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL); // to use the shader it has to dynamically compile it at run-time from its source code
-    glCompileShader(vertexShader); 
-
-    // check for shader compile errors (vertex)
-    int success;
-    char infoLog[512];
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << endl;
-    }
-
-    // Fragment Shader : is all about calculating the color output of your pixels
-    int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
-
-    // check for shader compile errors (fragment)
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-        cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << endl;
-    }
-
-    /**
-        Shader Program that we can use for rendering
-        To use the recently compiled shaders we have to link them to a shader program object 
-        and then activate this shader program when rendering objects.
-    */
-    int shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-
-
-    /**
-        check for linking errors (program)
-        When linking the shaders into a program it links the outputs of each shader to the inputs of the next shader. 
-        This is also where you'll get linking errors if your outputs and inputs do not match.
-    */
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if (!success) {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << endl;
-    }
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-
-    /**
-        ------------- VERTEX DATA -------------
-        input: Vertex Data. This vertex data is a collection of vertices.
-        normalized device coordinates range will end up visible on your screen (and all coordinates outside this region won't)
-        from -1.0 to 1.0
-    */
+    Shader ourShader("vertexShader.vs", "fragmentShaderMinDiagram.fs");
 
     /**
         NB. OpenGL works in 3D space we render a 2D triangle with each vertex having a z coordinate of 0.0.
         This way the depth of the triangle remains the same making it look like it's 2D.
         
-        Send vertex data to vertex shader. 
-        In this part we tell to OpenGl how it should interpret the vertex data in memory and how it should connect the vertex data to the vertex shader's attributes.
+        Send vertex data to vertex shader (load .off file). 
      */ 
 
 
-    // read .OFF files and initialize the scene
+    /**
+        Read .OFF file
+    */ 
+    ifstream in("model/horse.off");
+    if (!in) {
+        cout<<"\nError reading file."<<endl;
+        exit(0);
+    }
+    string s;
+    string offName = "OFF";
+    getline(in,s);
 
-/**
-    Read .OFF file
-*/ 
-ifstream in("model/horse.off");
-if (!in) {
-	cout<<"\nError reading file."<<endl;
-	exit(0);
-}
-string s;
-string offName = "OFF";
-getline(in,s);
+    if (s.compare(0,offName.size(),offName)!=0) {
+        cout << "This is not a valid OFF file." << endl;
+        exit(0);
+    }
 
-if (s.compare(0,offName.size(),offName)!=0) {
-    cout << "This is not a valid OFF file." << endl;
-	exit(0);
-}
+    int i, num_triangles, dummy;
+    in >> num_vertices >> num_triangles >> dummy;
 
-int i, num_triangles, dummy;
-in >> num_vertices >> num_triangles >> dummy;
+    v.resize(num_vertices);
+    for (i = 0; i < num_vertices; i++)
+        in >> v[i][0] >> v[i][1] >> v[i][2];
 
-v.resize(num_vertices);
-for (i = 0; i < num_vertices; i++)
-	in >> v[i][0] >> v[i][1] >> v[i][2];
+    t.resize(num_triangles);
 
-t.resize(num_triangles);
+    for (i = 0; i < num_triangles; i++)
+        in >> dummy >> t[i].v[0] >> t[i].v[1] >> t[i].v[2];
 
-for (i = 0; i < num_triangles; i++)
-	in >> dummy >> t[i].v[0] >> t[i].v[1] >> t[i].v[2];
-
-in.close();
+    in.close();
 
 
-// int v_counter[num_vertices] = {0};
-v_norm.resize(num_vertices);
+    // int v_counter[num_vertices] = {0};
+    v_norm.resize(num_vertices);
 
-// vertices array
-float vertices[num_triangles * 18];
+    // vertices array
+    float vertices[num_triangles * 18];
 
-int index = 0;
+    int index = 0;
 
 
-// calculate the right normals
-for (int k = 0; k < num_triangles; k++) {    
-    Point3d v1 = v[t[k].v[0]];
-    Point3d v2 = v[t[k].v[1]];
-    Point3d v3 = v[t[k].v[2]];
+    // calculate the right normals
+    for (int k = 0; k < num_triangles; k++) {    
+        Point3d v1 = v[t[k].v[0]];
+        Point3d v2 = v[t[k].v[1]];
+        Point3d v3 = v[t[k].v[2]];
 
-    // insert values in vertices
-    // first vertex
-    vertices[index] = v1.x();
-    vertices[index + 1] = v1.y();
-    vertices[index + 2] = v1.z();
+        // insert values in vertices
+        // first vertex
+        vertices[index] = v1.x();
+        vertices[index + 1] = v1.y();
+        vertices[index + 2] = v1.z();
 
-    vertices[index + 3] = 1.0f; // v1 red
-    vertices[index + 4] = 0.0f;
-    vertices[index + 5] = 0.0f;
+        vertices[index + 3] = 1.0f; // v1 red
+        vertices[index + 4] = 0.0f;
+        vertices[index + 5] = 0.0f;
 
-    // second vertex
-    vertices[index + 6] = v2.x();
-    vertices[index + 7] = v2.y();
-    vertices[index + 8] = v2.z();
+        // second vertex
+        vertices[index + 6] = v2.x();
+        vertices[index + 7] = v2.y();
+        vertices[index + 8] = v2.z();
 
-    vertices[index + 9] = 0.0f;
-    vertices[index + 10] = 1.0f; // v2 green
-    vertices[index + 11] = 0.0f;
+        vertices[index + 9] = 0.0f;
+        vertices[index + 10] = 1.0f; // v2 green
+        vertices[index + 11] = 0.0f;
 
-    // third vertex
-    vertices[index + 12] = v3.x();
-    vertices[index + 13] = v3.y();
-    vertices[index + 14] = v3.z();
-    
-    vertices[index + 15] = 0.0f;
-    vertices[index + 16] = 0.0f;
-    vertices[index + 17] = 1.0f; // v3 blue    
+        // third vertex
+        vertices[index + 12] = v3.x();
+        vertices[index + 13] = v3.y();
+        vertices[index + 14] = v3.z();
+        
+        vertices[index + 15] = 0.0f;
+        vertices[index + 16] = 0.0f;
+        vertices[index + 17] = 1.0f; // v3 blue    
 
-    index += 18;
+        index += 18;
 
-    // normal of a triangle
-    Point3d n = (v2-v1)^(v3-v1);
-    n.normalize();
+        // normal of a triangle
+        Point3d n = (v2-v1)^(v3-v1);
+        n.normalize();
 
-    // find the norm for the first vertex
-    // v_norm[t[k].v[0]] += n;
-    // v_counter[t[k].v[0]]++;
+        // find the norm for the first vertex
+        // v_norm[t[k].v[0]] += n;
+        // v_counter[t[k].v[0]]++;
 
-    // v_norm[t[k].v[1]] += n;
-    // v_counter[t[k].v[1]]++;
+        // v_norm[t[k].v[1]] += n;
+        // v_counter[t[k].v[1]]++;
 
-    // v_norm[t[k].v[2]] += n;
-    // v_counter[t[k].v[2]]++;
-  }
+        // v_norm[t[k].v[2]] += n;
+        // v_counter[t[k].v[2]]++;
+    }
 
   index -= 1; // since we added before 18 but we have used only 17 elements
 
@@ -365,11 +250,10 @@ for (int k = 0; k < num_triangles; k++) {
         stride and tells us the space between consecutive vertex attribute sets
         offset of where the position data begins in the buffer. Since the position data is at the start of the data array this value is just 0. 
     */
-    int max_num = 2; //sarebbe num_triangles
     
-        //position attribute
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(0 * sizeof(float))); // 72-bit floating point values, each position is composed of 6 of those values (3 points + 3 colours (one for each vertex))
-        glEnableVertexAttribArray(0);
+    //position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(0 * sizeof(float))); // 72-bit floating point values, each position is composed of 6 of those values (3 points + 3 colours (one for each vertex))
+    glEnableVertexAttribArray(0);
 
     // color attribute
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
@@ -401,7 +285,11 @@ for (int k = 0; k < num_triangles; k++) {
 
 
         // draw
-        glUseProgram(shaderProgram);
+        ourShader.use();
+
+        // camera/view transformation
+        glm::mat4 view = camera.GetViewMatrix();
+        // ourShader.setMat4("view", view);
 
         /**
             Every shader and rendering call after glUseProgram will now use this program object (and thus the shaders).
@@ -409,7 +297,6 @@ for (int k = 0; k < num_triangles; k++) {
             to the corresponding pixels on the final screen, resulting in fragments for the fragment shader to use.  
             + Clipping (discards all fragments that are outside your view, increasing performance).
         */
-
         glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
         glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
 
