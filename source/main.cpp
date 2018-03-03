@@ -13,15 +13,13 @@
 #include "shader.h"
 #include <GLFW/glfw3.h>
 #include <vector>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 using namespace std;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-// List of pointers to all the lights
-// vector<Light*> lights;
-
-// List of pointers to all the objects
-// vector<Object*> objects;
 
 // List of vertices and triangles
 vector<Point3d> v;
@@ -283,13 +281,14 @@ int main() {
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); //black screen
         glClear(GL_COLOR_BUFFER_BIT);
 
+         // create transformations
+        glm::mat4 transform;
+        transform = glm::rotate(transform, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
 
-        // draw
-        ourShader.use();
-
-        // camera/view transformation
-        glm::mat4 view = camera.GetViewMatrix();
-        // ourShader.setMat4("view", view);
+        // get matrix's uniform location and set matrix
+        ourShader.use(); //draw
+        unsigned int transformLoc = glGetUniformLocation(ourShader.shaderProgram, "transform");
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
 
         /**
             Every shader and rendering call after glUseProgram will now use this program object (and thus the shaders).
