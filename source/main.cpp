@@ -88,7 +88,7 @@ int main() {
         Since OpenGL 3.3 and higher the version numbers of GLSL match the version of OpenGL 
         (GLSL version 420 corresponds to OpenGL version 4.2 for example).
     */
-    Shader ourShader("vertexShader.vs", "fragmentShaderMinDiagram.fs");
+    Shader ourShader("vertexShader.vs", "fragmentShaderMaxDiagram.fs");
 
     /**
         NB. OpenGL works in 3D space we render a 2D triangle with each vertex having a z coordinate of 0.0.

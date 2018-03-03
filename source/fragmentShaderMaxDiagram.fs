@@ -11,7 +11,7 @@ void main()
             FragColor = vec4(1.0f, 0.0f, 0.0f, 1.0f); // red
 }
 
-ref: https://www.redblobgames.com/x/1730-terrain-shader-experiments/
+//ref: https://www.redblobgames.com/x/1730-terrain-shader-experiments/
 /**
     MAX DIAGRAM (Nearest-Neighbor method) - put colour closest to a vertex
     the region around a vertex is defined
