@@ -8,6 +8,9 @@
 #include <sstream>
 #include <iostream>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 /**
     ------------- SHADER PROGRAM -------------
     The graphics pipeline can be divided into two large parts: the first transforms your 3D coordinates into 2D coordinates 

@@ -12,7 +12,7 @@
 #include <fstream>
 #include "glad.h"
 #include "point3.h"
-#include "camera.h"
+// #include "camera.h"
 #include "shader.h"
 #include <GLFW/glfw3.h>
 #include <vector>

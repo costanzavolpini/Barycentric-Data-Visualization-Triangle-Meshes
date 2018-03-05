@@ -15,6 +15,6 @@ CPPSOURCES = \
 main: 
 	$(CPP) $(CPPFLAGS) $(CPPSOURCES) && $(CC) $(CFLAGS) $(CSOURCES) && $(CPP) $(FLAGS) $(OBJECTC) -o main
 
-.PHONY: clean
+.PHONY: all main clean
 clean:
-	$(RM) ./*.o
+	$(RM) *.o
