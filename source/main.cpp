@@ -1,18 +1,15 @@
 /**
     ref: https://learnopengl.com
     glfw3: brew install glfw3
-    g++ -c main.cpp && gcc -c glad.c && g++ -lglfw glad.o main.o -o main
+    g++ -c main.cpp && gcc -c glad.c && g++ -lglfw glad.o main.o -o main 
+    or just use make clean && make && ./main
     Costanza Volpini
-
-    MAYBE: g++ -c main.cpp && gcc -c glad.c && g++ -lglfw -framework GLUT -framework OpenGL glad.o main.o -o main
-
 */
 
 #include <iostream>
 #include <fstream>
 #include "glad.h"
 #include "point3.h"
-// #include "camera.h"
 #include "shader.h"
 #include <GLFW/glfw3.h>
 #include <vector>
@@ -278,25 +275,35 @@ int main() {
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); //black screen
         glClear(GL_COLOR_BUFFER_BIT);
 
-         // create transformations
-        glm::mat4 transform;
-        transform = glm::rotate(transform, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
-
         // get matrix's uniform location and set matrix
         ourShader.use(); //draw
 
+        /**
+            IMPORTANT FOR TRANSFORMATION:
+            Since GLM version 0.9.9, GLM default initializates matrix types to a 0-initalized matrix, 
+            instead of the identity matrix. From that version it is required to initialize matrix types as: glm::mat4 mat = glm::mat4(1.0f). 
+        */ 
         //view
-        glm::mat4 view;
-        float radius = 0.5f;
-        float camX   = sin(glfwGetTime()) * radius;
-        float camY   = cos(glfwGetTime()) * radius;
+        glm::mat4 view = glm::mat4(1.0f);
         // The glm::LookAt function requires a camera position, target/position the camera should look at and up vector that represents the up vector in world space.
-        view = glm::lookAt(glm::vec3(camX, camY, 0.0f), glm::vec3(-900.0f, 800.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        view = glm::lookAt(glm::vec3(0.0, 0.0, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         ourShader.setMat4("view", view);
 
-        // transform
+        // create transformations
+        glm::mat4 trans = glm::mat4(1.0f);
+        trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+        trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
         unsigned int transformLoc = glGetUniformLocation(ourShader.shaderProgram, "transform");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+        /**
+            The first argument should be familiar by now which is the uniform's location. 
+            The second argument tells OpenGL how many matrices we'd like to send, which is 1. 
+            The third argument asks us if we want to transpose our matrix, that is to swap the columns and rows.
+            OpenGL developers often use an internal matrix layout called column-major ordering which is the 
+            default matrix layout in GLM so there is no need to transpose the matrices; we can keep it at GL_FALSE. 
+            The last parameter is the actual matrix data, but GLM stores their matrices not in the exact way that 
+            OpenGL likes to receive them so we first transform them with GLM's built-in function value_ptr.
+        */
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
         /**
             Every shader and rendering call after glUseProgram will now use this program object (and thus the shaders).
