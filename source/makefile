@@ -1,0 +1,20 @@
+CPP = g++
+CC = gcc
+CFLAGS = -c
+CPPFLAGS = -c
+FLAGS = -lglfw
+
+OBJECTC = glad.o main.o
+
+CSOURCES = \
+	 glad.c
+
+CPPSOURCES = \
+	main.cpp 
+
+main: 
+	$(CPP) $(CPPFLAGS) $(CPPSOURCES) && $(CC) $(CFLAGS) $(CSOURCES) && $(CPP) $(FLAGS) $(OBJECTC) -o main
+
+.PHONY: clean
+clean:
+	$(RM) ./*.o

@@ -3,6 +3,9 @@
     glfw3: brew install glfw3
     g++ -c main.cpp && gcc -c glad.c && g++ -lglfw glad.o main.o -o main
     Costanza Volpini
+
+    MAYBE: g++ -c main.cpp && gcc -c glad.c && g++ -lglfw -framework GLUT -framework OpenGL glad.o main.o -o main
+
 */
 
 #include <iostream>
@@ -32,12 +35,6 @@ vector<Point3d> v_norm;
 // settings
 const unsigned int WIDTH = 800;
 const unsigned int HEIGHT = 600;
-
-// camera
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
-float lastX = WIDTH / 2.0f;
-float lastY = HEIGHT / 2.0f;
-
 
 int main() {
     /**
@@ -287,6 +284,17 @@ int main() {
 
         // get matrix's uniform location and set matrix
         ourShader.use(); //draw
+
+        //view
+        glm::mat4 view;
+        float radius = 0.5f;
+        float camX   = sin(glfwGetTime()) * radius;
+        float camY   = cos(glfwGetTime()) * radius;
+        // The glm::LookAt function requires a camera position, target/position the camera should look at and up vector that represents the up vector in world space.
+        view = glm::lookAt(glm::vec3(camX, camY, 0.0f), glm::vec3(-900.0f, 800.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        ourShader.setMat4("view", view);
+
+        // transform
         unsigned int transformLoc = glGetUniformLocation(ourShader.shaderProgram, "transform");
         glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
 

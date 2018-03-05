@@ -26,6 +26,7 @@
         "typeinfo": "cpp",
         "algorithm": "cpp",
         "type_traits": "cpp",
-        "*.ipp": "cpp"
+        "*.ipp": "cpp",
+        "valarray": "cpp"
     }
 }
