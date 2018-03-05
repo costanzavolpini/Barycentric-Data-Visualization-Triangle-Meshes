@@ -27,6 +27,7 @@
         "algorithm": "cpp",
         "type_traits": "cpp",
         "*.ipp": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "locale": "cpp"
     }
 }

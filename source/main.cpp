@@ -33,6 +33,11 @@ vector<Point3d> v_norm;
 const unsigned int WIDTH = 800;
 const unsigned int HEIGHT = 600;
 
+float fDistance;
+float dNear, dFar;
+float r;
+
+
 int main() {
     /**
         ------------- GLFW -------------
@@ -130,10 +135,28 @@ int main() {
     // vertices array
     float vertices[num_triangles * 18];
 
+    float minx, miny, minz, maxx, maxy, maxz;
+
+    /**
+        code to automatically center an obj:
+        1. find max and min for x, y and z
+        2. bound the model by a sphere of radius r, centered on a point p
+        ref: https://www.opengl.org/discussion_boards/showthread.php/130876-automatically-center-3d-object
+    */
+    if (num_triangles > 0){
+        // initialize values
+        minx = v[t[0].v[0]].x();
+        miny = v[t[0].v[0]].y();
+        minz = v[t[0].v[0]].z();
+
+        maxx = v[t[0].v[0]].x();
+        maxy = v[t[0].v[0]].y();
+        maxz = v[t[0].v[0]].z();
+    }
+    
     int index = 0;
 
 
-    // calculate the right normals
     for (int k = 0; k < num_triangles; k++) {    
         Point3d v1 = v[t[k].v[0]];
         Point3d v2 = v[t[k].v[1]];
@@ -145,6 +168,28 @@ int main() {
         vertices[index + 1] = v1.y();
         vertices[index + 2] = v1.z();
 
+        // find max and min for coord x
+        if (v1.x() < minx)
+            minx = v1.x();
+        
+        if (v1.x() > maxx)
+            maxx = v1.x();
+
+        // find max and min for coord y
+        if (v1.y() < miny)
+            miny = v1.y();
+        
+        if (v1.y() > maxy)
+            maxy = v1.y();
+
+        // find max and min for coord z
+        if (v1.z() < minz)
+            minz = v1.z();
+        
+        if (v1.z() > maxz)
+            maxz = v1.z();
+
+        //color
         vertices[index + 3] = 1.0f; // v1 red
         vertices[index + 4] = 0.0f;
         vertices[index + 5] = 0.0f;
@@ -154,6 +199,28 @@ int main() {
         vertices[index + 7] = v2.y();
         vertices[index + 8] = v2.z();
 
+        // find max and min for coord x
+        if (v2.x() < minx)
+            minx = v2.x();
+        
+        if (v2.x() > maxx)
+            maxx = v2.x();
+
+        // find max and min for coord y
+        if (v2.y() < miny)
+            miny = v2.y();
+        
+        if (v2.y() > maxy)
+            maxy = v2.y();
+
+        // find max and min for coord z
+        if (v2.z() < minz)
+            minz = v2.z();
+        
+        if (v2.z() > maxz)
+            maxz = v2.z();
+
+        //color
         vertices[index + 9] = 0.0f;
         vertices[index + 10] = 1.0f; // v2 green
         vertices[index + 11] = 0.0f;
@@ -163,6 +230,28 @@ int main() {
         vertices[index + 13] = v3.y();
         vertices[index + 14] = v3.z();
         
+        // find max and min for coord x
+        if (v3.x() < minx)
+            minx = v3.x();
+        
+        if (v3.x() > maxx)
+            maxx = v3.x();
+
+        // find max and min for coord y
+        if (v3.y() < miny)
+            miny = v3.y();
+        
+        if (v3.y() > maxy)
+            maxy = v3.y();
+
+        // find max and min for coord z
+        if (v3.z() < minz)
+            minz = v3.z();
+        
+        if (v3.z() > maxz)
+            maxz = v3.z();
+
+        //color
         vertices[index + 15] = 0.0f;
         vertices[index + 16] = 0.0f;
         vertices[index + 17] = 1.0f; // v3 blue    
@@ -172,30 +261,22 @@ int main() {
         // normal of a triangle
         Point3d n = (v2-v1)^(v3-v1);
         n.normalize();
-
-        // find the norm for the first vertex
-        // v_norm[t[k].v[0]] += n;
-        // v_counter[t[k].v[0]]++;
-
-        // v_norm[t[k].v[1]] += n;
-        // v_counter[t[k].v[1]]++;
-
-        // v_norm[t[k].v[2]] += n;
-        // v_counter[t[k].v[2]]++;
     }
 
-  index -= 1; // since we added before 18 but we have used only 17 elements
+    index -= 1; // since we added before 18 but we have used only 17 elements
 
+    // bound the model by a sphere of radius r, centered on a point p
+    float px, py, pz;
+    px = (minx + maxx) / 2.0f;
+    py = (miny + maxy) / 2.0f;
+    pz = (minz + maxz) / 2.0f;
+    r = sqrt((maxx - px) * (maxx - px) + (maxy - py) * (maxy - py) + (maxz - pz) * (maxz - pz));
 
-    // // avarage of norms of adj triangle of a vertex (sum of triangle norms / number of triangles)
-    // for(int k = 0; k < num_vertices; k++){
+    fDistance = r / 0.57735f; // where 0.57735f is tan(30 degrees);
 
-    //     if(v_counter[k] != 0){
-    //         v_norm[k] = v_norm[k] / v_counter[k];
-    //         v_norm[k].normalize();
-    //     }
-    // }
-
+    // The near and far clipping planes then lay either side of this point, allowing for the radius of the sphere 
+    dNear = fDistance - r;
+    dFar = fDistance + r;
     /**
         Create memory on the GPU where we store the vertex data, configure how OpenGL should interpret the memory and 
         specify how to send the data to the graphics card.
@@ -283,10 +364,15 @@ int main() {
             Since GLM version 0.9.9, GLM default initializates matrix types to a 0-initalized matrix, 
             instead of the identity matrix. From that version it is required to initialize matrix types as: glm::mat4 mat = glm::mat4(1.0f). 
         */ 
+        //frustum
+        //glm::perspective = field of view (zoom), aspect (height of frustum), near plane, far plane
+        glm::mat4 frustum = glm::perspective(fDistance, 2.0f * r, dNear, dFar);
+        ourShader.setMat4("projection", frustum);
+
         //view
         glm::mat4 view = glm::mat4(1.0f);
         // The glm::LookAt function requires a camera position, target/position the camera should look at and up vector that represents the up vector in world space.
-        view = glm::lookAt(glm::vec3(0.0, 0.0, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        view = glm::lookAt(glm::vec3(0.0, 0.0, fDistance), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         ourShader.setMat4("view", view);
 
         // create transformations
