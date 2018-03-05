@@ -33,9 +33,11 @@ vector<Point3d> v_norm;
 const unsigned int WIDTH = 800;
 const unsigned int HEIGHT = 600;
 
+// to have the obj in center
 float fDistance;
 float dNear, dFar;
 float r;
+float px, py, pz;
 
 
 int main() {
@@ -266,7 +268,6 @@ int main() {
     index -= 1; // since we added before 18 but we have used only 17 elements
 
     // bound the model by a sphere of radius r, centered on a point p
-    float px, py, pz;
     px = (minx + maxx) / 2.0f;
     py = (miny + maxy) / 2.0f;
     pz = (minz + maxz) / 2.0f;
@@ -372,13 +373,14 @@ int main() {
         //view
         glm::mat4 view = glm::mat4(1.0f);
         // The glm::LookAt function requires a camera position, target/position the camera should look at and up vector that represents the up vector in world space.
-        view = glm::lookAt(glm::vec3(0.0, 0.0, fDistance), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        // (eyeX, eyeY, eyeZ) (centerX, centerY, centerZ) (upX, upY, upZ)
+        view = glm::lookAt(glm::vec3(0.0, 0.0, fDistance), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         ourShader.setMat4("view", view);
 
         // create transformations
         glm::mat4 trans = glm::mat4(1.0f);
-        trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
-        trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+        trans = glm::translate(trans, glm::vec3(-px, -py, -pz));
+        // trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
         unsigned int transformLoc = glGetUniformLocation(ourShader.shaderProgram, "transform");
         /**
             The first argument should be familiar by now which is the uniform's location. 
