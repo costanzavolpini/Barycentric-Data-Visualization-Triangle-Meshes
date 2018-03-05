@@ -367,7 +367,8 @@ int main() {
         */ 
         //frustum
         //glm::perspective = field of view (zoom), aspect (height of frustum), near plane, far plane
-        glm::mat4 frustum = glm::perspective(fDistance, 2.0f * r, dNear, dFar);
+        float zoom = 1.0f;
+        glm::mat4 frustum = glm::perspective(fDistance * zoom, 2.0f * r, dNear, dFar);
         ourShader.setMat4("projection", frustum);
 
         //view
