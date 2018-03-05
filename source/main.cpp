@@ -82,7 +82,7 @@ int main() {
         Since OpenGL 3.3 and higher the version numbers of GLSL match the version of OpenGL 
         (GLSL version 420 corresponds to OpenGL version 4.2 for example).
     */
-    Shader ourShader("vertexShader.vs", "fragmentShaderMaxDiagram.fs");
+    Shader ourShader("vertexShader.vs", "edgeStripesFragmentShader.fs");
 
     /**
         NB. OpenGL works in 3D space we render a 2D triangle with each vertex having a z coordinate of 0.0.
@@ -95,7 +95,7 @@ int main() {
     /**
         Read .OFF file
     */ 
-    ifstream in("model/horse.off");
+    ifstream in("models/iCorsi/horse.off");
     if (!in) {
         cout<<"\nError reading file."<<endl;
         exit(0);
