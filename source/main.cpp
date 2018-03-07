@@ -89,7 +89,7 @@ int main() {
         Since OpenGL 3.3 and higher the version numbers of GLSL match the version of OpenGL 
         (GLSL version 420 corresponds to OpenGL version 4.2 for example).
     */
-    Shader ourShader("vertexShader.vs", "edgeStripesFragmentShader.fs");
+    Shader ourShader("vertexShader.vs", "maxDiagramFragmentShader.fs");
 
     /**
         NB. OpenGL works in 3D space we render a 2D triangle with each vertex having a z coordinate of 0.0.
@@ -102,7 +102,7 @@ int main() {
     /**
         Read .OFF file
     */ 
-    ifstream in("models/iCorsi/horse.off");
+    ifstream in("models/iCorsi/icosahedron_0.off");
     if (!in) {
         cout<<"\nError reading file."<<endl;
         exit(0);
@@ -327,11 +327,11 @@ int main() {
     
     //position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(0 * sizeof(float))); // 72-bit floating point values, each position is composed of 6 of those values (3 points + 3 colours (one for each vertex))
-    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(0); //this 0 is referred to the layout on shader
 
     // color attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(2); //this 2 is referred to the layout on shader
 
 
 
@@ -367,7 +367,7 @@ int main() {
         */ 
         //frustum
         //glm::perspective = field of view (zoom), aspect (height of frustum), near plane, far plane
-        float zoom = 1.0f;
+        float zoom = 5.0f;
         glm::mat4 frustum = glm::perspective(fDistance * zoom, 2.0f * r, dNear, dFar);
         ourShader.setMat4("projection", frustum);
 

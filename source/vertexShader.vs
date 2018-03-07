@@ -1,7 +1,9 @@
 #version 330 core
     layout (location = 0) in vec3 aPos;
-    layout (location = 1) in vec3 aCoords;
+    layout (location = 1) in vec3 aNormal;
+    layout (location = 2) in vec3 aCoords;
 
+    out vec3 Color;
     out vec3 Coords;
     uniform mat4 transform;
     uniform mat4 view;
