@@ -349,6 +349,7 @@ int main() {
     */
     while(!glfwWindowShouldClose(window)) { // function checks at the start of each loop iteration if GLFW has been instructed to close
 
+
         // process inputs whether relevant keys are pressed/released this frame and react accordingly
         if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
             glfwSetWindowShouldClose(window, true);
@@ -360,6 +361,7 @@ int main() {
         // get matrix's uniform location and set matrix
         ourShader.use(); //draw
 
+
         /**
             IMPORTANT FOR TRANSFORMATION:
             Since GLM version 0.9.9, GLM default initializates matrix types to a 0-initalized matrix, 
@@ -368,8 +370,9 @@ int main() {
         //frustum
         //glm::perspective = field of view (zoom), aspect (height of frustum), near plane, far plane
         float zoom = 5.0f;
-        glm::mat4 frustum = glm::perspective(fDistance * zoom, 2.0f * r, dNear, dFar);
-        ourShader.setMat4("projection", frustum);
+        glm::mat4 projection = glm::perspective(fDistance * zoom, r, dNear, dFar);
+        ourShader.setMat4("projection", projection);
+
 
         //view
         glm::mat4 view = glm::mat4(1.0f);
