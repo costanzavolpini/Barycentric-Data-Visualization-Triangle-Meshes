@@ -17,7 +17,9 @@
 \usepackage{sectsty}
 \usepackage[paper=a4paper,top=0.58in,left=1.65in, right=1.65in, bottom=1.65in]{geometry}
 
-\definecolor{gray}{RGB}{32,32,32}
+\definecolor{lightorange}{RGB}{251,211,168}
+\definecolor{darkred}{RGB}{153,0,0}
+\definecolor{darkgreen}{RGB}{0,51,25}
 
 \sectionfont{\fontsize{12}{15}\selectfont}
 %\usepackage{ifpdf}
@@ -64,8 +66,8 @@
 Using the power of barycentric coordinates we can figure out to which area a pixel belongs and which 
 color it should be painted with. 
 
-Passing barycentric coordinates to the fragment shader will clearly demonstrate that we can get different results from the classic 
-color interpolation (fig.\ref{fig:interpolation}).
+Passing barycentric coordinates to the fragment shader will clearly demonstrate that we can get results different from the classic
+color interpolation (Fig.\ref{fig:interpolation}).
 \begin{figure}[!htb]
   \minipage{0.32\textwidth}
     \includegraphics[width=\linewidth]{interpolation.png}
@@ -81,18 +83,17 @@ color interpolation (fig.\ref{fig:interpolation}).
   \endminipage
   \end{figure}
 
-Some achievable approaches can make out focusing on the distance from vertices. Undoubtedly for each vertex, we can recognize some closer points to it and some not.
+There are different approaches to color interpolation focusing on the distance from vertices. For each point in a triangle, we can easily determine its closest vertex, which we use as a cue for coloring.
 One approach can be represented by the following. 
 
-Let's consider a triangle in which in the top vertex we have the red 
-color, bottom left the green and in the bottom right the blue.
+Let us consider a triangle with top, bottom left and bottom right vertices to which we have assigned the colors red, green and blue respectively.
 The triangle 
 barycentre divides
-each median into two pieces that have a 2:1 ratio.
-In fig.\ref{fig:min} the farthest region from a vertex is colored. Also, we can notice that regions are divided by the "longer" part of medians.
-In fig.\ref{fig:max} we have colored the closest region from a vertex. 
-These approaches can be expressed in relation to barycentric coordinates.
+each median into two parts that have a 2:1 ratio.
+In Fig.\ref{fig:min} the farthest region from a vertex is colored. We can also notice that the regions are divided by the "longer" part of medians.
+In Fig.\ref{fig:max}, we have colored the region closest to the vertext. 
 \newgeometry{paper=a4paper,margin=1.65in}
+These approaches can be expressed by means of barycentric coordinates.
 
 \section{Project description and Goals}
 Alternative data visualization techniques can be found using the power of barycentric coordinates and GPU programming.
@@ -102,7 +103,7 @@ to vertices and then interpolating over the mesh triangles, that does not work i
 
 As a \textbf{first main goal}, we want to expand the idea of \textit{Flat Shading}\footnote{Flat Shading: the idea is to draw all the pixels
 of a triangle with the same 
-color.} also on vertices and edges. A next step could be to split the surface of triangle meshes into regions around vertex (fig.\ref{fig:left}) and edges (fig.\ref{fig:right}) and 
+color.} also on vertices and edges. A next step could be to split the surface of triangle meshes into regions around vertex (Fig.\ref{fig:left}) and edges (Fig.\ref{fig:right}) and 
 color them. 
 
 \begin{figure}[!htb]
@@ -121,8 +122,9 @@ Visualizing data given at the vertices or edges of the mesh in a piecewise const
 Examples of these edge and vertex data are the discrete Gaussian and discrete mean value curvature.
 
 The next step will be to analyze the results obtained. A \textbf{second main goal} would be to extend the project set up a \textit{Gouraud Shading}\footnote{Gouraud Shading: linear interpolate data given at the vertices over the triangles of the mesh, resulting in a piecewise linear and continuous visualization of the data.}
-for these new mesh tessellations. Using the barycentric coordinates and the fragment shader we can spell out a similar piecewise linear continuous interpolation over vertex and edge of regions (fig.\ref{fig:left} and fig.\ref{fig:right}).
-The final step would be to evaluate these data.
+for these new mesh tessellations. Using the barycentric coordinates and the fragment shader we can spell out a similar piecewise linear continuous interpolation over vertex and edge of regions (Fig.\ref{fig:left} and Fig.\ref{fig:right}).
+The final step would be to evaluate these data. The project will end with a report (deliverable) containing all the evaluations and analysis.
+
 
 \section{Milestones and Project Timeline} 
 \subsection{Milestones}
@@ -148,7 +150,7 @@ The final step would be to evaluate these data.
 
   \noindent\resizebox{\textwidth}{!}{
     \begin{tikzpicture}
-\begin{ganttchart}[vgrid, hgrid, link/.style={-latex, red},vrule/.style={thick, black},
+\begin{ganttchart}[vgrid, hgrid, bar/.append style={fill=lightorange}, link/.style={-latex, draw=darkred, fill=darkred},vrule/.style={thick, darkgreen},
   vrule label font=\bfseries]{1}{28}
   \gantttitle{Project Timeline (weeks)}{28} \\
   \gantttitlelist{1,...,14}{2} \\

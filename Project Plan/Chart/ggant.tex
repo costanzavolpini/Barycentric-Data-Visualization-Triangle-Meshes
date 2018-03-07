@@ -16,7 +16,9 @@
 \usepackage{xcolor}
 \usepackage{sectsty}
 \usepackage[paper=a4paper,top=0.58in,left=1.65in, right=1.65in, bottom=1.65in]{geometry}
-
+\definecolor{lightorange}{RGB}{251,211,168}
+\definecolor{darkred}{RGB}{153,0,0}
+\definecolor{darkgreen}{RGB}{0,51,25}
 \definecolor{gray}{RGB}{32,32,32}
 
 \sectionfont{\fontsize{12}{15}\selectfont}
@@ -53,8 +55,8 @@
   \begin{rotate}{270}
   % \noindent\resizebox{\textwidth}{!}{
     % \begin{tikzpicture}
-\begin{ganttchart}[vgrid, hgrid, link/.style={-latex, red},vrule/.style={thick, black},
-  vrule label font=\bfseries]{1}{28}
+      \begin{ganttchart}[vgrid, hgrid, bar/.append style={fill=lightorange}, link/.style={-latex, draw=darkred, fill=darkred},vrule/.style={thick, darkgreen},
+        vrule label font=\bfseries]{1}{28}
   \gantttitle{Project Timeline (weeks)}{28} \\
   \gantttitlelist{1,...,14}{2} \\
   \ganttbar{GPU vertex program}{1}{3} \\
