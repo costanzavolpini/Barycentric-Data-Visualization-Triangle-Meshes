@@ -11,6 +11,7 @@
 #include "glad.h"
 #include "point3.h"
 #include "shader.h"
+#include "camera.h"
 #include <GLFW/glfw3.h>
 #include <vector>
 #include <glm/glm.hpp>
@@ -19,7 +20,12 @@
 
 using namespace std;
 
+// resize window
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+
+// function for mouse
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 // List of vertices and triangles
 vector<Point3d> v;
@@ -33,12 +39,11 @@ vector<Point3d> v_norm;
 const unsigned int WIDTH = 800;
 const unsigned int HEIGHT = 600;
 
-// to have the obj in center
-float fDistance;
-float dNear, dFar;
-float r;
-float px, py, pz;
-
+// camera
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+float lastX = WIDTH / 2.0f;
+float lastY = HEIGHT / 2.0f;
+bool firstMouse = true;
 
 int main() {
     /**
@@ -71,6 +76,14 @@ int main() {
     // user resizes the window the viewport should be adjusted as well
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
+    // mouse 
+    glfwSetCursorPosCallback(window, mouse_callback); // x pos
+    glfwSetScrollCallback(window, scroll_callback); //y pos
+
+    // tell GLFW to capture our mouse
+    // (GLFWwindow * window, int mode, int value)
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
     /**
         ------------- GLAD -------------
         GLAD manages function pointers for OpenGL so we want to initialize GLAD before we call any OpenGL function
@@ -102,7 +115,7 @@ int main() {
     /**
         Read .OFF file
     */ 
-    ifstream in("models/iCorsi/icosahedron_0.off");
+    ifstream in("models/iCorsi/armadillo.off");
     if (!in) {
         cout<<"\nError reading file."<<endl;
         exit(0);
@@ -137,25 +150,12 @@ int main() {
     // vertices array
     float vertices[num_triangles * 18];
 
-    float minx, miny, minz, maxx, maxy, maxz;
-
     /**
         code to automatically center an obj:
         1. find max and min for x, y and z
         2. bound the model by a sphere of radius r, centered on a point p
         ref: https://www.opengl.org/discussion_boards/showthread.php/130876-automatically-center-3d-object
     */
-    if (num_triangles > 0){
-        // initialize values
-        minx = v[t[0].v[0]].x();
-        miny = v[t[0].v[0]].y();
-        minz = v[t[0].v[0]].z();
-
-        maxx = v[t[0].v[0]].x();
-        maxy = v[t[0].v[0]].y();
-        maxz = v[t[0].v[0]].z();
-    }
-    
     int index = 0;
 
 
@@ -170,27 +170,6 @@ int main() {
         vertices[index + 1] = v1.y();
         vertices[index + 2] = v1.z();
 
-        // find max and min for coord x
-        if (v1.x() < minx)
-            minx = v1.x();
-        
-        if (v1.x() > maxx)
-            maxx = v1.x();
-
-        // find max and min for coord y
-        if (v1.y() < miny)
-            miny = v1.y();
-        
-        if (v1.y() > maxy)
-            maxy = v1.y();
-
-        // find max and min for coord z
-        if (v1.z() < minz)
-            minz = v1.z();
-        
-        if (v1.z() > maxz)
-            maxz = v1.z();
-
         //color
         vertices[index + 3] = 1.0f; // v1 red
         vertices[index + 4] = 0.0f;
@@ -201,27 +180,6 @@ int main() {
         vertices[index + 7] = v2.y();
         vertices[index + 8] = v2.z();
 
-        // find max and min for coord x
-        if (v2.x() < minx)
-            minx = v2.x();
-        
-        if (v2.x() > maxx)
-            maxx = v2.x();
-
-        // find max and min for coord y
-        if (v2.y() < miny)
-            miny = v2.y();
-        
-        if (v2.y() > maxy)
-            maxy = v2.y();
-
-        // find max and min for coord z
-        if (v2.z() < minz)
-            minz = v2.z();
-        
-        if (v2.z() > maxz)
-            maxz = v2.z();
-
         //color
         vertices[index + 9] = 0.0f;
         vertices[index + 10] = 1.0f; // v2 green
@@ -231,27 +189,6 @@ int main() {
         vertices[index + 12] = v3.x();
         vertices[index + 13] = v3.y();
         vertices[index + 14] = v3.z();
-        
-        // find max and min for coord x
-        if (v3.x() < minx)
-            minx = v3.x();
-        
-        if (v3.x() > maxx)
-            maxx = v3.x();
-
-        // find max and min for coord y
-        if (v3.y() < miny)
-            miny = v3.y();
-        
-        if (v3.y() > maxy)
-            maxy = v3.y();
-
-        // find max and min for coord z
-        if (v3.z() < minz)
-            minz = v3.z();
-        
-        if (v3.z() > maxz)
-            maxz = v3.z();
 
         //color
         vertices[index + 15] = 0.0f;
@@ -267,17 +204,6 @@ int main() {
 
     index -= 1; // since we added before 18 but we have used only 17 elements
 
-    // bound the model by a sphere of radius r, centered on a point p
-    px = (minx + maxx) / 2.0f;
-    py = (miny + maxy) / 2.0f;
-    pz = (minz + maxz) / 2.0f;
-    r = sqrt((maxx - px) * (maxx - px) + (maxy - py) * (maxy - py) + (maxz - pz) * (maxz - pz));
-
-    fDistance = r / 0.57735f; // where 0.57735f is tan(30 degrees);
-
-    // The near and far clipping planes then lay either side of this point, allowing for the radius of the sphere 
-    dNear = fDistance - r;
-    dFar = fDistance + r;
     /**
         Create memory on the GPU where we store the vertex data, configure how OpenGL should interpret the memory and 
         specify how to send the data to the graphics card.
@@ -343,6 +269,7 @@ int main() {
 
     cout<<"Scene initialized..."<<endl;
 
+
     /**
         application to keep drawing images and handling user input until the program has been explicitly told to stop
         render loop
@@ -369,21 +296,19 @@ int main() {
         */ 
         //frustum
         //glm::perspective = field of view (zoom), aspect (height of frustum), near plane, far plane
-        float zoom = 5.0f;
-        glm::mat4 projection = glm::perspective(fDistance * zoom, r, dNear, dFar);
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
         ourShader.setMat4("projection", projection);
-
 
         //view
         glm::mat4 view = glm::mat4(1.0f);
         // The glm::LookAt function requires a camera position, target/position the camera should look at and up vector that represents the up vector in world space.
-        // (eyeX, eyeY, eyeZ) (centerX, centerY, centerZ) (upX, upY, upZ)
-        view = glm::lookAt(glm::vec3(0.0, 0.0, fDistance), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        // camera.GetViewMatrix call a LookAt with: (eyeX, eyeY, eyeZ) (centerX, centerY, centerZ) (upX, upY, upZ)
+        view = camera.GetViewMatrix();
         ourShader.setMat4("view", view);
 
         // create transformations
         glm::mat4 trans = glm::mat4(1.0f);
-        trans = glm::translate(trans, glm::vec3(-px, -py, -pz));
+        // trans = glm::translate(trans, glm::vec3(-px, -py, -pz));
         // trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
         unsigned int transformLoc = glGetUniformLocation(ourShader.shaderProgram, "transform");
         /**
@@ -429,4 +354,26 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
         height will be significantly larger than specified on retina displays.
     */
     glViewport(0, 0, width, height);
+}
+
+// glfw: whenever the mouse moves, this callback is called
+void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+    if (firstMouse) {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+
+    lastX = xpos;
+    lastY = ypos;
+
+    camera.ProcessMouseMovement(xoffset, yoffset);
+}
+
+// glfw: whenever the mouse scroll wheel scrolls, this callback is called
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+    camera.ProcessMouseScroll(yoffset);
 }
