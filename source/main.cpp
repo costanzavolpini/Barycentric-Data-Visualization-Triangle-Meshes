@@ -12,11 +12,13 @@
 #include "point3.h"
 #include "shader.h"
 #include "camera.h"
+#include "Light.h"
 #include <GLFW/glfw3.h>
 #include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
 
 using namespace std;
 
@@ -30,6 +32,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 // keyboard
 void processInput(GLFWwindow *window);
 
+vector<Light*> lights;
 
 // List of vertices and triangles
 vector<Point3d> v;
@@ -276,6 +279,21 @@ int main() {
     glBindVertexArray(0); 
 
     cout<<"Scene initialized..."<<endl;
+
+      /**
+        Light source (white light from top left)
+    */ 
+    Material LightCol;
+        LightCol.ambient = Color3d(0.6, 0.6, 0.6);
+        LightCol.diffuse = Color3d(1.0, 1.0, 1.0);
+        LightCol.specular = Color3d(1.0, 1.0, 1.0);
+
+    Point3d LightPos(-10.0, 5.0, -5.0);
+
+    Light* light = new Light(LightPos, LightCol);
+    light->setDirectional();
+
+    lights.push_back(light);
 
 
     /**
