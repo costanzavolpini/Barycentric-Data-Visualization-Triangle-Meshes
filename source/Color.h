@@ -8,9 +8,9 @@
 #define COLOR_H
 
 /***************************************************************************
- Point.h
- Comment:  This file contains all point definitions.
- ***************************************************************************/
+Color.h
+Comment:  This file contains all Color definitions.
+***************************************************************************/
 
 //-----------------------------------------------------------------------------
 /// Template class for colors with RGB-components.

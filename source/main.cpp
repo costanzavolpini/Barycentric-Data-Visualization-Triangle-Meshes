@@ -6,55 +6,66 @@
     Costanza Volpini
 */
 
-#include <iostream>
-#include <fstream>
-#include "glad.h"
-#include "point3.h"
-#include "shader.h"
-#include "camera.h"
+#include "Base.h"
 #include "Light.h"
-#include <GLFW/glfw3.h>
-#include <vector>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include "Color.h"
+#include "Shader.h"
+#include "Camera.h"
+// #include "Object.h"
 
+// #include "Object.h"
+// #include "Plane.h"
 
 using namespace std;
 
-// resize window
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-
-// function for mouse
-void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-
-// keyboard
-void processInput(GLFWwindow *window);
-
-vector<Light*> lights;
-
-// List of vertices and triangles
-vector<Point3d> v;
-struct Triangle { int v[3]; };
-vector<Triangle> t;
-int num_vertices = 10;
-vector<int> v_counter(num_vertices);
-vector<Point3d> v_norm;
-
 // settings
-const unsigned int WIDTH = 800;
-const unsigned int HEIGHT = 600;
+    const unsigned int WIDTH = 800;
+    const unsigned int HEIGHT = 600;
 
-// camera
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
-float lastX = WIDTH / 2.0f;
-float lastY = HEIGHT / 2.0f;
-bool firstMouse = true;
+    // animation parameter (time)
+    double tau;
 
-// timing
-float deltaTime = 0.0f;	// time between current frame and last frame
-float lastFrame = 0.0f;
+    // List of pointers to all the lights
+    vector<Light *> lights;
+
+	// List of pointers to all the objects
+	// vector<Object *> objects;
+
+    // List of vertices and triangles
+    vector<Point3d> v;
+    struct Triangle { int v[3]; };
+    vector<Triangle> t;
+
+    int num_vertices = 10;
+    vector<int> v_counter(num_vertices);
+
+    vector<Point3d> v_norm; 
+
+    // Camera settings
+    Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+    float lastX = WIDTH / 2.0f;
+    float lastY = HEIGHT / 2.0f;
+    bool firstMouse = true;
+
+    // functions used for ray tracing
+	Color3d trace(Ray Ray, int cnt);
+    // Object * findNearestObject(Ray ray);
+	Color3d PhongLighting(Point3d p, Point3d n, Point3d v, Material mat);
+	bool inShadow(Point3d p, Light * l);
+
+    // Timing
+    float deltaTime = 0.0f;	// time between current frame and last frame
+    float lastFrame = 0.0f;
+
+        // resize window
+    void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+
+    // function for mouse
+    void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+    void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+
+    // keyboard
+    void processInput(GLFWwindow *window);
 
 int main() {
     /**
@@ -154,8 +165,6 @@ int main() {
 
     in.close();
 
-
-    // int v_counter[num_vertices] = {0};
     v_norm.resize(num_vertices);
 
     // vertices array
@@ -295,14 +304,11 @@ int main() {
 
     lights.push_back(light);
 
-
     /**
         application to keep drawing images and handling user input until the program has been explicitly told to stop
         render loop
     */
     while(!glfwWindowShouldClose(window)) { // function checks at the start of each loop iteration if GLFW has been instructed to close
-
-
         // per-frame time logic
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
@@ -379,7 +385,6 @@ int main() {
 
 // whenever the window size changed this callback function executes
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-
     /**
         make sure the viewport matches the new window dimensions; note that width and 
         height will be significantly larger than specified on retina displays.

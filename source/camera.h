@@ -1,11 +1,12 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include "glad.h"
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include "Base.h"
 
-#include <vector>
+/***************************************************************************
+Camera.h
+Comment:  This file contains all Camera definitions and functions.
+***************************************************************************/
 
 // possible options for camera movement.
 enum Camera_Movement {
