@@ -16,7 +16,8 @@ Comment:  This file contains all Object definitions to construct and draw an obj
 class Object {
   public:
     vector<float> vertices; // vector containing all vertices and colors
-    vector<float> normals;
+    vector<Point3d> normals;
+    vector<float> fnormals;
     
     /**
         Memory on the GPU where we store the vertex data
@@ -30,6 +31,7 @@ class Object {
             cout << "error loading file" << endl;
             return;
         }
+        vecPoint3dToFloat(normals, fnormals);
       }
 
      // Function to initialize VBO and VAO
@@ -53,7 +55,7 @@ class Object {
 
           glBindBuffer(GL_ARRAY_BUFFER, VBO_NORMAL); 
 
-          glBufferData(GL_ARRAY_BUFFER, sizeof(float) * normals.size(), &normals[0], GL_STATIC_DRAW);
+          glBufferData(GL_ARRAY_BUFFER, sizeof(float) * fnormals.size(), &fnormals[0], GL_STATIC_DRAW);
 
           // ------------- VAO -------------
           glGenVertexArrays(1, &VAO);
@@ -86,11 +88,13 @@ class Object {
           glEnableVertexAttribArray(1); //this 1 is referred to the layout on shader
 
           // ------- VAO and VBO for Lamp
-          vector<float> lampVertices, lampNormal;
-            if(!load("models/Geometry/cube.off", lampVertices, lampNormal)){
-                cout << "error loading cube for lamp" << endl;
+          vector<float> lampVertices;
+          vector<Point3d> emptyVector;
+            if(!load("models/Geometry/sphere2.off", lampVertices, emptyVector)){
+                cout << "error loading sphere for lamp" << endl;
                 return;
             }
+
 
           // vbo lamp
           glGenBuffers(1, &VBO_LAMP);

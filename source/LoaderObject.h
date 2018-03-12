@@ -20,9 +20,7 @@ vector<Point3d> v;
 struct Triangle { int v[3]; };
 vector<Triangle> t;
 
-vector<float> normals; 
-
-        bool load (const char * path, vector<float> &out_vertices, vector<float> &out_normals) {
+        bool load (const char * path, vector<float> &out_vertices, vector<Point3d> &out_normals) {
             /**
                 Read .OFF file
             */ 
@@ -56,13 +54,13 @@ vector<float> normals;
 
             // vertices array
             vector<float> vertices(num_triangles * 18);
+            vector<Point3d> normals(num_vertices);
 
             int index = 0;
-            int index_normal = 0;
+            // int index_normal = 0;
 
             // save normals
             vector<int> v_counter(num_vertices);
-            normals.resize(num_triangles * 3);
 
             // save everything with the color into vertices --- 
             for (int k = 0; k < num_triangles; k++) {    
@@ -107,24 +105,27 @@ vector<float> normals;
                 Point3d n = (v2-v1)^(v3-v1);
                 n.normalize();
 
-                // find the norm for the first triangle
-                normals[index_normal] = n.x();
-                normals[index_normal + 1] = n.y();
-                normals[index_normal + 2] = n.z();
-                index_normal += 3;
+                // find the norm for the first vertex
+                normals[t[k].v[0]] += n;
+                v_counter[t[k].v[0]]++;
+
+                normals[t[k].v[1]] += n;
+                v_counter[t[k].v[1]]++;
+
+                normals[t[k].v[2]] += n;
+                v_counter[t[k].v[2]]++;
+
             }
 
-            // // average of norms of adj triangle of a vertex (sum of triangle norms / number of triangles)
-            // for(int k = 0; k < num_vertices; k++){
-            //     if(v_counter[k] != 0){
-            //         normals[k] = normals[k] / v_counter[k];
-            //         normals[k].normalize();
-            //     }
-            // }
-
+            // average of norms of adj triangle of a vertex (sum of triangle norms / number of triangles)
+            for(int k = 0; k < num_vertices; k++){
+                if(v_counter[k] != 0){
+                    normals[k] = normals[k] / v_counter[k];
+                    normals[k].normalize();
+                }
+            }
 
             // output vectors ---
-            // out_vertices.reserve(num_triangles * 18);
             // For each vertex of each triangle
             for (unsigned int i = 0; i < vertices.size(); i++) {
                 // get value
@@ -134,12 +135,21 @@ vector<float> normals;
 
             for (unsigned int i = 0; i < normals.size(); i++) {
                 // get value
-                float value = normals[i];
+                Point3d value = normals[i];
                 out_normals.push_back(value);
             }
 
             cout << "Object loaded" << endl;
             return true;
         }
+
+void vecPoint3dToFloat(vector<Point3d> &_vec, vector<float> &_out) {
+    _out.clear();
+    for (auto i = _vec.begin(); i != _vec.end(); ++i) {
+        _out.push_back(i->x());
+        _out.push_back(i->y());
+        _out.push_back(i->z());
+    }
+}
 
 #endif
