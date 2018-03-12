@@ -5,6 +5,7 @@
 
     out vec3 Color;
     out vec3 Coords;
+    out vec3 Normal;
     uniform mat4 transform;
     uniform mat4 view;
     uniform mat4 projection;
@@ -13,6 +14,7 @@
     {
        gl_Position =  projection * view * transform * vec4(aPos, 1.0);
        Coords = aCoords;
+       Normal = aNormal;  
     }
 
 //create a vec3 called aPos

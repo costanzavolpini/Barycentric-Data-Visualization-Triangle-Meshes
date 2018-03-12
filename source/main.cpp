@@ -22,9 +22,6 @@ using namespace std;
     // animation parameter (time)
     double tau;
 
-    // List of pointers to all the lights
-    vector<Light *> lights;
-
 	// List of pointers to all the objects
 	// vector<Object *> objects;
 
@@ -34,17 +31,11 @@ using namespace std;
     float lastY = HEIGHT / 2.0f;
     bool firstMouse = true;
 
-    // functions used for ray tracing
-	// Color3d trace(Ray Ray, int cnt);
-    // // Object * findNearestObject(Ray ray);
-	// Color3d PhongLighting(Point3d p, Point3d n, Point3d v, Material mat);
-	// bool inShadow(Point3d p, Light * l);
-
     // Timing
     float deltaTime = 0.0f;	// time between current frame and last frame
     float lastFrame = 0.0f;
 
-        // resize window
+    // resize window
     void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
     // function for mouse
@@ -53,6 +44,9 @@ using namespace std;
 
     // keyboard
     void processInput(GLFWwindow *window);
+
+    // lighting
+    glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
 int main() {
     /**
@@ -112,6 +106,7 @@ int main() {
         (GLSL version 420 corresponds to OpenGL version 4.2 for example).
     */
     Shader ourShader("vertexShader.vs", "maxDiagramFragmentShader.fs");
+    Shader lampShader("lampVertexShader.vs", "lampFragmentShader.fs");
 
     /**
         NB. OpenGL works in 3D space we render a 2D triangle with each vertex having a z coordinate of 0.0.
@@ -158,7 +153,9 @@ int main() {
 
         // get matrix's uniform location and set matrix
         ourShader.use(); //draw
-
+        ourShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
+        ourShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
+        ourShader.setVec3("lightPos", lightPos);
 
         /**
             IMPORTANT FOR TRANSFORMATION:
@@ -194,6 +191,16 @@ int main() {
         glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
         object.draw();
+
+        lampShader.use();
+        lampShader.setMat4("projection", projection);
+        lampShader.setMat4("view", view);
+        // model = glm::mat4();
+        // model = glm::translate(model, lightPos);
+        // model = glm::scale(model, glm::vec3(0.2f));
+        // lampShader.setMat4("model", model);
+
+        object.drawLight();
 
         glfwSwapBuffers(window); // will swap the color buffer
         glfwPollEvents(); // function checks if any events are triggered (like keyboard input or mouse movement events) 

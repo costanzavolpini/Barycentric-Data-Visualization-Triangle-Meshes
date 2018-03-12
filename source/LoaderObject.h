@@ -20,7 +20,7 @@ vector<Point3d> v;
 struct Triangle { int v[3]; };
 vector<Triangle> t;
 
-vector<Point3d> v_norm; 
+vector<float> normals; 
 
         bool load (const char * path, vector<float> &out_vertices, vector<float> &out_normals) {
             /**
@@ -54,13 +54,17 @@ vector<Point3d> v_norm;
 
             in.close();
 
-            v_norm.resize(num_vertices);
-
             // vertices array
             vector<float> vertices(num_triangles * 18);
 
             int index = 0;
+            int index_normal = 0;
 
+            // save normals
+            vector<int> v_counter(num_vertices);
+            normals.resize(num_triangles * 3);
+
+            // save everything with the color into vertices --- 
             for (int k = 0; k < num_triangles; k++) {    
                 Point3d v1 = v[t[k].v[0]];
                 Point3d v2 = v[t[k].v[1]];
@@ -102,17 +106,36 @@ vector<Point3d> v_norm;
                 // normal of a triangle
                 Point3d n = (v2-v1)^(v3-v1);
                 n.normalize();
+
+                // find the norm for the first triangle
+                normals[index_normal] = n.x();
+                normals[index_normal + 1] = n.y();
+                normals[index_normal + 2] = n.z();
+                index_normal += 3;
             }
 
-            vector<float> temp_vertices;
+            // // average of norms of adj triangle of a vertex (sum of triangle norms / number of triangles)
+            // for(int k = 0; k < num_vertices; k++){
+            //     if(v_counter[k] != 0){
+            //         normals[k] = normals[k] / v_counter[k];
+            //         normals[k].normalize();
+            //     }
+            // }
 
+
+            // output vectors ---
             // out_vertices.reserve(num_triangles * 18);
             // For each vertex of each triangle
             for (unsigned int i = 0; i < vertices.size(); i++) {
                 // get value
                 float value = vertices[i];
-
                 out_vertices.push_back(value);
+            }
+
+            for (unsigned int i = 0; i < normals.size(); i++) {
+                // get value
+                float value = normals[i];
+                out_normals.push_back(value);
             }
 
             cout << "Object loaded" << endl;
