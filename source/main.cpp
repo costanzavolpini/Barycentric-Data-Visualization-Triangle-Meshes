@@ -134,9 +134,7 @@ int main() {
         ourShader.setVec3("light.ambient", 1.2f, 1.2f, 1.2f);
         ourShader.setVec3("light.diffuse", 1.5f, 1.5f, 1.5f);
         ourShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
-        ourShader.setFloat("light.constant", 1.0f);
-        ourShader.setFloat("light.linear", 0.09f);
-        ourShader.setFloat("light.quadratic", 0.032f);
+        ourShader.setFloat("shininess", 32.0f);
 
         /**
             IMPORTANT FOR TRANSFORMATION:
@@ -145,20 +143,23 @@ int main() {
         */ 
         //frustum
         //glm::perspective = field of view (zoom), aspect (height of frustum), near plane, far plane
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
-        ourShader.setMat4("projection", projection);
+        glm::mat4 projection = glm::mat4(1.0f);
+        projection = glm::perspective(glm::radians(camera.Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
 
         //view
         glm::mat4 view = glm::mat4(1.0f);
         // The glm::LookAt function requires a camera position, target/position the camera should look at and up vector that represents the up vector in world space.
         // camera.GetViewMatrix call a LookAt with: (eyeX, eyeY, eyeZ) (centerX, centerY, centerZ) (upX, upY, upZ)
         view = camera.GetViewMatrix();
+
+        ourShader.setMat4("projection", projection);
         ourShader.setMat4("view", view);
 
         // create transformations
         glm::mat4 trans = glm::mat4(1.0f);
+        ourShader.setMat4("transform", trans);
         // trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-        unsigned int transformLoc = glGetUniformLocation(ourShader.shaderProgram, "transform");
+        // unsigned int transformLoc = glGetUniformLocation(ourShader.shaderProgram, "transform");
         /**
             The first argument should be familiar by now which is the uniform's location. 
             The second argument tells OpenGL how many matrices we'd like to send, which is 1. 
@@ -168,21 +169,14 @@ int main() {
             The last parameter is the actual matrix data, but GLM stores their matrices not in the exact way that 
             OpenGL likes to receive them so we first transform them with GLM's built-in function value_ptr.
         */
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+        // glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
         object.draw();
 
         lampShader.use();
-        view = glm::mat4(1.0f);
         lampShader.setMat4("projection", projection);
-        lampShader.setMat4("view", view);
-        trans = glm::mat4(1.0f);
-        trans = glm::scale(trans, glm::vec3(0.2f));
-        transformLoc = glGetUniformLocation(lampShader.shaderProgram, "transform");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
-        // trans = glm::translate(trans, lightPos);
-        // trans = glm::scale(trans, glm::vec3(0.2f));
-        lampShader.setMat4("transform", trans);
+        lampShader.setMat4("view", glm::mat4(1.0f));
+        lampShader.setMat4("transform", glm::mat4(1.0f));
 
         object.drawLight();
 

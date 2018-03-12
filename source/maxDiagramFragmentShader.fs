@@ -7,10 +7,6 @@ struct Light {
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
-	
-    float constant;
-    float linear;
-    float quadratic;
 };
 
 in vec3 Normal;  
@@ -18,6 +14,7 @@ in vec3 Coords;
 
 uniform vec3 viewPos; 
 uniform Light light;
+uniform float shininess;
 
 
 void main()
@@ -34,7 +31,7 @@ void main()
         // specular
         vec3 viewDir = normalize(viewPos - Coords);
         vec3 reflectDir = reflect(-lightDir, norm);  
-        float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+        float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
         vec3 specular = light.specular * spec;
 
         if (Coords.x > Coords.y && Coords.x > Coords.z) {
