@@ -8,21 +8,23 @@
 
 using namespace std;
 
+/***************************************************************************
+Object.h
+Comment:  This file contains all Object definitions to construct and draw an object.
+***************************************************************************/
 
 class Object {
   public:
-    vector<float> vertices;
+    vector<float> vertices; // vector containing all vertices and colors
     vector<float> normals;
     
     /**
-        Create memory on the GPU where we store the vertex data, configure how OpenGL should interpret the memory and 
-        specify how to send the data to the graphics card.
+        Memory on the GPU where we store the vertex data
         VBO: manage this memory via so called vertex buffer objects (VBO) that can store a large number of vertices in the GPU's memory
     */
-    // GLuint VBO;
-    // GLuint VAO;
     unsigned int VBO, VAO;
 
+    // Constructor
       Object(const std::string &_path) {
         if(!load(_path.c_str(), vertices, normals)){
             cout << "error loading file" << endl;
@@ -30,20 +32,14 @@ class Object {
         }
       }
 
+     // Function to initialize VBO and VAO
       void init() {
-          /**
-              ------------- VBO -------------
-              advantage of using those buffer objects is that we can send large batches of data all at once 
-              to the graphics card without having to send data a vertex a time
-          */
+
+          // ------------- VBO -------------
+          // Use VBO to avoid to send data vertex at a time (we send everything together)
           glGenBuffers(1, &VBO); //generate buffer, bufferID = 1
 
           glBindBuffer(GL_ARRAY_BUFFER, VBO); 
-          /**
-              buffer type of a vertex buffer object is GL_ARRAY_BUFFER
-              From that point (bind) on any buffer calls we make (on the GL_ARRAY_BUFFER target) will be used to configure the currently bound buffer, which is VBO.
-              NB for glBufferData: the fourth parameter specifies how we want the graphics card to manage the given data.
-          */
 
           /**
               GL_STATIC_DRAW: the data will most likely not change at all or very rarely.
@@ -56,18 +52,15 @@ class Object {
           glGenVertexArrays(1, &VAO);
 
           /**
-              bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
-              VAO: advantage that when configuring vertex attribute pointers you only have to make those calls once and 
+              VAO: when configuring vertex attribute pointers you only have to make those calls once and 
               whenever we want to draw the object, we can just bind the corresponding VAO
           */
-          glBindVertexArray(VAO);
-          // If we fail to bind a VAO, OpenGL will most likely refuse to draw anything.
+          glBindVertexArray(VAO); // If we fail to bind a VAO, OpenGL will most likely refuse to draw anything.
 
           /**
               void glVertexAttribPointer(GLuint index​, GLint size​, GLenum type​, GLboolean normalized​, GLsizei stride​, const GLvoid * pointer​);
-              NB we specified the location of the position vertex attribute in the vertex shader with layout (example: location = 0). We want to pass data to this vertex attribute, we pass in 0 (since location = 0).
               size = 6 since we want to pass 3 values (it is a vec3) and a colour for each vertex.
-              stride and tells us the space between consecutive vertex attribute sets
+              stride tells us the space between consecutive vertex attribute sets
               offset of where the position data begins in the buffer. Since the position data is at the start of the data array this value is just 0. 
           */
           
@@ -80,25 +73,32 @@ class Object {
           glEnableVertexAttribArray(2); //this 2 is referred to the layout on shader
 
           /**
-              You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
-              VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
+            Unbind the VAO so other VAO calls won't accidentally modify this VAO, but this rarely happens. 
+            Modifying other VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
           */
           glBindVertexArray(0); 
 
-          cout<<"Scene initialized..."<<endl;
+          cout << "Scene initialized..." << endl;
       }
 
+      // function to draw the triangles of the mesh
+      // it must be called after that we have called glUseProgram on shader.
       void draw(){
           /**
-            Every shader and rendering call after glUseProgram will now use this program object (and thus the shaders).
             The output of the geometry shader is then passed on to the rasterization stage where it maps the resulting primitive(s) 
             to the corresponding pixels on the final screen, resulting in fragments for the fragment shader to use.  
             + Clipping (discards all fragments that are outside your view, increasing performance).
         */
         int num_triangles = vertices.size() / 18;
 
-        glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
+        glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
+      }
+
+     // delete the shader objects once we've linked them into the program object; we no longer need them anymore
+      void clear(){
+        glDeleteVertexArrays(1, &VAO);
+        glDeleteBuffers(1, &VBO);
       }
 };
 

@@ -12,10 +12,6 @@
 #include "Shader.h"
 #include "Camera.h"
 #include "Object.h"
-// #include "Object.h"
-
-// #include "Object.h"
-// #include "Plane.h"
 
 using namespace std;
 
@@ -204,8 +200,7 @@ int main() {
     }
 
     // delete the shader objects once we've linked them into the program object; we no longer need them anymore
-    glDeleteVertexArrays(1, &object.VAO);
-    glDeleteBuffers(1, &object.VBO);
+    object.clear();
 
     // clean/delete all resources that were allocated
     glfwTerminate(); 

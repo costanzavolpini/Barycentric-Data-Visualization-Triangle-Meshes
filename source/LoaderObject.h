@@ -9,17 +9,18 @@
 
 using namespace std;
 
+
+/***************************************************************************
+LoaderObject.h
+Comment:  This file load the mesh using an .OFF file.
+***************************************************************************/
+
 // List of vertices and triangles
 vector<Point3d> v;
 struct Triangle { int v[3]; };
 vector<Triangle> t;
 
-int num_vertices = 10;
-vector<int> v_counter(num_vertices);
-
 vector<Point3d> v_norm; 
-
-int num_triangles;
 
         bool load (const char * path, vector<float> &out_vertices, vector<float> &out_normals) {
             /**
@@ -39,7 +40,7 @@ int num_triangles;
                 return false;
             }
 
-            int i, dummy, num_triangles;
+            int i, dummy, num_triangles, num_vertices;
             in >> num_vertices >> num_triangles >> dummy;
 
             v.resize(num_vertices);
@@ -113,6 +114,8 @@ int num_triangles;
 
                 out_vertices.push_back(value);
             }
+
+            cout << "Object loaded" << endl;
             return true;
         }
 
