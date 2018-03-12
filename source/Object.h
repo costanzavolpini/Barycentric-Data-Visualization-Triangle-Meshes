@@ -86,20 +86,16 @@ class Object {
           glEnableVertexAttribArray(1); //this 1 is referred to the layout on shader
 
           // ------- VAO and VBO for Lamp
-          float lamp[] = { //small cube
-                3.0f, 3.0f, 0.0f, 
-                0.0f, 3.0f, 0.0f, 
-                0.0f, 3.0f, 3.0f, 
-                3.0f, 3.0f, 3.0f, 
-                0.0f, 0.0f, 3.0f,
-                3.0f, 0.0f, 3.0f, 
-                3.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, 0.0f,
-            };
+          vector<float> lampVertices, lampNormal;
+            if(!load("models/Geometry/cube.off", lampVertices, lampNormal)){
+                cout << "error loading cube for lamp" << endl;
+                return;
+            }
+
           // vbo lamp
           glGenBuffers(1, &VBO_LAMP);
           glBindBuffer(GL_ARRAY_BUFFER, VBO_LAMP);
-          glBufferData(GL_ARRAY_BUFFER, sizeof(lamp), lamp, GL_STATIC_DRAW);
+          glBufferData(GL_ARRAY_BUFFER, sizeof(float) * lampVertices.size(), &lampVertices[0], GL_STATIC_DRAW);
 
           // vao lamp
           glGenVertexArrays(1, &VAO_LAMP);

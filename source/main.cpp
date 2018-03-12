@@ -7,23 +7,15 @@
 */
 
 #include "Base.h"
-#include "Light.h"
-#include "Color.h"
 #include "Shader.h"
 #include "Camera.h"
 #include "Object.h"
 
 using namespace std;
 
-// settings
+    // settings
     const unsigned int WIDTH = 800;
     const unsigned int HEIGHT = 600;
-
-    // animation parameter (time)
-    double tau;
-
-	// List of pointers to all the objects
-	// vector<Object *> objects;
 
     // Camera settings
     Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
@@ -119,21 +111,6 @@ int main() {
     object.init();
 
     /**
-        Light source (white light from top left)
-    */ 
-    // Material LightCol;
-    //     LightCol.ambient = Color3d(0.6, 0.6, 0.6);
-    //     LightCol.diffuse = Color3d(1.0, 1.0, 1.0);
-    //     LightCol.specular = Color3d(1.0, 1.0, 1.0);
-
-    // Point3d LightPos(-10.0, 5.0, -5.0);
-
-    // Light* light = new Light(LightPos, LightCol);
-    // light->setDirectional();
-
-    // lights.push_back(light);
-
-    /**
         application to keep drawing images and handling user input until the program has been explicitly told to stop
         render loop
     */
@@ -153,9 +130,16 @@ int main() {
 
         // get matrix's uniform location and set matrix
         ourShader.use(); //draw
-        ourShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
-        ourShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
-        ourShader.setVec3("lightPos", lightPos);
+        ourShader.setVec3("light.position", lightPos);
+        ourShader.setVec3("viewPos", camera.Position);
+
+        // light properties
+        ourShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
+        ourShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
+        ourShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+        ourShader.setFloat("light.constant", 1.0f);
+        ourShader.setFloat("light.linear", 0.09f);
+        ourShader.setFloat("light.quadratic", 0.032f);
 
         /**
             IMPORTANT FOR TRANSFORMATION:
@@ -193,12 +177,24 @@ int main() {
         object.draw();
 
         lampShader.use();
+        view = glm::mat4(1.0f);
         lampShader.setMat4("projection", projection);
         lampShader.setMat4("view", view);
-        // model = glm::mat4();
-        // model = glm::translate(model, lightPos);
-        // model = glm::scale(model, glm::vec3(0.2f));
-        // lampShader.setMat4("model", model);
+        trans = glm::mat4(1.0f);
+        transformLoc = glGetUniformLocation(lampShader.shaderProgram, "transform");
+        /**
+            The first argument should be familiar by now which is the uniform's location. 
+            The second argument tells OpenGL how many matrices we'd like to send, which is 1. 
+            The third argument asks us if we want to transpose our matrix, that is to swap the columns and rows.
+            OpenGL developers often use an internal matrix layout called column-major ordering which is the 
+            default matrix layout in GLM so there is no need to transpose the matrices; we can keep it at GL_FALSE. 
+            The last parameter is the actual matrix data, but GLM stores their matrices not in the exact way that 
+            OpenGL likes to receive them so we first transform them with GLM's built-in function value_ptr.
+        */
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+        // trans = glm::translate(trans, lightPos);
+        // trans = glm::scale(trans, glm::vec3(0.2f));
+        lampShader.setMat4("transform", trans);
 
         object.drawLight();
 
