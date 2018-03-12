@@ -19,13 +19,11 @@ class Object {
         specify how to send the data to the graphics card.
         VBO: manage this memory via so called vertex buffer objects (VBO) that can store a large number of vertices in the GPU's memory
     */
-    GLuint VBO;
-    GLuint VAO;
-    // unsigned int VBO, VAO;
+    // GLuint VBO;
+    // GLuint VAO;
+    unsigned int VBO, VAO;
 
       Object(const std::string &_path) {
-        vector<float> vertices;
-        vector<float> normals;
         if(!load(_path.c_str(), vertices, normals))
             return;
       }
@@ -50,7 +48,7 @@ class Object {
               GL_DYNAMIC_DRAW: the data is likely to change a lot.
               GL_STREAM_DRAW: the data will change every time it is drawn.
           */
-          glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices.data(), GL_STATIC_DRAW); // copies the previously defined vertex data into the buffer's memor
+          glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices[0], GL_STATIC_DRAW); // copies the previously defined vertex data into the buffer's memor
           
           // ------------- VAO -------------
           glGenVertexArrays(1, &VAO);
@@ -79,7 +77,6 @@ class Object {
           glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
           glEnableVertexAttribArray(2); //this 2 is referred to the layout on shader
 
-
           /**
               You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
               VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
@@ -87,6 +84,19 @@ class Object {
           glBindVertexArray(0); 
 
           cout<<"Scene initialized..."<<endl;
+      }
+
+      void draw(){
+          /**
+            Every shader and rendering call after glUseProgram will now use this program object (and thus the shaders).
+            The output of the geometry shader is then passed on to the rasterization stage where it maps the resulting primitive(s) 
+            to the corresponding pixels on the final screen, resulting in fragments for the fragment shader to use.  
+            + Clipping (discards all fragments that are outside your view, increasing performance).
+        */
+        int num_triangles = vertices.size() / 18;
+
+        glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
+        glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
       }
 };
 

@@ -39,10 +39,10 @@ using namespace std;
     bool firstMouse = true;
 
     // functions used for ray tracing
-	Color3d trace(Ray Ray, int cnt);
-    // Object * findNearestObject(Ray ray);
-	Color3d PhongLighting(Point3d p, Point3d n, Point3d v, Material mat);
-	bool inShadow(Point3d p, Light * l);
+	// Color3d trace(Ray Ray, int cnt);
+    // // Object * findNearestObject(Ray ray);
+	// Color3d PhongLighting(Point3d p, Point3d n, Point3d v, Material mat);
+	// bool inShadow(Point3d p, Light * l);
 
     // Timing
     float deltaTime = 0.0f;	// time between current frame and last frame
@@ -124,7 +124,7 @@ int main() {
         Send vertex data to vertex shader (load .off file). 
      */ 
     
-    Object object = Object("models/iCorsi/armadillo.off");
+    Object object = Object("models/iCorsi/icosahedron_0.off");
     object.init();
 
     /**
@@ -197,15 +197,7 @@ int main() {
         */
         glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
-        /**
-            Every shader and rendering call after glUseProgram will now use this program object (and thus the shaders).
-            The output of the geometry shader is then passed on to the rasterization stage where it maps the resulting primitive(s) 
-            to the corresponding pixels on the final screen, resulting in fragments for the fragment shader to use.  
-            + Clipping (discards all fragments that are outside your view, increasing performance).
-        */
-        glBindVertexArray(object.VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
-        glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
-
+        object.draw();
 
         glfwSwapBuffers(window); // will swap the color buffer
         glfwPollEvents(); // function checks if any events are triggered (like keyboard input or mouse movement events) 

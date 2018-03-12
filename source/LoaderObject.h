@@ -21,11 +21,11 @@ vector<Point3d> v_norm;
 
 int num_triangles;
 
-        bool load (const char * path, vector<float> vertices, vector<float> normals) {
+        bool load (const char * path, vector<float> &out_vertices, vector<float> &out_normals) {
             /**
                 Read .OFF file
             */ 
-            ifstream in("models/iCorsi/armadillo.off"); // substitute with path
+            ifstream in(path); // substitute with path
             if (!in) {
                 cout<<"\nError reading file."<<endl;
                 return false;
@@ -39,7 +39,7 @@ int num_triangles;
                 return false;
             }
 
-            int i, dummy;
+            int i, dummy, num_triangles;
             in >> num_vertices >> num_triangles >> dummy;
 
             v.resize(num_vertices);
@@ -56,8 +56,7 @@ int num_triangles;
             v_norm.resize(num_vertices);
 
             // vertices array
-            // float vertices[num_triangles * 18];
-            vertices.resize(num_triangles * 18);
+            vector<float> vertices(num_triangles * 18);
 
             int index = 0;
 
@@ -104,7 +103,17 @@ int num_triangles;
                 n.normalize();
             }
 
-            index -= 1; // since we added before 18 but we have used only 17 elements
+            index -= 1; // since we added before 18 but we have used only 17 elements 
+            vector<float> temp_vertices;
+
+            // out_vertices.reserve(num_triangles * 18);
+            // For each vertex of each triangle
+            for (unsigned int i = 0; i < vertices.size(); i++) {
+                // get value
+                float value = vertices[i];
+
+                out_vertices.push_back(value);
+            }
             return true;
         }
 
