@@ -28,9 +28,6 @@ Comment:  This file contains all basic definitions.
 
 // local includes
 #include "Point3.h"
-// #include "Point2.h"
-#include "Color.h"
-#include "Structs.h"
 #include "Camera.h"
 
 

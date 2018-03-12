@@ -22,7 +22,7 @@ class Object {
         Memory on the GPU where we store the vertex data
         VBO: manage this memory via so called vertex buffer objects (VBO) that can store a large number of vertices in the GPU's memory
     */
-    unsigned int VBO, VAO;
+    unsigned int VBO, VAO, VBO_NORMAL, VBO_LAMP, VAO_LAMP;
 
     // Constructor
       Object(const std::string &_path) {
@@ -47,7 +47,14 @@ class Object {
               GL_STREAM_DRAW: the data will change every time it is drawn.
           */
           glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices.size(), &vertices[0], GL_STATIC_DRAW); // copies the previously defined vertex data into the buffer's memor
-          
+
+          // VBO NORMALS
+          glGenBuffers(1, &VBO_NORMAL); //generate buffer, bufferID = 1
+
+          glBindBuffer(GL_ARRAY_BUFFER, VBO_NORMAL); 
+
+          glBufferData(GL_ARRAY_BUFFER, sizeof(float) * normals.size(), &normals[0], GL_STATIC_DRAW);
+
           // ------------- VAO -------------
           glGenVertexArrays(1, &VAO);
 
@@ -63,7 +70,8 @@ class Object {
               stride tells us the space between consecutive vertex attribute sets
               offset of where the position data begins in the buffer. Since the position data is at the start of the data array this value is just 0. 
           */
-          
+
+          glBindBuffer(GL_ARRAY_BUFFER, VBO);
           //position attribute
           glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(0 * sizeof(float))); // 72-bit floating point values, each position is composed of 6 of those values (3 points + 3 colours (one for each vertex))
           glEnableVertexAttribArray(0); //this 0 is referred to the layout on shader
@@ -71,6 +79,31 @@ class Object {
           // color attribute
           glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
           glEnableVertexAttribArray(2); //this 2 is referred to the layout on shader
+
+          glBindBuffer(GL_ARRAY_BUFFER, VBO_NORMAL);
+          //normal attribute
+          glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float))); 
+          glEnableVertexAttribArray(1); //this 1 is referred to the layout on shader
+
+          // ------- VAO and VBO for Lamp
+          vector<float> lampVertices, lampNormal;
+            if(!load("models/Geometry/cube.off", lampVertices, lampNormal)){
+                cout << "error loading cube for lamp" << endl;
+                return;
+            }
+
+          // vbo lamp
+          glGenBuffers(1, &VBO_LAMP);
+          glBindBuffer(GL_ARRAY_BUFFER, VBO_LAMP);
+          glBufferData(GL_ARRAY_BUFFER, sizeof(float) * lampVertices.size(), &lampVertices[0], GL_STATIC_DRAW);
+
+          // vao lamp
+          glGenVertexArrays(1, &VAO_LAMP);
+          glBindVertexArray(VAO_LAMP); 
+          glBindBuffer(GL_ARRAY_BUFFER, VBO_LAMP);
+          glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+          glEnableVertexAttribArray(0);
+
 
           /**
             Unbind the VAO so other VAO calls won't accidentally modify this VAO, but this rarely happens. 
@@ -95,10 +128,19 @@ class Object {
         glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
       }
 
+      // function to draw the light
+      void drawLight(){
+        glBindVertexArray(VAO_LAMP);
+        glDrawArrays(GL_TRIANGLES, 0, 9 * 3); //cube
+      }
+
      // delete the shader objects once we've linked them into the program object; we no longer need them anymore
       void clear(){
         glDeleteVertexArrays(1, &VAO);
         glDeleteBuffers(1, &VBO);
+        glDeleteVertexArrays(1, &VAO_LAMP);
+        glDeleteBuffers(1, &VBO_LAMP);
+
       }
 };
 
