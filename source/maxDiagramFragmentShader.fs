@@ -2,7 +2,7 @@
 out vec4 FragColor;
 
 struct Light {
-    vec3 position;  
+    vec3 direction;
   
     vec3 ambient;
     vec3 diffuse;
@@ -27,7 +27,7 @@ void main()
 
         // diffuse 
         vec3 norm = normalize(Normal);
-        vec3 lightDir = normalize(light.position - Coords);
+        vec3 lightDir = normalize(-light.direction);
         float diff = max(dot(norm, lightDir), 0.0);
         vec3 diffuse = light.diffuse * diff;
 
@@ -36,14 +36,6 @@ void main()
         vec3 reflectDir = reflect(-lightDir, norm);  
         float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
         vec3 specular = light.specular * spec;
-
-        // attenuation
-        float distance    = length(light.position - Coords);
-        float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));    
-
-        ambient *= attenuation;  
-        diffuse *= attenuation;
-        specular *= attenuation;   
 
         if (Coords.x > Coords.y && Coords.x > Coords.z) {
             vec3 result = (ambient + diffuse + specular) * vec3(0.0f, 0.0f, 1.0f); // blue
