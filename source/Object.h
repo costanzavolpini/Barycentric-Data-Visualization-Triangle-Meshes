@@ -24,8 +24,10 @@ class Object {
     unsigned int VBO, VAO;
 
       Object(const std::string &_path) {
-        if(!load(_path.c_str(), vertices, normals))
+        if(!load(_path.c_str(), vertices, normals)){
+            cout << "error loading file" << endl;
             return;
+        }
       }
 
       void init() {
@@ -48,7 +50,7 @@ class Object {
               GL_DYNAMIC_DRAW: the data is likely to change a lot.
               GL_STREAM_DRAW: the data will change every time it is drawn.
           */
-          glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices[0], GL_STATIC_DRAW); // copies the previously defined vertex data into the buffer's memor
+          glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices.size(), &vertices[0], GL_STATIC_DRAW); // copies the previously defined vertex data into the buffer's memor
           
           // ------------- VAO -------------
           glGenVertexArrays(1, &VAO);

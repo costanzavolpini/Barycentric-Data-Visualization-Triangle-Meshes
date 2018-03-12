@@ -103,7 +103,6 @@ int num_triangles;
                 n.normalize();
             }
 
-            index -= 1; // since we added before 18 but we have used only 17 elements 
             vector<float> temp_vertices;
 
             // out_vertices.reserve(num_triangles * 18);
