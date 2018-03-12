@@ -6,55 +6,53 @@
     Costanza Volpini
 */
 
-#include <iostream>
-#include <fstream>
-#include "glad.h"
-#include "point3.h"
-#include "shader.h"
-#include "camera.h"
+#include "Base.h"
 #include "Light.h"
-#include <GLFW/glfw3.h>
-#include <vector>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
+#include "Color.h"
+#include "Shader.h"
+#include "Camera.h"
+#include "Object.h"
 
 using namespace std;
 
-// resize window
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-
-// function for mouse
-void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-
-// keyboard
-void processInput(GLFWwindow *window);
-
-vector<Light*> lights;
-
-// List of vertices and triangles
-vector<Point3d> v;
-struct Triangle { int v[3]; };
-vector<Triangle> t;
-int num_vertices = 10;
-vector<int> v_counter(num_vertices);
-vector<Point3d> v_norm;
-
 // settings
-const unsigned int WIDTH = 800;
-const unsigned int HEIGHT = 600;
+    const unsigned int WIDTH = 800;
+    const unsigned int HEIGHT = 600;
 
-// camera
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
-float lastX = WIDTH / 2.0f;
-float lastY = HEIGHT / 2.0f;
-bool firstMouse = true;
+    // animation parameter (time)
+    double tau;
 
-// timing
-float deltaTime = 0.0f;	// time between current frame and last frame
-float lastFrame = 0.0f;
+    // List of pointers to all the lights
+    vector<Light *> lights;
+
+	// List of pointers to all the objects
+	// vector<Object *> objects;
+
+    // Camera settings
+    Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+    float lastX = WIDTH / 2.0f;
+    float lastY = HEIGHT / 2.0f;
+    bool firstMouse = true;
+
+    // functions used for ray tracing
+	// Color3d trace(Ray Ray, int cnt);
+    // // Object * findNearestObject(Ray ray);
+	// Color3d PhongLighting(Point3d p, Point3d n, Point3d v, Material mat);
+	// bool inShadow(Point3d p, Light * l);
+
+    // Timing
+    float deltaTime = 0.0f;	// time between current frame and last frame
+    float lastFrame = 0.0f;
+
+        // resize window
+    void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+
+    // function for mouse
+    void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+    void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+
+    // keyboard
+    void processInput(GLFWwindow *window);
 
 int main() {
     /**
@@ -121,188 +119,30 @@ int main() {
         
         Send vertex data to vertex shader (load .off file). 
      */ 
-
-
-    /**
-        Read .OFF file
-    */ 
-    ifstream in("models/iCorsi/armadillo.off");
-    if (!in) {
-        cout<<"\nError reading file."<<endl;
-        exit(0);
-    }
-    string s;
-    string offName = "OFF";
-    getline(in,s);
-
-    if (s.compare(0,offName.size(),offName)!=0) {
-        cout << "This is not a valid OFF file." << endl;
-        exit(0);
-    }
-
-    int i, num_triangles, dummy;
-    in >> num_vertices >> num_triangles >> dummy;
-
-    v.resize(num_vertices);
-    for (i = 0; i < num_vertices; i++)
-        in >> v[i][0] >> v[i][1] >> v[i][2];
-
-    t.resize(num_triangles);
-
-    for (i = 0; i < num_triangles; i++)
-        in >> dummy >> t[i].v[0] >> t[i].v[1] >> t[i].v[2];
-
-    in.close();
-
-
-    // int v_counter[num_vertices] = {0};
-    v_norm.resize(num_vertices);
-
-    // vertices array
-    float vertices[num_triangles * 18];
-
-    /**
-        code to automatically center an obj:
-        1. find max and min for x, y and z
-        2. bound the model by a sphere of radius r, centered on a point p
-        ref: https://www.opengl.org/discussion_boards/showthread.php/130876-automatically-center-3d-object
-    */
-    int index = 0;
-
-
-    for (int k = 0; k < num_triangles; k++) {    
-        Point3d v1 = v[t[k].v[0]];
-        Point3d v2 = v[t[k].v[1]];
-        Point3d v3 = v[t[k].v[2]];
-
-        // insert values in vertices
-        // first vertex
-        vertices[index] = v1.x();
-        vertices[index + 1] = v1.y();
-        vertices[index + 2] = v1.z();
-
-        //color
-        vertices[index + 3] = 1.0f; // v1 red
-        vertices[index + 4] = 0.0f;
-        vertices[index + 5] = 0.0f;
-
-        // second vertex
-        vertices[index + 6] = v2.x();
-        vertices[index + 7] = v2.y();
-        vertices[index + 8] = v2.z();
-
-        //color
-        vertices[index + 9] = 0.0f;
-        vertices[index + 10] = 1.0f; // v2 green
-        vertices[index + 11] = 0.0f;
-
-        // third vertex
-        vertices[index + 12] = v3.x();
-        vertices[index + 13] = v3.y();
-        vertices[index + 14] = v3.z();
-
-        //color
-        vertices[index + 15] = 0.0f;
-        vertices[index + 16] = 0.0f;
-        vertices[index + 17] = 1.0f; // v3 blue    
-
-        index += 18;
-
-        // normal of a triangle
-        Point3d n = (v2-v1)^(v3-v1);
-        n.normalize();
-    }
-
-    index -= 1; // since we added before 18 but we have used only 17 elements
-
-    /**
-        Create memory on the GPU where we store the vertex data, configure how OpenGL should interpret the memory and 
-        specify how to send the data to the graphics card.
-        VBO: manage this memory via so called vertex buffer objects (VBO) that can store a large number of vertices in the GPU's memory
-    */
-    unsigned int VBO, VAO;
-
-    /**
-        ------------- VBO -------------
-        advantage of using those buffer objects is that we can send large batches of data all at once 
-        to the graphics card without having to send data a vertex a time
-    */
-    glGenBuffers(1, &VBO); //generate buffer, bufferID = 1
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO); 
-    /**
-        buffer type of a vertex buffer object is GL_ARRAY_BUFFER
-        From that point (bind) on any buffer calls we make (on the GL_ARRAY_BUFFER target) will be used to configure the currently bound buffer, which is VBO.
-        NB for glBufferData: the fourth parameter specifies how we want the graphics card to manage the given data.
-    */
-
-    /**
-        GL_STATIC_DRAW: the data will most likely not change at all or very rarely.
-        GL_DYNAMIC_DRAW: the data is likely to change a lot.
-        GL_STREAM_DRAW: the data will change every time it is drawn.
-    */
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); // copies the previously defined vertex data into the buffer's memor
     
-    // ------------- VAO -------------
-    glGenVertexArrays(1, &VAO);
+    Object object = Object("models/iCorsi/icosahedron_0.off");
+    object.init();
 
     /**
-        bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
-        VAO: advantage that when configuring vertex attribute pointers you only have to make those calls once and 
-        whenever we want to draw the object, we can just bind the corresponding VAO
-    */
-    glBindVertexArray(VAO);
-    // If we fail to bind a VAO, OpenGL will most likely refuse to draw anything.
-
-    /**
-        void glVertexAttribPointer(GLuint index​, GLint size​, GLenum type​, GLboolean normalized​, GLsizei stride​, const GLvoid * pointer​);
-        NB we specified the location of the position vertex attribute in the vertex shader with layout (example: location = 0). We want to pass data to this vertex attribute, we pass in 0 (since location = 0).
-        size = 6 since we want to pass 3 values (it is a vec3) and a colour for each vertex.
-        stride and tells us the space between consecutive vertex attribute sets
-        offset of where the position data begins in the buffer. Since the position data is at the start of the data array this value is just 0. 
-    */
-    
-    //position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(0 * sizeof(float))); // 72-bit floating point values, each position is composed of 6 of those values (3 points + 3 colours (one for each vertex))
-    glEnableVertexAttribArray(0); //this 0 is referred to the layout on shader
-
-    // color attribute
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(2); //this 2 is referred to the layout on shader
-
-
-
-    /**
-        You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
-        VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
-    */
-    glBindVertexArray(0); 
-
-    cout<<"Scene initialized..."<<endl;
-
-      /**
         Light source (white light from top left)
     */ 
-    Material LightCol;
-        LightCol.ambient = Color3d(0.6, 0.6, 0.6);
-        LightCol.diffuse = Color3d(1.0, 1.0, 1.0);
-        LightCol.specular = Color3d(1.0, 1.0, 1.0);
+    // Material LightCol;
+    //     LightCol.ambient = Color3d(0.6, 0.6, 0.6);
+    //     LightCol.diffuse = Color3d(1.0, 1.0, 1.0);
+    //     LightCol.specular = Color3d(1.0, 1.0, 1.0);
 
-    Point3d LightPos(-10.0, 5.0, -5.0);
+    // Point3d LightPos(-10.0, 5.0, -5.0);
 
-    Light* light = new Light(LightPos, LightCol);
-    light->setDirectional();
+    // Light* light = new Light(LightPos, LightCol);
+    // light->setDirectional();
 
-    lights.push_back(light);
-
+    // lights.push_back(light);
 
     /**
         application to keep drawing images and handling user input until the program has been explicitly told to stop
         render loop
     */
     while(!glfwWindowShouldClose(window)) { // function checks at the start of each loop iteration if GLFW has been instructed to close
-
-
         // per-frame time logic
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
@@ -353,23 +193,14 @@ int main() {
         */
         glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
-        /**
-            Every shader and rendering call after glUseProgram will now use this program object (and thus the shaders).
-            The output of the geometry shader is then passed on to the rasterization stage where it maps the resulting primitive(s) 
-            to the corresponding pixels on the final screen, resulting in fragments for the fragment shader to use.  
-            + Clipping (discards all fragments that are outside your view, increasing performance).
-        */
-        glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
-        glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
-
+        object.draw();
 
         glfwSwapBuffers(window); // will swap the color buffer
         glfwPollEvents(); // function checks if any events are triggered (like keyboard input or mouse movement events) 
     }
 
     // delete the shader objects once we've linked them into the program object; we no longer need them anymore
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
+    object.clear();
 
     // clean/delete all resources that were allocated
     glfwTerminate(); 
@@ -379,7 +210,6 @@ int main() {
 
 // whenever the window size changed this callback function executes
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-
     /**
         make sure the viewport matches the new window dimensions; note that width and 
         height will be significantly larger than specified on retina displays.
