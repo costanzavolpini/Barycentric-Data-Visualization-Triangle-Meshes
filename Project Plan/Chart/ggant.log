@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2018.1.19)  11 MAR 2018 19:28
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2018.1.19)  12 MAR 2018 09:31
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -690,11 +690,11 @@ ABD: EveryShipout initializing macros
 * layoutoffset:(h,v)=(0.0pt,0.0pt)
 * modes: 
 * h-part:(L,W,R)=(36.135pt, 525.23788pt, 36.135pt)
-* v-part:(T,H,B)=(36.135pt, 772.77686pt, 36.135pt)
+* v-part:(T,H,B)=(36.135pt, 780.0043pt, 28.90755pt)
 * \paperwidth=597.50787pt
 * \paperheight=845.04684pt
 * \textwidth=525.23788pt
-* \textheight=772.77686pt
+* \textheight=780.0043pt
 * \oddsidemargin=-36.135pt
 * \evensidemargin=-36.135pt
 * \topmargin=-73.135pt
@@ -721,10 +721,10 @@ ABD: EveryShipout initializing macros
 {/usr/local/texlive/2017/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
 (./ggant.aux) ) 
 Here is how much of TeX's memory you used:
- 16879 strings out of 492980
- 338192 string characters out of 6132509
- 402285 words of memory out of 5000000
- 20123 multiletter control sequences out of 15000+600000
+ 16873 strings out of 492980
+ 338043 string characters out of 6132509
+ 401068 words of memory out of 5000000
+ 20117 multiletter control sequences out of 15000+600000
  4848 words of font info for 18 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  62i,7n,69p,478b,832s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -733,7 +733,7 @@ cm/cmbx10.pfb></usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/c
 m/cmr10.pfb></usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/
 cmr6.pfb></usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmr
 8.pfb>
-Output written on ggant.pdf (1 page, 58460 bytes).
+Output written on ggant.pdf (1 page, 58934 bytes).
 PDF statistics:
  27 PDF objects out of 1000 (max. 8388607)
  19 compressed objects within 1 object stream

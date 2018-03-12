@@ -17,7 +17,7 @@
 \usepackage{sectsty}
 \usepackage{pdflscape}
 
-\usepackage[paper=a4paper,top=0.5in,left=0.5in, right=0.5in, bottom=0.5in]{geometry}
+\usepackage[paper=a4paper,top=0.5in,left=0.5in, right=0.5in, bottom=0.4in]{geometry}
 \definecolor{lightorange}{RGB}{251,211,168}
 \definecolor{darkred}{RGB}{153,0,0}
 \definecolor{darkgreen}{RGB}{0,51,25}
@@ -60,12 +60,12 @@
         vrule/.style={thick, darkgreen},
         vrule label font=\bfseries,
         x unit=2.1mm,
-        y unit chart=1.2cm, 
+        y unit chart=1.145cm, 
         time slot format=little-endian,
         % progress=today,
         today=11.3.18 
-        ]{19.2.2018}{1.6.2018}
-  \gantttitlecalendar*{19.2.2018}{1.6.2018}{month=shortname, week} \\
+        ]{19.2.2018}{31.5.2018}
+  \gantttitlecalendar*{19.2.2018}{31.5.2018}{month=shortname, week} \\
   \ganttbar[
     progress=100,
     bar/.append style={fill=black!43}
@@ -83,7 +83,7 @@
   \ganttbar{Write the final report}{14.5.2018}{27.5.2018}
   \ganttbar{}{23.4.2018}{26.4.2018}
   \ganttnewline
-  \ganttbar{Make the poster}{28.5.2018}{1.6.2018}
+  \ganttbar{Make the poster}{21.5.2018}{27.5.2018}
   % \ganttbar{}{10}{15}
   % \ganttbar{}{25}{28}
   % \ganttlink[link type=f-s]{elem0}{elem1}
@@ -99,7 +99,7 @@
   \ganttvrule{M2}{25.3.2018}
   \ganttvrule{M3}{15.4.2018}
   \ganttvrule{M4}{6.5.2018}
-  \ganttvrule{M5}{25.5.2018}
+  \ganttvrule{M5}{27.5.2018}
 \end{ganttchart}
 \end{tikzpicture}
 % \end{rotate}
@@ -109,9 +109,9 @@
   \item [] \textbf{Milestone 2:} Implementation of Flat shading on vertices and edges.
   \item [] \textbf{Milestone 3:} GPU fragment program.
   \item [] \textbf{Milestone 4:} Implementation of an extension of Gouraud shading.
-  \item [] \textbf{Milestone 5:} A first version of the report.
+  \item [] \textbf{Milestone 5:} A first version of the report and poster.
 \end{itemize}
-
+\begin{flushright}\small{\color{gray!50}{The 15th week will be used only for possible delays or reviews.}}\end{flushright}
 \end{landscape}
 \end{document}  
 
