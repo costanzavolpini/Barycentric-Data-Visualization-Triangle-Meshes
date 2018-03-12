@@ -37,9 +37,6 @@ using namespace std;
     // keyboard
     void processInput(GLFWwindow *window);
 
-    // lighting
-    glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
-
 int main() {
     /**
         ------------- GLFW -------------
@@ -107,7 +104,7 @@ int main() {
         Send vertex data to vertex shader (load .off file). 
      */ 
     
-    Object object = Object("models/iCorsi/icosahedron_0.off");
+    Object object = Object("models/iCorsi/horse.off");
     object.init();
 
     /**
@@ -130,12 +127,12 @@ int main() {
 
         // get matrix's uniform location and set matrix
         ourShader.use(); //draw
-        ourShader.setVec3("light.position", lightPos);
+        ourShader.setVec3("light.direction", -0.2f, -1.0f, -0.3f); 
         ourShader.setVec3("viewPos", camera.Position);
 
         // light properties
-        ourShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
-        ourShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
+        ourShader.setVec3("light.ambient", 1.2f, 1.2f, 1.2f);
+        ourShader.setVec3("light.diffuse", 1.5f, 1.5f, 1.5f);
         ourShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
         ourShader.setFloat("light.constant", 1.0f);
         ourShader.setFloat("light.linear", 0.09f);
@@ -160,7 +157,6 @@ int main() {
 
         // create transformations
         glm::mat4 trans = glm::mat4(1.0f);
-        // trans = glm::translate(trans, glm::vec3(-px, -py, -pz));
         // trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
         unsigned int transformLoc = glGetUniformLocation(ourShader.shaderProgram, "transform");
         /**
@@ -181,16 +177,8 @@ int main() {
         lampShader.setMat4("projection", projection);
         lampShader.setMat4("view", view);
         trans = glm::mat4(1.0f);
+        trans = glm::scale(trans, glm::vec3(0.2f));
         transformLoc = glGetUniformLocation(lampShader.shaderProgram, "transform");
-        /**
-            The first argument should be familiar by now which is the uniform's location. 
-            The second argument tells OpenGL how many matrices we'd like to send, which is 1. 
-            The third argument asks us if we want to transpose our matrix, that is to swap the columns and rows.
-            OpenGL developers often use an internal matrix layout called column-major ordering which is the 
-            default matrix layout in GLM so there is no need to transpose the matrices; we can keep it at GL_FALSE. 
-            The last parameter is the actual matrix data, but GLM stores their matrices not in the exact way that 
-            OpenGL likes to receive them so we first transform them with GLM's built-in function value_ptr.
-        */
         glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
         // trans = glm::translate(trans, lightPos);
         // trans = glm::scale(trans, glm::vec3(0.2f));
