@@ -72,7 +72,7 @@ public:
         // you instruct glm to create a matrix that will look from cameraPos, at cameraPos + cameraFront, so just in front of the camera. 
         // The trick here is that you move both the position and target at the same time, with the same offset, as the second parameter 
         // is based on the first parameter. This is why the camera does not 'rotate', it has the effect of 'strafing' in First person shooter games.
-        return glm::lookAt(Position, Position +  Front, Up);
+        return glm::lookAt(Position, Position +  Front, Up); //check!
     }
 
     // ------------------- KEYBOARD ---------------------------

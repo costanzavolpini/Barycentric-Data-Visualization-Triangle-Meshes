@@ -26,6 +26,14 @@ Comment:  This file contains all basic definitions.
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+// #ifdef __APPLE__
+// #include <GLUT/glut.h>
+// #else
+// #include <GL/glut.h>
+// #endif
+
+ 
+
 // local includes
 #include "Point3.h"
 #include "Camera.h"

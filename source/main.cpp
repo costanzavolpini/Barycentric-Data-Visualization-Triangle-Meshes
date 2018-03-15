@@ -11,6 +11,9 @@
 #include "Camera.h"
 #include "Object.h"
 
+
+
+
 using namespace std;
 
     // settings
@@ -30,12 +33,16 @@ using namespace std;
     // resize window
     void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
-    // function for mouse
-    void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-    void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-
     // keyboard
     void processInput(GLFWwindow *window);
+
+    double last_mx = 0, last_my = 0, cur_mx = 0, cur_my = 0;
+    int arcball_on = false;
+
+    void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
+    static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
+    glm::vec3 get_arcball_vector(double x, double y);
+    
 
 int main() {
     /**
@@ -69,12 +76,13 @@ int main() {
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     // mouse 
-    glfwSetCursorPosCallback(window, mouse_callback); // x pos
-    glfwSetScrollCallback(window, scroll_callback); //y pos
+    glfwSetInputMode(window, GLFW_STICKY_MOUSE_BUTTONS, 1);
+    glfwSetMouseButtonCallback(window, mouse_button_callback); // call the callback when the user press a button. It corresponds to glutMouseFunc
+    glfwSetCursorPosCallback(window, cursor_position_callback); // call the callback when the user move the cursor. It corresponds to glutMotionFunc
 
     // tell GLFW to capture our mouse
     // (GLFWwindow * window, int mode, int value)
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     /**
         ------------- GLAD -------------
@@ -104,7 +112,7 @@ int main() {
         Send vertex data to vertex shader (load .off file). 
      */ 
     
-    Object object = Object("models/iCorsi/horse.off");
+    Object object = Object("models/iCorsi/icosahedron_0.off");
     object.init();
 
     /**
@@ -123,7 +131,8 @@ int main() {
 
         // render colours
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); //black screen
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the depth buffer before each render iteration (otherwise the depth information of the previous frame stays in the buffer).
+
 
         // get matrix's uniform location and set matrix
         ourShader.use(); //draw
@@ -143,40 +152,46 @@ int main() {
         */ 
         //frustum
         //glm::perspective = field of view (zoom), aspect (height of frustum), near plane, far plane
+        glm::mat4 view = glm::mat4(1.0f);
         glm::mat4 projection = glm::mat4(1.0f);
         projection = glm::perspective(glm::radians(camera.Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
 
-        //view
-        glm::mat4 view = glm::mat4(1.0f);
         // The glm::LookAt function requires a camera position, target/position the camera should look at and up vector that represents the up vector in world space.
         // camera.GetViewMatrix call a LookAt with: (eyeX, eyeY, eyeZ) (centerX, centerY, centerZ) (upX, upY, upZ)
         view = camera.GetViewMatrix();
 
         ourShader.setMat4("projection", projection);
-        ourShader.setMat4("view", view);
 
         // create transformations
-        glm::mat4 trans = glm::mat4(1.0f);
-        ourShader.setMat4("transform", trans);
-        // trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-        // unsigned int transformLoc = glGetUniformLocation(ourShader.shaderProgram, "transform");
-        /**
-            The first argument should be familiar by now which is the uniform's location. 
-            The second argument tells OpenGL how many matrices we'd like to send, which is 1. 
-            The third argument asks us if we want to transpose our matrix, that is to swap the columns and rows.
-            OpenGL developers often use an internal matrix layout called column-major ordering which is the 
-            default matrix layout in GLM so there is no need to transpose the matrices; we can keep it at GL_FALSE. 
-            The last parameter is the actual matrix data, but GLM stores their matrices not in the exact way that 
-            OpenGL likes to receive them so we first transform them with GLM's built-in function value_ptr.
-        */
-        // glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+        glm::mat4 model = glm::mat4(1.0f);
+        
+        // arcball move
+        if (cur_mx != last_mx || cur_my != last_my) {
+            glm::vec3 va = get_arcball_vector(last_mx, last_my); //OP1
+            glm::vec3 vb = get_arcball_vector(cur_mx,  cur_my); //OP2
+            float angle = acos(min(1.0f, glm::dot(va, vb)));
+            glm::vec3 axis_in_camera_coord = glm::cross(va, vb);
+
+            // converting the rotation axis from camera coordinates to object coordinates. 
+            model = glm::translate(model,  glm::vec3( 0.0f,  0.0f,  0.0f));
+            glm::mat3 camera2object = glm::inverse(glm::mat3(camera.GetViewMatrix()) * glm::mat3(model)); //from camera to object coord
+            glm::vec3 axis_in_object_coord = camera2object * axis_in_camera_coord;
+
+            // rotation axis from object coordinates to world coordinates
+            model = glm::rotate(model, glm::degrees(angle), axis_in_object_coord);
+            last_mx = cur_mx;
+            last_my = cur_my;
+        }
+
+        ourShader.setMat4("view", view);
+        ourShader.setMat4("model", model);
 
         object.draw();
 
         lampShader.use();
         lampShader.setMat4("projection", projection);
         lampShader.setMat4("view", glm::mat4(1.0f));
-        lampShader.setMat4("transform", glm::mat4(1.0f));
+        lampShader.setMat4("model", glm::mat4(1.0f));
 
         object.drawLight();
 
@@ -202,39 +217,89 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 }
 
-// glfw: whenever the mouse moves, this callback is called
-void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
-    if (firstMouse) {
-        lastX = xpos;
-        lastY = ypos;
-        firstMouse = false;
-    }
-
-    float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
-
-    lastX = xpos;
-    lastY = ypos;
-
-    camera.ProcessMouseMovement(xoffset, yoffset);
+// Function that activate arcball when button left is pressed.
+// mouse button, button action and modifier bits.
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
+        arcball_on = true;
+        double xpos, ypos;
+        glfwGetCursorPos(window, &xpos, &ypos);
+        last_mx = cur_mx = xpos;
+        last_my = cur_my = ypos;
+        cout << "left " << cur_mx << endl;
+        cout << "left " << cur_my << endl;
+    } else
+        arcball_on = false;
 }
 
-// glfw: whenever the mouse scroll wheel scrolls, this callback is called
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-    camera.ProcessMouseScroll(yoffset);
+// Function that take position when arcball is activate (left button is pressed)
+static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos){
+  if (arcball_on) {  // if left button is pressed
+    cur_mx = xpos;
+    cur_my = ypos;
+    cout << cur_mx << endl;
+    cout << cur_my << endl;
+  }
 }
+
+// void onMouse(int button, int state, int x, int y) {
+//   if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+//     arcball_on = true;
+//     last_mx = cur_mx = x;
+//     last_my = cur_my = y;
+//   } else {
+//     arcball_on = false;
+//   }
+// }
+
+// void onMotion(int x, int y) {
+//   if (arcball_on) {  // if left button is pressed
+//     cur_mx = x;
+//     cur_my = y;
+//   }
+// }
 
 // keyboard
 void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-        camera.ProcessKeyboard(UP, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-        camera.ProcessKeyboard(BOTTOM, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-        camera.ProcessKeyboard(LEFT, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-        camera.ProcessKeyboard(RIGHT, deltaTime);
+
+
+    // if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+    //     camera.ProcessKeyboard(UP, deltaTime);
+    // if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+    //     camera.ProcessKeyboard(BOTTOM, deltaTime);
+    // if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+    //     camera.ProcessKeyboard(LEFT, deltaTime);
+    // if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+    //     camera.ProcessKeyboard(RIGHT, deltaTime);
+
+
 }
+
+
+/**
+    Get a normalized vector from the center of the virtual ball O to a
+    point P on the virtual ball surface, such that P is aligned on
+    screen's (X,Y) coordinates.  If (X,Y) is too far away from the
+    sphere, return the nearest point on the virtual ball surface.
+    https://en.wikibooks.org/wiki/OpenGL_Programming/Modern_OpenGL_Tutorial_Arcball
+ */
+glm::vec3 get_arcball_vector(double x, double y) {
+// convert the x,y screen coordinates to [-1,1] coordinates
+  glm::vec3 P = glm::vec3(1.0 * (x/WIDTH) * 2 - 1.0,
+			  1.0 * (y/HEIGHT) * 2 - 1.0,
+			  0);
+  P.y = -P.y;
+  float OP_squared = P.x * P.x + P.y * P.y;
+
+  // use the Pythagorean theorem to check the length of the OP vector and compute the z coordinate
+  if (OP_squared <= 1 * 1)
+    P.z = sqrt(1 * 1 - OP_squared);  // Pythagore
+  else
+    P = glm::normalize(P);  // nearest point
+  return P;
+}
+
