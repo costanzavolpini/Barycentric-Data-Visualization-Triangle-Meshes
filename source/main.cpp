@@ -118,6 +118,10 @@ int main() {
     Object object = Object("models/iCorsi/icosahedron_0.off");
     object.init();
 
+    glm::mat4 view = glm::mat4(1.0f);
+    glm::mat4 projection = glm::mat4(1.0f);
+    glm::mat4 model = glm::mat4(1.0f);
+
     /**
         application to keep drawing images and handling user input until the program has been explicitly told to stop
         render loop
@@ -130,7 +134,6 @@ int main() {
 
         // keyboard
         processInput(window);
-
 
         // render colours
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); //black screen
@@ -153,8 +156,6 @@ int main() {
             Since GLM version 0.9.9, GLM default initializates matrix types to a 0-initalized matrix, 
             instead of the identity matrix. From that version it is required to initialize matrix types as: glm::mat4 mat = glm::mat4(1.0f). 
         */ 
-        glm::mat4 view = glm::mat4(1.0f);
-        glm::mat4 projection = glm::mat4(1.0f);
         projection = glm::perspective(glm::radians(camera.Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 10.0f);
 
         // The glm::LookAt function requires a camera position, target/position the camera should look at and up vector that represents the up vector in world space.
@@ -162,8 +163,8 @@ int main() {
         view = camera.GetViewMatrix();
 
         // create transformations
-        glm::mat4 model = glm::mat4(1.0f);
 
+            // cout << "BEF: " << glm::to_string(model) << endl;
 
         // arcball move
         // ref: https://en.wikibooks.org/wiki/OpenGL_Programming/Modern_OpenGL_Tutorial_Arcball
@@ -174,7 +175,7 @@ int main() {
             glm::vec3 axis_in_camera_coord = glm::cross(va, vb);
 
             // converting the rotation axis from camera coordinates to object coordinates. 
-            // cout << glm::to_string(model) << endl;
+            cout << glm::to_string(model) << endl;
 
             glm::mat3 camera2object = glm::inverse(glm::mat3(camera.GetViewMatrix()) * glm::mat3(model)); //reverse of (local object coords -> world coords -> camera space coords)
             glm::vec3 axis_in_object_coord = camera2object * axis_in_camera_coord;
@@ -182,8 +183,10 @@ int main() {
             // rotation axis from object coordinates to world coordinates
             model = glm::rotate(model, glm::degrees(angle), axis_in_object_coord);
             last_mx = cur_mx;
-            last_my = cur_my;
+            last_my = cur_my;                                
         }
+                    cout << "AFT: " << glm::to_string(model) << endl;
+
         ourShader.setMat4("projection", projection);
         ourShader.setMat4("view", view);
         ourShader.setMat4("model", model);
