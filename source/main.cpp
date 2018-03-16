@@ -78,7 +78,7 @@ int main() {
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     // mouse 
-    glfwSetInputMode(window, GLFW_STICKY_MOUSE_BUTTONS, 1);
+    // glfwSetInputMode(window, GLFW_STICKY_MOUSE_BUTTONS, 1);
     glfwSetMouseButtonCallback(window, mouse_button_callback); // call the callback when the user press a button. It corresponds to glutMouseFunc
     glfwSetCursorPosCallback(window, cursor_position_callback); // call the callback when the user move the cursor. It corresponds to glutMotionFunc
     glfwSetScrollCallback(window, scroll_callback); //zoom
@@ -164,6 +164,7 @@ int main() {
         // create transformations
         glm::mat4 model = glm::mat4(1.0f);
 
+
         // arcball move
         // ref: https://en.wikibooks.org/wiki/OpenGL_Programming/Modern_OpenGL_Tutorial_Arcball
         if (cur_mx != last_mx || cur_my != last_my) {
@@ -173,10 +174,9 @@ int main() {
             glm::vec3 axis_in_camera_coord = glm::cross(va, vb);
 
             // converting the rotation axis from camera coordinates to object coordinates. 
-            model = glm::translate(model,  glm::vec3( 0.0f,  0.0f,  0.0f));
-            cout << glm::to_string(model) << endl;
+            // cout << glm::to_string(model) << endl;
 
-            glm::mat3 camera2object = glm::inverse(glm::mat3(camera.GetViewMatrix()) * glm::mat3(model)); //from camera to object coord
+            glm::mat3 camera2object = glm::inverse(glm::mat3(camera.GetViewMatrix()) * glm::mat3(model)); //reverse of (local object coords -> world coords -> camera space coords)
             glm::vec3 axis_in_object_coord = camera2object * axis_in_camera_coord;
 
             // rotation axis from object coordinates to world coordinates
@@ -184,7 +184,6 @@ int main() {
             last_mx = cur_mx;
             last_my = cur_my;
         }
-
         ourShader.setMat4("projection", projection);
         ourShader.setMat4("view", view);
         ourShader.setMat4("model", model);
@@ -230,8 +229,6 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         glfwGetCursorPos(window, &xpos, &ypos);
         last_mx = cur_mx = xpos;
         last_my = cur_my = ypos;
-        cout << "left " << cur_mx << endl;
-        cout << "left " << cur_my << endl;
     } else
         arcball_on = false;
 }
@@ -241,8 +238,6 @@ static void cursor_position_callback(GLFWwindow* window, double xpos, double ypo
   if (arcball_on) {  // if left button is pressed
     cur_mx = xpos;
     cur_my = ypos;
-    cout << "x : " <<  cur_mx << endl;
-    cout << "y: " << cur_my << endl;
   }
 }
 
@@ -266,14 +261,15 @@ glm::vec3 get_arcball_vector(double x, double y) {
   glm::vec3 P = glm::vec3(1.0 * (x/WIDTH) * 2 - 1.0,
 			  1.0 * (y/HEIGHT) * 2 - 1.0,
 			  0);
-//   P.y = -P.y;
+  P.y = -P.y;
+// P.x = -P.x;
   float OP_squared = P.x * P.x + P.y * P.y;
 
   // use the Pythagorean theorem to check the length of the OP vector and compute the z coordinate
-  if (OP_squared <= 1 * 1)
-    P.z = sqrt(1 * 1 - OP_squared);  // Pythagore
+  if (OP_squared <= 1)
+    P.z = sqrt(1 - OP_squared);  // Pythagore
   else
-    P = glm::normalize(P);  // nearest point
+    P = glm::normalize(P); 
   return P;
 }
 
