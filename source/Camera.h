@@ -20,7 +20,6 @@ enum Camera_Movement {
 const float ROTATION_Y  = -90.0f; // clockwise rotation on axis y (PITCH) -- angle that depicts how much we're looking up or down
 const float ROTATION_X  =  0.0f; // clockwise rotation on axis x (YAW) -- represents the magnitude we're looking to the left or to the right
 const float SPEED       =  2.5f;
-const float SENSITIVITY =  0.1f;
 const float ZOOM        =  45.0f;
 
 
@@ -41,14 +40,12 @@ public:
     float Rotation_x; // pitch
 
     // Camera options
-    float MovementSpeed;
-    float MouseSensitivity;
     float Zoom;
 
     // Constructor with vectors
     // it passes some default values that can be override
     // using a member initializer list - we initialize this values
-    Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float rotat_y = ROTATION_Y, float rotat_x = ROTATION_X) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM) {
+    Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float rotat_y = ROTATION_Y, float rotat_x = ROTATION_X) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), Zoom(ZOOM) {
         Position = position;
         WorldUp = up;
         Rotation_y = rotat_y;
@@ -57,7 +54,7 @@ public:
     }
 
     // Constructor with scalar values
-    Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float rotat_y, float rotat_x) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM) {
+    Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float rotat_y, float rotat_x) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), Zoom(ZOOM) {
         Position = glm::vec3(posX, posY, posZ);
         WorldUp = glm::vec3(upX, upY, upZ);
         Rotation_y = rotat_y;
@@ -72,44 +69,7 @@ public:
         // you instruct glm to create a matrix that will look from cameraPos, at cameraPos + cameraFront, so just in front of the camera. 
         // The trick here is that you move both the position and target at the same time, with the same offset, as the second parameter 
         // is based on the first parameter. This is why the camera does not 'rotate', it has the effect of 'strafing' in First person shooter games.
-        return glm::lookAt(Position, Position +  Front, Up); //check!
-    }
-
-    // ------------------- KEYBOARD ---------------------------
-    // Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
-    void ProcessKeyboard(Camera_Movement direction, float deltaTime) {
-        float velocity = MovementSpeed * deltaTime;
-        if (direction == UP)
-            Position -= Up * velocity;
-        if (direction == BOTTOM)
-            Position += Up * velocity;
-        if (direction == LEFT)
-            Position -= Right * velocity;
-        if (direction == RIGHT)
-            Position += Right * velocity;
-    }
-
-    // ------------------- MOUSE ---------------------------
-    // To look around the scene we have to change the cameraFront vector based on the input of the mouse.
-
-    // Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
-    void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainRotation_x = true) {
-        xoffset *= MouseSensitivity;
-        yoffset *= MouseSensitivity;
-
-        Rotation_y += xoffset;
-        Rotation_x += yoffset;
-
-        // Make sure that when rotat_x is out of bounds, screen doesn't get flipped
-        if (constrainRotation_x) {
-            if (Rotation_x > 89.0f) // from 90 grades...
-                Rotation_x = 89.0f;
-            if (Rotation_x < -89.0f)
-                Rotation_x = -89.0f;
-        }
-
-        // Update Front, Right and Up Vectors using the updated Euler angles
-        updateCameraVectors();
+        return glm::lookAt(Position, Position +  Front, Up);
     }
 
     // Processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis

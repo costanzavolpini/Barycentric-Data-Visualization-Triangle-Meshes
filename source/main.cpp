@@ -11,7 +11,8 @@
 #include "Camera.h"
 #include "Object.h"
 
-
+//to test
+#include "glm/ext.hpp"
 
 
 using namespace std;
@@ -21,7 +22,7 @@ using namespace std;
     const unsigned int HEIGHT = 600;
 
     // Camera settings
-    Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+    Camera camera(glm::vec3(0.0f, 0.0f, 6.0f));
     float lastX = WIDTH / 2.0f;
     float lastY = HEIGHT / 2.0f;
     bool firstMouse = true;
@@ -42,6 +43,7 @@ using namespace std;
     void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
     static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
     glm::vec3 get_arcball_vector(double x, double y);
+    void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
     
 
 int main() {
@@ -79,6 +81,7 @@ int main() {
     glfwSetInputMode(window, GLFW_STICKY_MOUSE_BUTTONS, 1);
     glfwSetMouseButtonCallback(window, mouse_button_callback); // call the callback when the user press a button. It corresponds to glutMouseFunc
     glfwSetCursorPosCallback(window, cursor_position_callback); // call the callback when the user move the cursor. It corresponds to glutMotionFunc
+    glfwSetScrollCallback(window, scroll_callback); //zoom
 
     // tell GLFW to capture our mouse
     // (GLFWwindow * window, int mode, int value)
@@ -150,22 +153,19 @@ int main() {
             Since GLM version 0.9.9, GLM default initializates matrix types to a 0-initalized matrix, 
             instead of the identity matrix. From that version it is required to initialize matrix types as: glm::mat4 mat = glm::mat4(1.0f). 
         */ 
-        //frustum
-        //glm::perspective = field of view (zoom), aspect (height of frustum), near plane, far plane
         glm::mat4 view = glm::mat4(1.0f);
         glm::mat4 projection = glm::mat4(1.0f);
-        projection = glm::perspective(glm::radians(camera.Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
+        projection = glm::perspective(glm::radians(camera.Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 10.0f);
 
         // The glm::LookAt function requires a camera position, target/position the camera should look at and up vector that represents the up vector in world space.
         // camera.GetViewMatrix call a LookAt with: (eyeX, eyeY, eyeZ) (centerX, centerY, centerZ) (upX, upY, upZ)
         view = camera.GetViewMatrix();
 
-        ourShader.setMat4("projection", projection);
-
         // create transformations
         glm::mat4 model = glm::mat4(1.0f);
-        
+
         // arcball move
+        // ref: https://en.wikibooks.org/wiki/OpenGL_Programming/Modern_OpenGL_Tutorial_Arcball
         if (cur_mx != last_mx || cur_my != last_my) {
             glm::vec3 va = get_arcball_vector(last_mx, last_my); //OP1
             glm::vec3 vb = get_arcball_vector(cur_mx,  cur_my); //OP2
@@ -174,6 +174,8 @@ int main() {
 
             // converting the rotation axis from camera coordinates to object coordinates. 
             model = glm::translate(model,  glm::vec3( 0.0f,  0.0f,  0.0f));
+            cout << glm::to_string(model) << endl;
+
             glm::mat3 camera2object = glm::inverse(glm::mat3(camera.GetViewMatrix()) * glm::mat3(model)); //from camera to object coord
             glm::vec3 axis_in_object_coord = camera2object * axis_in_camera_coord;
 
@@ -183,6 +185,7 @@ int main() {
             last_my = cur_my;
         }
 
+        ourShader.setMat4("projection", projection);
         ourShader.setMat4("view", view);
         ourShader.setMat4("model", model);
 
@@ -238,45 +241,16 @@ static void cursor_position_callback(GLFWwindow* window, double xpos, double ypo
   if (arcball_on) {  // if left button is pressed
     cur_mx = xpos;
     cur_my = ypos;
-    cout << cur_mx << endl;
-    cout << cur_my << endl;
+    cout << "x : " <<  cur_mx << endl;
+    cout << "y: " << cur_my << endl;
   }
 }
 
-// void onMouse(int button, int state, int x, int y) {
-//   if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-//     arcball_on = true;
-//     last_mx = cur_mx = x;
-//     last_my = cur_my = y;
-//   } else {
-//     arcball_on = false;
-//   }
-// }
-
-// void onMotion(int x, int y) {
-//   if (arcball_on) {  // if left button is pressed
-//     cur_mx = x;
-//     cur_my = y;
-//   }
-// }
 
 // keyboard
 void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
-
-
-
-    // if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-    //     camera.ProcessKeyboard(UP, deltaTime);
-    // if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-    //     camera.ProcessKeyboard(BOTTOM, deltaTime);
-    // if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-    //     camera.ProcessKeyboard(LEFT, deltaTime);
-    // if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-    //     camera.ProcessKeyboard(RIGHT, deltaTime);
-
-
 }
 
 
@@ -292,7 +266,7 @@ glm::vec3 get_arcball_vector(double x, double y) {
   glm::vec3 P = glm::vec3(1.0 * (x/WIDTH) * 2 - 1.0,
 			  1.0 * (y/HEIGHT) * 2 - 1.0,
 			  0);
-  P.y = -P.y;
+//   P.y = -P.y;
   float OP_squared = P.x * P.x + P.y * P.y;
 
   // use the Pythagorean theorem to check the length of the OP vector and compute the z coordinate
@@ -301,5 +275,10 @@ glm::vec3 get_arcball_vector(double x, double y) {
   else
     P = glm::normalize(P);  // nearest point
   return P;
+}
+
+// glfw: whenever the mouse scroll wheel scrolls, this callback is called
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+    camera.ProcessMouseScroll(yoffset);
 }
 
