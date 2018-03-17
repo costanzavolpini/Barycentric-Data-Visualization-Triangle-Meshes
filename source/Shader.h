@@ -99,6 +99,11 @@ public:
         glUseProgram(shaderProgram); 
     }
 
+    // deactivate
+    void deactivate() { 
+        glUseProgram(0);
+    }
+
     // utility uniform functions
     // ------------------------------------------------------------------------
     void setBool(const std::string &name, bool value) const {         
