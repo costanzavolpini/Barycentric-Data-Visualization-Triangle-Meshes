@@ -9,6 +9,8 @@
         "memory": "cpp",
         "utility": "cpp",
         "__locale": "cpp",
-        "bitset": "cpp"
+        "bitset": "cpp",
+        "__functional_03": "cpp",
+        "functional": "cpp"
     }
 }

@@ -3,6 +3,14 @@
 #define ARCBALL_H
 #include "Base.h"
 
+/**
+    Get a normalized vector from the center of the virtual ball O to a
+    point P on the virtual ball surface, such that P is aligned on
+    screen's (X,Y) coordinates.  If (X,Y) is too far away from the
+    sphere, return the nearest point on the virtual ball surface.
+    https://en.wikibooks.org/wiki/OpenGL_Programming/Modern_OpenGL_Tutorial_Arcball
+ */
+
 class Arcball {
     int WIDTH, HEIGHT;
     float speed;

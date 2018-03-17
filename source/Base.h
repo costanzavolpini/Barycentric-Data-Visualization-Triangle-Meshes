@@ -27,18 +27,9 @@ Comment:  This file contains all basic definitions.
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
-
-// #ifdef __APPLE__
-// #include <GLUT/glut.h>
-// #else
-// #include <GL/glut.h>
-// #endif
-
  
 
-// local includes
 #include "Point3.h"
-#include "Camera.h"
 
 
 #endif

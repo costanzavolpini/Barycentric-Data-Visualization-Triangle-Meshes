@@ -85,26 +85,6 @@ class Object {
           glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float))); 
           glEnableVertexAttribArray(1); //this 1 is referred to the layout on shader
 
-          // ------- VAO and VBO for Lamp
-          vector<float> lampVertices, lampNormal;
-            if(!load("models/Geometry/cube.off", lampVertices, lampNormal)){
-                cout << "error loading cube for lamp" << endl;
-                return;
-            }
-
-          // vbo lamp
-          glGenBuffers(1, &VBO_LAMP);
-          glBindBuffer(GL_ARRAY_BUFFER, VBO_LAMP);
-          glBufferData(GL_ARRAY_BUFFER, sizeof(float) * lampVertices.size(), &lampVertices[0], GL_STATIC_DRAW);
-
-          // vao lamp
-          glGenVertexArrays(1, &VAO_LAMP);
-          glBindVertexArray(VAO_LAMP); 
-          glBindBuffer(GL_ARRAY_BUFFER, VBO_LAMP);
-          glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-          glEnableVertexAttribArray(0);
-
-
           /**
             Unbind the VAO so other VAO calls won't accidentally modify this VAO, but this rarely happens. 
             Modifying other VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
@@ -128,18 +108,11 @@ class Object {
         glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
       }
 
-      // function to draw the light
-      void drawLight(){
-        glBindVertexArray(VAO_LAMP);
-        glDrawArrays(GL_TRIANGLES, 0, 9 * 3); //cube
-      }
 
      // delete the shader objects once we've linked them into the program object; we no longer need them anymore
       void clear(){
         glDeleteVertexArrays(1, &VAO);
         glDeleteBuffers(1, &VBO);
-        glDeleteVertexArrays(1, &VAO_LAMP);
-        glDeleteBuffers(1, &VBO_LAMP);
 
       }
 };

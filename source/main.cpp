@@ -8,7 +8,6 @@
 
 #include "Base.h"
 #include "Shader.h"
-#include "Camera.h"
 #include "Arcball.h"
 #include "Object.h"
 
@@ -22,26 +21,19 @@ using namespace std;
     const unsigned int WIDTH = 800;
     const unsigned int HEIGHT = 600;
 
-    // Camera settings
-    // Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
-    // float lastX = WIDTH / 2.0f;
-    // float lastY = HEIGHT / 2.0f;
-    // bool firstMouse = true;
-
     // Arcball instance
     static Arcball arcball(WIDTH, HEIGHT, 1.5f, true, true);
 
     void error_callback(int error, const char * desc);
 
-    // Timing
-    float deltaTime = 0.0f;	// time between current frame and last frame
-    float lastFrame = 0.0f;
+    // Camera options
+    float Zoom = 45.0f;
 
     // resize window
     void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
     // keyboard
-    void processInput(GLFWwindow *window);
+    void process_input(GLFWwindow *window);
 
     double last_mx = 0, last_my = 0, cur_mx = 0, cur_my = 0;
     int arcball_on = false;
@@ -114,7 +106,6 @@ int main() {
         (GLSL version 420 corresponds to OpenGL version 4.2 for example).
     */
     Shader ourShader("vertexShader.vs", "maxDiagramFragmentShader.fs");
-    Shader lampShader("lampVertexShader.vs", "lampFragmentShader.fs");
 
     /**
         NB. OpenGL works in 3D space we render a 2D triangle with each vertex having a z coordinate of 0.0.
@@ -132,7 +123,7 @@ int main() {
         instead of the identity matrix. From that version it is required to initialize matrix types as: glm::mat4 mat = glm::mat4(1.0f). 
     */ 
     glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0., 0., 0.), glm::vec3(0., 1., 0.));
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)WIDTH / (float)HEIGHT, 0.1f, 10.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 10.0f);
     glm::mat4 model = glm::mat4(1.0f);
 
     ourShader.use(); //draw
@@ -152,28 +143,22 @@ int main() {
     */
     while(!glfwWindowShouldClose(window)) { // function checks at the start of each loop iteration if GLFW has been instructed to close
         // keyboard
-        processInput(window);
+        process_input(window);
 
         // render colours
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); //black screen
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the depth buffer before each render iteration (otherwise the depth information of the previous frame stays in the buffer).
 
+        // arcball
         glm::mat4 rotated_view = view * arcball.create_rotation_matrix_view();
         glm::mat4 rotated_model = model * arcball.create_rotation_matrix_model(view);
+        projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 10.0f);
 
         ourShader.setMat4("projection", projection);
         ourShader.setMat4("view", rotated_view);
         ourShader.setMat4("model", rotated_model);
 
         object.draw();
-
-        // lampShader.use();
-        // lampShader.setMat4("projection", projection);
-        // lampShader.setMat4("view", rotated_view);
-        // lampShader.setMat4("model", rotated_model);
-
-
-        // object.drawLight();
 
         glfwSwapBuffers(window); // will swap the color buffer
         glfwPollEvents(); // function checks if any events are triggered (like keyboard input or mouse movement events) 
@@ -213,40 +198,18 @@ static void cursor_position_callback(GLFWwindow* window, double xpos, double ypo
 
 
 // keyboard
-void processInput(GLFWwindow *window) {
+void process_input(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 }
 
 
-/**
-    Get a normalized vector from the center of the virtual ball O to a
-    point P on the virtual ball surface, such that P is aligned on
-    screen's (X,Y) coordinates.  If (X,Y) is too far away from the
-    sphere, return the nearest point on the virtual ball surface.
-    https://en.wikibooks.org/wiki/OpenGL_Programming/Modern_OpenGL_Tutorial_Arcball
- */
-glm::vec3 get_arcball_vector(double x, double y) {
-  // x,y screen coordinates
-  glm::vec3 P = glm::vec3((2 * x - WIDTH ) / WIDTH,
-			  -(2 * y - HEIGHT) / HEIGHT,
-			  0);
-
-    // clamp
-    P.x = glm::clamp(P.x, -1.0f, 1.0f );
-    P.y = glm::clamp(P.y, -1.0f, 1.0f );
-    
-    float OP_squared = P.x * P.x + P.y * P.y;
-
-    // use the Pythagorean theorem to check the length of the OP vector and compute the z coordinate
-    if (OP_squared <= 1)
-        P.z = sqrt(1 - OP_squared);  // Pythagore
-    else
-        P = glm::normalize(P); 
-    return P;
-}
-
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-    // camera.ProcessMouseScroll(yoffset);
+        if (Zoom >= 1.0f && Zoom <= 45.0f)
+            Zoom -= yoffset;
+        if (Zoom <= 1.0f)
+            Zoom = 1.0f;
+        if (Zoom >= 45.0f)
+            Zoom = 45.0f;
 }
