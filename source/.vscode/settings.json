@@ -1,0 +1,16 @@
+{
+    "files.associations": {
+        "ostream": "cpp",
+        "iostream": "cpp",
+        "algorithm": "cpp",
+        "chrono": "cpp",
+        "limits": "cpp",
+        "valarray": "cpp",
+        "memory": "cpp",
+        "utility": "cpp",
+        "__locale": "cpp",
+        "bitset": "cpp",
+        "__functional_03": "cpp",
+        "functional": "cpp"
+    }
+}

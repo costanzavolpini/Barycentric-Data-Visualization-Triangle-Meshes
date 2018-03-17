@@ -8,8 +8,12 @@
 
 #include "Base.h"
 #include "Shader.h"
-#include "Camera.h"
+#include "Arcball.h"
 #include "Object.h"
+
+//to test
+#include "glm/ext.hpp"
+
 
 using namespace std;
 
@@ -17,25 +21,28 @@ using namespace std;
     const unsigned int WIDTH = 800;
     const unsigned int HEIGHT = 600;
 
-    // Camera settings
-    Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
-    float lastX = WIDTH / 2.0f;
-    float lastY = HEIGHT / 2.0f;
-    bool firstMouse = true;
+    // Arcball instance
+    static Arcball arcball(WIDTH, HEIGHT, 1.5f, true, true);
 
-    // Timing
-    float deltaTime = 0.0f;	// time between current frame and last frame
-    float lastFrame = 0.0f;
+    void error_callback(int error, const char * desc);
+
+    // Camera options
+    float Zoom = 45.0f;
 
     // resize window
     void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
-    // function for mouse
-    void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-    void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-
     // keyboard
-    void processInput(GLFWwindow *window);
+    void process_input(GLFWwindow *window);
+
+    double last_mx = 0, last_my = 0, cur_mx = 0, cur_my = 0;
+    int arcball_on = false;
+
+    void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
+    static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
+    // glm::vec3 get_arcball_vector(double x, double y);
+    void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+    
 
 int main() {
     /**
@@ -64,17 +71,21 @@ int main() {
         return -1;
     }
     glfwMakeContextCurrent(window);
+    glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
-    // user resizes the window the viewport should be adjusted as well
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     // mouse 
-    glfwSetCursorPosCallback(window, mouse_callback); // x pos
-    glfwSetScrollCallback(window, scroll_callback); //y pos
+    // glfwSetInputMode(window, GLFW_STICKY_MOUSE_BUTTONS, 1);
+
+    // callback functions
+    glfwSetScrollCallback(window, scroll_callback); //zoom
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback); // user resizes the window the viewport should be adjusted as well
+    glfwSetMouseButtonCallback(window, mouse_button_callback); // call the callback when the user press a button. It corresponds to glutMouseFunc
+    glfwSetCursorPosCallback(window, cursor_position_callback); // call the callback when the user move the cursor. It corresponds to glutMotionFunc
 
     // tell GLFW to capture our mouse
     // (GLFWwindow * window, int mode, int value)
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     /**
         ------------- GLAD -------------
@@ -95,7 +106,6 @@ int main() {
         (GLSL version 420 corresponds to OpenGL version 4.2 for example).
     */
     Shader ourShader("vertexShader.vs", "maxDiagramFragmentShader.fs");
-    Shader lampShader("lampVertexShader.vs", "lampFragmentShader.fs");
 
     /**
         NB. OpenGL works in 3D space we render a 2D triangle with each vertex having a z coordinate of 0.0.
@@ -104,85 +114,57 @@ int main() {
         Send vertex data to vertex shader (load .off file). 
      */ 
     
-    Object object = Object("models/iCorsi/horse.off");
+    Object object = Object("models/iCorsi/icosahedron_0.off");
     object.init();
 
     /**
-        application to keep drawing images and handling user input until the program has been explicitly told to stop
-        render loop
-    */
-    while(!glfwWindowShouldClose(window)) { // function checks at the start of each loop iteration if GLFW has been instructed to close
-        // per-frame time logic
-        float currentFrame = glfwGetTime();
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
+        IMPORTANT FOR TRANSFORMATION:
+        Since GLM version 0.9.9, GLM default initializates matrix types to a 0-initalized matrix, 
+        instead of the identity matrix. From that version it is required to initialize matrix types as: glm::mat4 mat = glm::mat4(1.0f). 
+    */ 
+    glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0., 0., 0.), glm::vec3(0., 1., 0.));
+    glm::mat4 projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, 3.0f, 10.0f); //near plane must be close of the the camera location (aound 3.0f)
+    glm::mat4 model = glm::mat4(1.0f);
 
-        // keyboard
-        processInput(window);
-
-
-        // render colours
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f); //black screen
-        glClear(GL_COLOR_BUFFER_BIT);
+    ourShader.use(); //draw
 
         // get matrix's uniform location and set matrix
-        ourShader.use(); //draw
         ourShader.setVec3("light.direction", -0.2f, -1.0f, -0.3f); 
-        ourShader.setVec3("viewPos", camera.Position);
+        ourShader.setVec3("viewPos", glm::vec3(0.0f, 0.0f, 3.0f));
 
         // light properties
         ourShader.setVec3("light.ambient", 1.2f, 1.2f, 1.2f);
         ourShader.setVec3("light.diffuse", 1.5f, 1.5f, 1.5f);
         ourShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
         ourShader.setFloat("shininess", 32.0f);
+    /**
+        application to keep drawing images and handling user input until the program has been explicitly told to stop
+        render loop
+    */
+    while(!glfwWindowShouldClose(window)) { // function checks at the start of each loop iteration if GLFW has been instructed to close
+        // keyboard
+        process_input(window);
 
-        /**
-            IMPORTANT FOR TRANSFORMATION:
-            Since GLM version 0.9.9, GLM default initializates matrix types to a 0-initalized matrix, 
-            instead of the identity matrix. From that version it is required to initialize matrix types as: glm::mat4 mat = glm::mat4(1.0f). 
-        */ 
-        //frustum
-        //glm::perspective = field of view (zoom), aspect (height of frustum), near plane, far plane
-        glm::mat4 projection = glm::mat4(1.0f);
-        projection = glm::perspective(glm::radians(camera.Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
+        // render colours
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f); //black screen
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the depth buffer before each render iteration (otherwise the depth information of the previous frame stays in the buffer).
 
-        //view
-        glm::mat4 view = glm::mat4(1.0f);
-        // The glm::LookAt function requires a camera position, target/position the camera should look at and up vector that represents the up vector in world space.
-        // camera.GetViewMatrix call a LookAt with: (eyeX, eyeY, eyeZ) (centerX, centerY, centerZ) (upX, upY, upZ)
-        view = camera.GetViewMatrix();
+        // arcball
+        glm::mat4 rotated_view = view * arcball.rotation_matrix_view();
+        glm::mat4 rotated_model = model * arcball.rotation_matrix_model(view);
+        projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, 3.0f, 10.0f);
 
         ourShader.setMat4("projection", projection);
-        ourShader.setMat4("view", view);
-
-        // create transformations
-        glm::mat4 trans = glm::mat4(1.0f);
-        ourShader.setMat4("transform", trans);
-        // trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-        // unsigned int transformLoc = glGetUniformLocation(ourShader.shaderProgram, "transform");
-        /**
-            The first argument should be familiar by now which is the uniform's location. 
-            The second argument tells OpenGL how many matrices we'd like to send, which is 1. 
-            The third argument asks us if we want to transpose our matrix, that is to swap the columns and rows.
-            OpenGL developers often use an internal matrix layout called column-major ordering which is the 
-            default matrix layout in GLM so there is no need to transpose the matrices; we can keep it at GL_FALSE. 
-            The last parameter is the actual matrix data, but GLM stores their matrices not in the exact way that 
-            OpenGL likes to receive them so we first transform them with GLM's built-in function value_ptr.
-        */
-        // glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+        ourShader.setMat4("view", rotated_view);
+        ourShader.setMat4("model", rotated_model);
 
         object.draw();
-
-        lampShader.use();
-        lampShader.setMat4("projection", projection);
-        lampShader.setMat4("view", glm::mat4(1.0f));
-        lampShader.setMat4("transform", glm::mat4(1.0f));
-
-        object.drawLight();
 
         glfwSwapBuffers(window); // will swap the color buffer
         glfwPollEvents(); // function checks if any events are triggered (like keyboard input or mouse movement events) 
     }
+
+    ourShader.deactivate();
 
     // delete the shader objects once we've linked them into the program object; we no longer need them anymore
     object.clear();
@@ -202,39 +184,32 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 }
 
-// glfw: whenever the mouse moves, this callback is called
-void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
-    if (firstMouse) {
-        lastX = xpos;
-        lastY = ypos;
-        firstMouse = false;
-    }
-
-    float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
-
-    lastX = xpos;
-    lastY = ypos;
-
-    camera.ProcessMouseMovement(xoffset, yoffset);
+// Function that activate arcball when button left is pressed.
+// mouse button, button action and modifier bits.
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+     arcball.mouse_btn_callback(window, button, action, mods);
 }
+
+// Function that take position when arcball is activate (left button is pressed)
+static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos){
+  arcball.cursor_position_callback( window, xpos, ypos );
+}
+
+
+// keyboard
+void process_input(GLFWwindow *window) {
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+}
+
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-    camera.ProcessMouseScroll(yoffset);
-}
-
-// keyboard
-void processInput(GLFWwindow *window) {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
-
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-        camera.ProcessKeyboard(UP, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-        camera.ProcessKeyboard(BOTTOM, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-        camera.ProcessKeyboard(LEFT, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-        camera.ProcessKeyboard(RIGHT, deltaTime);
+        if (Zoom >= 1.0f && Zoom <= 45.0f)
+            Zoom -= yoffset;
+        if (Zoom <= 1.0f)
+            Zoom = 1.0f;
+        if (Zoom >= 45.0f)
+            Zoom = 45.0f;
 }
