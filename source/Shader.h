@@ -109,8 +109,10 @@ public:
         shaderProgram = glCreateProgram();
         glAttachShader(shaderProgram, vertexShader);
         glAttachShader(shaderProgram, fragmentShader);
-        if(pathGeometryShader != nullptr)
+        if(pathGeometryShader != nullptr){
             glAttachShader(shaderProgram, geometry);
+        }                                                
+
         glLinkProgram(shaderProgram);
         checkCompileErrors(shaderProgram, "PROGRAM");
 
