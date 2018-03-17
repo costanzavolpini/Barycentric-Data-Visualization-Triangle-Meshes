@@ -18,6 +18,7 @@ Comment:  This file contains all basic definitions.
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <iostream>
 
 #include "glad.h"
 

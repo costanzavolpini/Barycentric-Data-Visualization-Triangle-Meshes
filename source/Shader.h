@@ -20,19 +20,22 @@ class Shader {
 public:
     unsigned int shaderProgram;
 
-    // constructor generates read the shader
+    // constructor generates read the shader (GS is not required)
     // ------------------------------------------------------------------------
-    Shader(const char * pathVertexShader, const char * pathFragmentShader) {
+    Shader(const char * pathVertexShader, const char * pathFragmentShader, const char * pathGeometryShader = nullptr) {
 
-        // 1. retrieve the vertex/fragment source code from filePath
+        // 1. retrieve the vertex/fragment(/geometry) source code from filePath
         std::string vertexCode;
         std::string fragmentCode;
+        std::string geometryCode;
         std::ifstream vShaderFile;
         std::ifstream fShaderFile;
+        std::ifstream gShaderFile;
 
         // ensure ifstream objects can throw exceptions:
         vShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
         fShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
+        gShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
 
         try {
             // open files
@@ -51,6 +54,15 @@ public:
             // convert stream into string
             vertexCode   = vShaderStream.str();
             fragmentCode = fShaderStream.str();
+
+            // read GS if any
+            if(pathGeometryShader != nullptr) {
+                gShaderFile.open(pathGeometryShader);
+                std::stringstream gShaderStream;
+                gShaderStream << gShaderFile.rdbuf();
+                gShaderFile.close();
+                geometryCode = gShaderStream.str();
+            }
         }
         catch (std::ifstream::failure e) {
             std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
@@ -78,6 +90,17 @@ public:
         checkCompileErrors(fragmentShader, "FRAGMENT"); // check for shader compile errors (fragment)
 
 
+        // if geometry shader is given, compile geometry shader
+        unsigned int geometry;
+        if(pathGeometryShader != nullptr) {
+            const char * gShaderCode = geometryCode.c_str();
+            geometry = glCreateShader(GL_GEOMETRY_SHADER);
+            glShaderSource(geometry, 1, &gShaderCode, NULL);
+            glCompileShader(geometry);
+            checkCompileErrors(geometry, "GEOMETRY");
+        }
+
+
         /**
             Shader Program that we can use for rendering
             To use the recently compiled shaders we have to link them to a shader program object 
@@ -86,12 +109,16 @@ public:
         shaderProgram = glCreateProgram();
         glAttachShader(shaderProgram, vertexShader);
         glAttachShader(shaderProgram, fragmentShader);
+        if(pathGeometryShader != nullptr)
+            glAttachShader(shaderProgram, geometry);
         glLinkProgram(shaderProgram);
         checkCompileErrors(shaderProgram, "PROGRAM");
 
         // delete the shaders as they're linked into our program now and no longer necessary
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
+        if(pathGeometryShader != nullptr)
+            glDeleteShader(geometry);
     }
     // activate the shader
     // ------------------------------------------------------------------------
