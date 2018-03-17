@@ -123,7 +123,7 @@ int main() {
         instead of the identity matrix. From that version it is required to initialize matrix types as: glm::mat4 mat = glm::mat4(1.0f). 
     */ 
     glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0., 0., 0.), glm::vec3(0., 1., 0.));
-    glm::mat4 projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 10.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, 3.0f, 10.0f); //near plane must be close of the the camera location (aound 3.0f)
     glm::mat4 model = glm::mat4(1.0f);
 
     ourShader.use(); //draw
@@ -150,9 +150,9 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the depth buffer before each render iteration (otherwise the depth information of the previous frame stays in the buffer).
 
         // arcball
-        glm::mat4 rotated_view = view * arcball.create_rotation_matrix_view();
-        glm::mat4 rotated_model = model * arcball.create_rotation_matrix_model(view);
-        projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 10.0f);
+        glm::mat4 rotated_view = view * arcball.rotation_matrix_view();
+        glm::mat4 rotated_model = model * arcball.rotation_matrix_model(view);
+        projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, 3.0f, 10.0f);
 
         ourShader.setMat4("projection", projection);
         ourShader.setMat4("view", rotated_view);

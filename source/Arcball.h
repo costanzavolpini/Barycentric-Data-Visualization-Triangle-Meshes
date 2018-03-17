@@ -81,13 +81,13 @@ class Arcball {
 
         // create rotation matrix with camera coords
         // multiply this matrix with view matrix to rotate the camera
-        glm::mat4 create_rotation_matrix_view(){
+        glm::mat4 rotation_matrix_view(){
             return glm::rotate(glm::degrees(angle) * speed, camera_axis);
         }
 
         // create rotation matrix with world coords
         // multiply this matrix with model matrix to rotate the object
-        glm::mat4 create_rotation_matrix_model(glm::mat4& view_matrix){
+        glm::mat4 rotation_matrix_model(glm::mat4& view_matrix){
             glm::vec3 axis = glm::inverse(glm::mat3(view_matrix)) * camera_axis;
             return glm::rotate(glm::degrees(angle) * speed, axis);
         }
