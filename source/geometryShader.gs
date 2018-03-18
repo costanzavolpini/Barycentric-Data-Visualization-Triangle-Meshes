@@ -1,6 +1,7 @@
 #version 330 core
 in vec4 vertex_color[3];
 layout (points, max_vertices=3) out;
+
 out vec3 coords;
 out vec4 wedge_color[3];
 

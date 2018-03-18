@@ -1,6 +1,6 @@
 #version 330 core
-out vec3 coords;
-out vec4 wedge_color[3];
+in vec3 coords;
+in vec4 wedge_color[3];
 out vec4 fragColor;
 
 void main()

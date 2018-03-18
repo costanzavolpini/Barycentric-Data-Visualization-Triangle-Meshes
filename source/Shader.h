@@ -89,7 +89,6 @@ public:
         glCompileShader(fragmentShader);
         checkCompileErrors(fragmentShader, "FRAGMENT"); // check for shader compile errors (fragment)
 
-
         // if geometry shader is given, compile geometry shader
         unsigned int geometry;
         if(pathGeometryShader != nullptr) {
