@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2018.1.19)  12 MAR 2018 09:31
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2018.1.19)  18 MAR 2018 22:31
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -721,19 +721,19 @@ ABD: EveryShipout initializing macros
 {/usr/local/texlive/2017/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
 (./ggant.aux) ) 
 Here is how much of TeX's memory you used:
- 16873 strings out of 492980
- 338043 string characters out of 6132509
- 401068 words of memory out of 5000000
- 20117 multiletter control sequences out of 15000+600000
+ 16887 strings out of 492980
+ 338323 string characters out of 6132509
+ 402643 words of memory out of 5000000
+ 20131 multiletter control sequences out of 15000+600000
  4848 words of font info for 18 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 62i,7n,69p,478b,832s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 62i,7n,74p,478b,832s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/
 cm/cmbx10.pfb></usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/c
 m/cmr10.pfb></usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/
 cmr6.pfb></usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmr
 8.pfb>
-Output written on ggant.pdf (1 page, 58934 bytes).
+Output written on ggant.pdf (1 page, 59262 bytes).
 PDF statistics:
  27 PDF objects out of 1000 (max. 8388607)
  19 compressed objects within 1 object stream
