@@ -107,12 +107,18 @@ public:
         */
         shaderProgram = glCreateProgram();
         glAttachShader(shaderProgram, vertexShader);
-        glAttachShader(shaderProgram, fragmentShader);
         if(pathGeometryShader != nullptr){
             glAttachShader(shaderProgram, geometry);
-        }                                                
+            //glProgramParameteriARB(shaderProgram, GL_GEOMETRY_VERTICES_OUT, 3);
+            glProgramParameteri(shaderProgram, GL_GEOMETRY_VERTICES_OUT, 3);
+
+            glProgramParameteri(shaderProgram, GL_GEOMETRY_INPUT_TYPE, GL_TRIANGLES);
+            glProgramParameteri(shaderProgram, GL_GEOMETRY_OUTPUT_TYPE, GL_TRIANGLES);
+        }           
+        glAttachShader(shaderProgram, fragmentShader);                             
 
         glLinkProgram(shaderProgram);
+        std::cout << "jjj" << std::endl;
         checkCompileErrors(shaderProgram, "PROGRAM");
 
         // delete the shaders as they're linked into our program now and no longer necessary

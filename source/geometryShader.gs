@@ -1,31 +1,30 @@
 #version 330 core
-in vec4 vertex_color[3];
-layout (points, max_vertices = 3) out;
+//layout (triangles) in;
+//layout (points, max_vertices = 3) out;
+//layout (triangles) out;
 
-// Geometry Shader
-out VertexAttrib
-{
-  vec3 coords;
-  vec4 wedge_color[3];
-} outData;
+in vec4 vertex_color[3];
+out vec3 coords;
+out vec4 wedge_color[3];
+
 
 
 void main()
 {
-	outData.wedge_color[0] = vertex_color[0];
-	outData.wedge_color[1] = vertex_color[1];
-	outData.wedge_color[2] = vertex_color[2];
+	wedge_color[0] = vertex_color[0];
+	wedge_color[1] = vertex_color[1];
+	wedge_color[2] = vertex_color[2];
 
-	outData.coords = vec3(1.0, 0.0, 0.0);
-    gl_Position = vertex_color[0];
+	coords = vec3(1.0, 0.0, 0.0);
+    gl_Position = gl_in[0].gl_Position;
     EmitVertex();
 
-	outData.coords = vec3(0.0, 1.0, 0.0);
-    gl_Position = vertex_color[1];
+	coords = vec3(0.0, 1.0, 0.0);
+    gl_Position = gl_in[1].gl_Position;
     EmitVertex();
 
-	outData.coords = vec3(0.0, 0.0, 1.0);
-    gl_Position = vertex_color[2];
+	coords = vec3(0.0, 0.0, 1.0);
+    gl_Position = gl_in[2].gl_Position;
     EmitVertex();
 
     EndPrimitive();

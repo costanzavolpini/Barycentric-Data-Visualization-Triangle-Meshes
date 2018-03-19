@@ -1,8 +1,8 @@
 CPP = g++
 CC = gcc
 CFLAGS = -c
-CPPFLAGS = -c
-FLAGS = -lglfw
+CPPFLAGS = -c -std=c++11
+FLAGS = -framework OpenGL -lglfw
 
 OBJECTC = glad.o main.o
 
