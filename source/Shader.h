@@ -110,10 +110,10 @@ public:
         if(pathGeometryShader != nullptr){
             glAttachShader(shaderProgram, geometry);
             //glProgramParameteriARB(shaderProgram, GL_GEOMETRY_VERTICES_OUT, 3);
-            glProgramParameteri(shaderProgram, GL_GEOMETRY_VERTICES_OUT, 3);
+            // glProgramParameteri(shaderProgram, GL_GEOMETRY_VERTICES_OUT, 3);
 
-            glProgramParameteri(shaderProgram, GL_GEOMETRY_INPUT_TYPE, GL_TRIANGLES);
-            glProgramParameteri(shaderProgram, GL_GEOMETRY_OUTPUT_TYPE, GL_TRIANGLES);
+            // glProgramParameteri(shaderProgram, GL_GEOMETRY_INPUT_TYPE, GL_TRIANGLES);
+            // glProgramParameteri(shaderProgram, GL_GEOMETRY_OUTPUT_TYPE, GL_TRIANGLES);
         }           
         glAttachShader(shaderProgram, fragmentShader);                             
 

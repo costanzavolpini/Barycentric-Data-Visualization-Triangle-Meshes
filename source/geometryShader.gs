@@ -1,7 +1,6 @@
 #version 330 core
-//layout (triangles) in;
-//layout (points, max_vertices = 3) out;
-//layout (triangles) out;
+layout (triangles) in;
+layout (triangle_strip, max_vertices = 3 ) out; 
 
 in vec4 vertex_color[3];
 out vec3 coords;
