@@ -41,6 +41,6 @@
         vec3 specular = light.specular * spec;
 
         vec3 result = (ambient + diffuse + specular) * vec3(gl_Position);
-        vertex_color = vec4(result, 1.0f);
+        vertex_color = vec4(result, 1.0f); //using aPos change!
     
     }
