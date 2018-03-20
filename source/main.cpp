@@ -114,7 +114,7 @@ int main() {
         Send vertex data to vertex shader (load .off file). 
      */ 
     
-    Object object = Object("models/iCorsi/icosahedron_0.off");
+    Object object = Object("models/iCorsi/icosahedron_1.off");
     object.init();
 
     /**
@@ -129,13 +129,13 @@ int main() {
     ourShader.use(); //draw
 
     // get matrix's uniform location and set matrix
-    ourShader.setVec3("light.direction", -0.2f, -1.0f, -0.3f); 
+    ourShader.setVec3("light.direction", 5.0f, 5.0f, 5.0f); 
     ourShader.setVec3("viewPos", glm::vec3(0.0f, 0.0f, 3.0f));
 
     // light properties
-    ourShader.setVec3("light.ambient", 1.2f, 1.2f, 1.2f);
-    ourShader.setVec3("light.diffuse", 1.5f, 1.5f, 1.5f);
-    ourShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+    ourShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
+    ourShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
+    ourShader.setVec3("light.specular", 0.8f, 0.8f, 0.8f);
     ourShader.setFloat("shininess", 32.0f);
     /**
         application to keep drawing images and handling user input until the program has been explicitly told to stop
