@@ -24,6 +24,7 @@
     void main()
     {
         gl_Position =  projection * view * model * vec4(aPos, 1.0); 
+        vec4 Pos = view * model * vec4(aPos, 1.0); 
 
         // ambient
         vec3 ambient = light.ambient;
@@ -35,12 +36,12 @@
         vec3 diffuse = light.diffuse * diff;
 
         // specular
-        vec3 viewDir = normalize(viewPos - aCoord);
+        vec3 viewDir = normalize(viewPos - Pos.xyz);
         vec3 reflectDir = reflect(-lightDir, norm);  
         float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
         vec3 specular = light.specular * spec;
 
-        vec3 result = (ambient + diffuse + specular) * vec3(gl_Position);
-        vertex_color = vec4(result, 1.0f); //using aPos change!
+        vec3 result = (ambient + diffuse + specular) * 0.5;
+        vertex_color = vec4((aPos + vec3(1.0,1.0,1.0))/2, 1.0f); //using aPos change!
     
     }
