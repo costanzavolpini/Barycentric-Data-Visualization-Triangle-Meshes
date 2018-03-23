@@ -65,9 +65,22 @@
         vec3 pos = vec3(model * vec4(aPos, 1.0));
         vec3 normal = mat3(transpose(inverse(model))) * aNormal;  
     
-        vertex_color = get_result_color(pos, light.ambient, get_diffuse(pos, normal), get_specular(pos, normal));
+       // vertex_color = normalize(get_result_color(pos, light.ambient, get_diffuse(pos, normal), get_specular(pos, normal)));
 
-        //vertex_color = vec4((aPos + vec3(1.0,1.0,1.0))/2, 1.0f); 
+    vertex_color = vec4((pos + vec3(1.0,1.0,1.0))/2, 1.0f); 
+    // vertex_color = vec4(pos, 1.0);
+
+        if(vertex_color[0] >= 0.7){
+            vertex_color = vec4(1.0, 0.0, 0.0, 1.0); //red
+        }
+
+        if(vertex_color[1] >= 0.5){
+            vertex_color = vec4(0.0, 1.0, 0.0, 1.0); //green
+        }
+
+        if(vertex_color[2] >= 0.2){
+            vertex_color = vec4(0.0, 0.0, 1.0, 1.0); //blue
+        }
     
         gl_Position = projection * view * model * vec4(aPos, 1.0); 
     }
