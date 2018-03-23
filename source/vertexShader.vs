@@ -20,28 +20,55 @@
     uniform Light light;
     uniform float shininess;
 
-    void main()
-    {
-        gl_Position =  projection * view * model * vec4(aPos, 1.0); 
-        vec4 Pos = view * model * vec4(aPos, 1.0); 
+    // get specular color at current Pos
+    vec3 get_specular(vec3 pos, vec3 normal) {
+        // get directional vector to the light and to the camera from pos
+        vec3 lightDir = normalize(light.position - pos);
+        vec3 viewDir = normalize(viewPos - pos);
 
-        // ambient
-        vec3 ambient = light.ambient;
+        // specular shading
+        vec3 reflectDir = reflect(-lightDir, normal);
+        float specular_intensity = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
 
-        // diffuse 
-        vec3 norm = normalize(aNormal);
-        vec3 lightDir = normalize(-light.position);
-        float diff = max(dot(norm, lightDir), 0.0);
-        vec3 diffuse = light.diffuse * diff;
-
-        // specular
-        vec3 viewDir = normalize(viewPos - Pos.xyz);
-        vec3 reflectDir = reflect(-lightDir, norm);  
-        float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
-        vec3 specular = light.specular * spec;
-
-        vec3 result = (ambient + diffuse + specular) * 0.5;
-       vertex_color = vec4((aPos + vec3(1.0,1.0,1.0))/2, 1.0f); //using aPos change!
-       // vertex_color = vec4(result, 1.0);
+        // get resulting colour
+        vec3 specular = light.specular * specular_intensity;
     
+        return specular;
     }
+
+
+    // return diffuse at current Pos
+    vec3 get_diffuse(vec3 pos, vec3 normal) {
+        vec3 lightDir = normalize(light.position - pos);
+        float diffuse_intensity = max(dot(normal, lightDir), 0.0);
+
+        // get resulting colour
+        vec3 diffuse = light.diffuse * diffuse_intensity;
+
+        return diffuse;
+    }
+
+    vec4 get_result_color(vec3 pos, vec3 ambient, vec3 diffuse, vec3 specular) {
+        // attenuation
+        float distance = length(light.position - pos);
+       // float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));    
+        float attenuation = 1.0/ distance;
+
+        //ambient *= attenuation;
+        //diffuse *= attenuation;
+        //specular *= attenuation;
+
+        return vec4((ambient + diffuse + specular), 1.0);
+    }
+
+    void main() {
+        vec3 pos = vec3(model * vec4(aPos, 1.0));
+        vec3 normal = mat3(transpose(inverse(model))) * aNormal;  
+    
+        vertex_color = get_result_color(pos, light.ambient, get_diffuse(pos, normal), get_specular(pos, normal));
+
+        //vertex_color = vec4((aPos + vec3(1.0,1.0,1.0))/2, 1.0f); 
+    
+        gl_Position = projection * view * model * vec4(aPos, 1.0); 
+    }
+ 

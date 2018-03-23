@@ -61,6 +61,7 @@ vector<Triangle> t;
 
             // save normals
             vector<int> v_counter(num_vertices);
+            std::fill(v_counter.begin(), v_counter.end(), 0);
 
             // save everything with the color into vertices --- 
             for (int k = 0; k < num_triangles; k++) {    
@@ -75,17 +76,17 @@ vector<Triangle> t;
                 vertices[index + 2] = v1.z();
 
                 // second vertex
-                vertices[index + 6] = v2.x();
-                vertices[index + 7] = v2.y();
-                vertices[index + 8] = v2.z();
+                vertices[index + 3] = v2.x();
+                vertices[index + 4] = v2.y();
+                vertices[index + 5] = v2.z();
 
                 // third vertex
-                vertices[index + 12] = v3.x();
-                vertices[index + 13] = v3.y();
-                vertices[index + 14] = v3.z();
+                vertices[index + 6] = v3.x();
+                vertices[index + 7] = v3.y();
+                vertices[index + 8] = v3.z();
   
 
-                index += 18;
+                index += 9;
 
                 // normal of a triangle
                 Point3d n = (v2-v1)^(v3-v1);
