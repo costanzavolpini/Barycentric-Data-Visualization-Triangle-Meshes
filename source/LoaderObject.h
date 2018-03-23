@@ -74,30 +74,16 @@ vector<Triangle> t;
                 vertices[index + 1] = v1.y();
                 vertices[index + 2] = v1.z();
 
-                //color
-                vertices[index + 3] = 1.0f; // v1 red
-                vertices[index + 4] = 0.0f;
-                vertices[index + 5] = 0.0f;
-
                 // second vertex
                 vertices[index + 6] = v2.x();
                 vertices[index + 7] = v2.y();
                 vertices[index + 8] = v2.z();
 
-                //color
-                vertices[index + 9] = 0.0f;
-                vertices[index + 10] = 1.0f; // v2 green
-                vertices[index + 11] = 0.0f;
-
                 // third vertex
                 vertices[index + 12] = v3.x();
                 vertices[index + 13] = v3.y();
                 vertices[index + 14] = v3.z();
-
-                //color
-                vertices[index + 15] = 0.0f;
-                vertices[index + 16] = 0.0f;
-                vertices[index + 17] = 1.0f; // v3 blue    
+  
 
                 index += 18;
 

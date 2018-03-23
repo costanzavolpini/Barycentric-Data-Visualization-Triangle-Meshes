@@ -78,10 +78,6 @@ class Object {
           glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(0 * sizeof(float))); // 72-bit floating point values, each position is composed of 6 of those values (3 points + 3 colours (one for each vertex))
           glEnableVertexAttribArray(0); //this 0 is referred to the layout on shader
 
-          // color attribute
-          glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-          glEnableVertexAttribArray(2); //this 2 is referred to the layout on shader
-
           glBindBuffer(GL_ARRAY_BUFFER, VBO_NORMAL);
           //normal attribute
           glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float))); 
