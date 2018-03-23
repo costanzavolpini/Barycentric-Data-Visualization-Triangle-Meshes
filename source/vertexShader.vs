@@ -3,7 +3,7 @@
     layout (location = 1) in vec3 aNormal; 
 
     struct Light {
-        vec3 direction;
+        vec3 position;
     
         vec3 ambient;
         vec3 diffuse;
@@ -30,7 +30,7 @@
 
         // diffuse 
         vec3 norm = normalize(aNormal);
-        vec3 lightDir = normalize(-light.direction);
+        vec3 lightDir = normalize(-light.position);
         float diff = max(dot(norm, lightDir), 0.0);
         vec3 diffuse = light.diffuse * diff;
 
@@ -41,6 +41,7 @@
         vec3 specular = light.specular * spec;
 
         vec3 result = (ambient + diffuse + specular) * 0.5;
-        vertex_color = vec4((aPos + vec3(1.0,1.0,1.0))/2, 1.0f); //using aPos change!
+       vertex_color = vec4((aPos + vec3(1.0,1.0,1.0))/2, 1.0f); //using aPos change!
+       // vertex_color = vec4(result, 1.0);
     
     }

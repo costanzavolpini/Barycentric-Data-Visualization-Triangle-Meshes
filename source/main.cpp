@@ -129,7 +129,7 @@ int main() {
     ourShader.use(); //draw
 
     // get matrix's uniform location and set matrix
-    ourShader.setVec3("light.direction", 5.0f, 5.0f, 5.0f); 
+    ourShader.setVec3("light.position", 5.0f, 5.0f, 5.0f); 
     ourShader.setVec3("viewPos", glm::vec3(0.0f, 0.0f, 3.0f));
 
     // light properties
