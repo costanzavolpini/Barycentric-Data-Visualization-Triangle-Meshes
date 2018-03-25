@@ -17,7 +17,7 @@
 \usepackage{sectsty}
 \usepackage{pdflscape}
 
-\usepackage[paper=a4paper,top=0.5in,left=0.5in, right=0.5in, bottom=0.4in]{geometry}
+\usepackage[paper=a4paper,top=0.4in,left=0.5in, right=0.5in, bottom=0.4in]{geometry}
 \definecolor{lightorange}{RGB}{251,211,168}
 \definecolor{darkred}{RGB}{153,0,0}
 \definecolor{darkgreen}{RGB}{0,51,25}
@@ -63,7 +63,7 @@
         y unit chart=1.145cm, 
         time slot format=little-endian,
         % progress=today,
-        today=11.3.18 
+        today=25.3.18 
         ]{19.2.2018}{31.5.2018}
   \gantttitlecalendar*{19.2.2018}{31.5.2018}{month=shortname, week} \\
   \ganttbar[
@@ -74,8 +74,11 @@
     progress=100,
     bar/.append style={fill=black!43}
     ]{Add functionalities to\ganttalignnewline the GPU vertex program}{5.3.2018}{11.3.2018} \\
-  \ganttbar{Extend Flat Shading\ganttalignnewline on vertices and edges}{12.3.2018}{25.3.2018} \ganttnewline
-  \ganttbar{Split surface triangle mesh\ganttalignnewline into regions around vertices\ganttalignnewline and edges and color them}{26.3.2018}{01.4.2018} \ganttnewline
+  \ganttbar[
+    progress=90,
+    bar/.append style={fill=darkred}
+    ]{Extend Flat Shading\ganttalignnewline on vertices and edges}{12.3.2018}{25.3.2018} \ganttnewline
+  \ganttbar{Split surface triangle mesh\ganttalignnewline into regions around vertices\ganttalignnewline and edges and color them \ganttalignnewline \textit{Gaussian Curvature}}{26.3.2018}{01.4.2018} \ganttnewline
   \ganttbar{Develop a GPU\ganttalignnewline fragment program}{02.4.2018}{15.4.2018} \ganttnewline
   \ganttbar{Evaluation and\ganttalignnewline comparison\ganttalignnewline about the extension\ganttalignnewline of Flat Shading}{16.4.2018}{22.4.2018} \ganttnewline
   \ganttbar{Extend Gouraud\ganttalignnewline Shading for these new\ganttalignnewline mesh tessellations.}{23.4.2018}{6.5.2018} \ganttnewline
@@ -111,7 +114,7 @@
   \item [] \textbf{Milestone 4:} Implementation of an extension of Gouraud shading.
   \item [] \textbf{Milestone 5:} A first version of the report and poster.
 \end{itemize}
-\begin{flushright}\small{\color{gray!50}{The 15th week will be used only for possible delays or reviews.}}\end{flushright}
+\begin{flushright}\small{\color{gray!50}{The 15th week will be used only for possible delays or reviews.} \color{darkred}{Red bars mean \textit{Late}.} \color{darkgreen}{Green bars mean \textit{Early}.}}\end{flushright}
 \end{landscape}
 \end{document}  
 
