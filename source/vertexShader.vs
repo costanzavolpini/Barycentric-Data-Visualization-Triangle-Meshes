@@ -40,7 +40,7 @@
     // return diffuse at current Pos
     vec3 get_diffuse(vec3 pos, vec3 normal) {
         vec3 lightDir = normalize(light.position - pos);
-        float diffuse_intensity = max(dot(normal, lightDir), 0.0);
+        float diffuse_intensity = max(dot(normal, lightDir), 0.0); 
 
         // get resulting colour
         vec3 diffuse = light.diffuse * diffuse_intensity;
@@ -49,15 +49,6 @@
     }
 
     vec4 get_result_color(vec3 pos, vec3 ambient, vec3 diffuse, vec3 specular) {
-        // attenuation
-        float distance = length(light.position - pos);
-       // float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));    
-        float attenuation = 1.0/ distance;
-
-        //ambient *= attenuation;
-        //diffuse *= attenuation;
-        //specular *= attenuation;
-
         return vec4((ambient + diffuse + specular), 1.0);
     }
 
@@ -65,22 +56,24 @@
         vec3 pos = vec3(model * vec4(aPos, 1.0));
         vec3 normal = mat3(transpose(inverse(model))) * aNormal;  
     
-       // vertex_color = normalize(get_result_color(pos, light.ambient, get_diffuse(pos, normal), get_specular(pos, normal)));
+       vertex_color = get_result_color(pos, light.ambient, get_diffuse(pos, normal), get_specular(pos, normal));
+    //    vertex_color = normalize(vec4(get_diffuse(pos, normal), 1.0)); //just for debug
 
-    vertex_color = vec4((pos + vec3(1.0,1.0,1.0))/2, 1.0f); 
-    // vertex_color = vec4(pos, 1.0);
+    vertex_color = vec4((pos + vec3(1.0,1.0,1.0))/2, 1.0f);  //works without ligthing
 
-        if(vertex_color[0] >= 0.7){
-            vertex_color = vec4(1.0, 0.0, 0.0, 1.0); //red
-        }
 
-        if(vertex_color[1] >= 0.5){
-            vertex_color = vec4(0.0, 1.0, 0.0, 1.0); //green
-        }
+        //just for debug
+        // if(vertex_color[0] >= 0.7){
+        //     vertex_color = vec4(1.0, 0.0, 0.0, 1.0); //red
+        // }
 
-        if(vertex_color[2] >= 0.2){
-            vertex_color = vec4(0.0, 0.0, 1.0, 1.0); //blue
-        }
+        // if(vertex_color[1] >= 0.5){
+        //     vertex_color = vec4(0.0, 1.0, 0.0, 1.0); //green
+        // }
+
+        // if(vertex_color[2] >= 0.2){
+        //     vertex_color = vec4(0.0, 0.0, 1.0, 1.0); //blue
+        // }
     
         gl_Position = projection * view * model * vec4(aPos, 1.0); 
     }

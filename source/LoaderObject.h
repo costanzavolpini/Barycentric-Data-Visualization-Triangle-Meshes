@@ -55,13 +55,14 @@ vector<Triangle> t;
             // vertices array
             vector<float> vertices(num_triangles * 18);
             vector<Point3d> normals(num_vertices);
+            std::fill(normals.begin(), normals.end(), 0);
 
             int index = 0;
             // int index_normal = 0;
 
             // save normals
             vector<int> v_counter(num_vertices);
-            std::fill(v_counter.begin(), v_counter.end(), 0);
+            std::fill(v_counter.begin(), v_counter.end(), 0); // initialize every vertex normal to (0,0,0)
 
             // save everything with the color into vertices --- 
             for (int k = 0; k < num_triangles; k++) {    
@@ -88,22 +89,22 @@ vector<Triangle> t;
 
                 index += 9;
 
-                // normal of a triangle
+                // for every triangle face compute face normal and normalize it
                 Point3d n = (v2-v1)^(v3-v1);
                 n.normalize();
 
-                // find the norm for the first vertex
+                // for every vertex of the face add n to the vertex normal
                 normals[t[k].v[0]] += n;
-                v_counter[t[k].v[0]]++;
+                v_counter[t[k].v[0]]++; // update counter
 
                 normals[t[k].v[1]] += n;
                 v_counter[t[k].v[1]]++;
 
                 normals[t[k].v[2]] += n;
                 v_counter[t[k].v[2]]++;
-
             }
 
+            // normalize every vertex normal
             // average of norms of adj triangle of a vertex (sum of triangle norms / number of triangles)
             for(int k = 0; k < num_vertices; k++){
                 if(v_counter[k] != 0){
