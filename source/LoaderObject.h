@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <map>
+#include <iterator>
 
 using namespace std;
 
@@ -19,6 +21,7 @@ Comment:  This file load the mesh using an .OFF file.
 vector<Point3d> v;
 struct Triangle { int v[3]; };
 vector<Triangle> t;
+double PI = atan(1)*4;
 
         bool load (const char * path, vector<float> &out_vertices, vector<Point3d> &out_normals) {
             /**
@@ -102,6 +105,7 @@ vector<Triangle> t;
 
                 normals[t[k].v[2]] += n;
                 v_counter[t[k].v[2]]++;
+
             }
 
             // normalize every vertex normal
@@ -112,6 +116,67 @@ vector<Triangle> t;
                     normals[k].normalize();
                 }
             }
+
+
+            // find gaussian curvature
+            map <int, double> gc_map;  //vertex_j, gc
+            for(int i = 0; i < num_vertices; i++){
+                int vertex_j = i;
+                Point3d vertex_value = Point3d(vertices[i], vertices[i + 1], vertices[i + 2]);
+
+                double sum_angles = 0;
+
+                // for each vertex j, search all triangles adjacent k
+                for(int k = 0; k < num_triangles; k++){
+
+                    if(t[k].v[0] == vertex_j){
+                        // v1 -> v0 -> v2
+                        // 2 vectors v1v0 and v0v2 that means v0-v1 and v2-v0
+                        Point3d v0 = vertex_value; //vertex in which I want to find the angle is j
+                        Point3d v1 = Point3d(vertices[t[k].v[1]], vertices[t[k].v[1] + 1], vertices[t[k].v[1] + 2]);
+                        Point3d v2 = Point3d(vertices[t[k].v[2]], vertices[t[k].v[2] + 1], vertices[t[k].v[2] + 2]);
+
+                        // vectors
+                        Point3d v1v0 = Point3d(v0.x() - v1.x(), v0.y() - v1.y(), v0.z() - v1.z());
+                        Point3d v0v2 = Point3d(v2.x() - v0.x(), v2.y() - v0.y(), v2.z() - v0.z());
+
+                        double angle = v1v0.getAngle(v0v2);
+                        sum_angles += angle;
+
+                    } else if(t[k].v[1] == vertex_j){
+                        // v2 -> v1 -> v0
+                        // 2 vectors v2v1 and v1v0 that means v1-v2 and v0-v1
+                        Point3d v0 = Point3d(vertices[t[k].v[0]], vertices[t[k].v[0] + 1], vertices[t[k].v[0] + 2]);
+                        Point3d v1 = vertex_value; //vertex in which I want to find the angle is j
+                        Point3d v2 = Point3d(vertices[t[k].v[2]], vertices[t[k].v[2] + 1], vertices[t[k].v[2] + 2]);
+
+                        // vectors
+                        Point3d v2v1 = Point3d(v1.x() - v2.x(), v1.y() - v2.y(), v1.z() - v2.z());
+                        Point3d v1v0 = Point3d(v0.x() - v1.x(), v0.y() - v1.y(), v0.z() - v1.z());
+
+                        double angle = v2v1.getAngle(v1v0);
+                        sum_angles += angle;
+
+                    }else if(t[k].v[2] == vertex_j){
+                        // v0 -> v2 -> v1
+                        // 2 vectors v0v2 and v2v1 that means v2-v0 and v1-v2
+                        Point3d v0 = Point3d(vertices[t[k].v[0]], vertices[t[k].v[0] + 1], vertices[t[k].v[0] + 2]);
+                        Point3d v1 = Point3d(vertices[t[k].v[1]], vertices[t[k].v[1] + 1], vertices[t[k].v[1] + 2]);
+                        Point3d v2 = vertex_value; //vertex in which I want to find the angle is j
+
+                        // vectors
+                        Point3d v0v2 = Point3d(v2.x() - v0.x(), v2.y() - v0.y(), v2.z() - v0.z());
+                        Point3d v2v1 = Point3d(v1.x() - v2.x(), v1.y() - v2.y(), v1.z() - v2.z());
+
+                        double angle = v0v2.getAngle(v2v1);
+                        sum_angles += angle;
+                    }
+                }
+
+                double gaussian_curvature_j = 2 * PI - sum_angles;
+                gc_map.insert(pair <int, double> (vertex_j, gaussian_curvature_j));
+            }
+
 
             // output vectors ---
             // For each vertex of each triangle

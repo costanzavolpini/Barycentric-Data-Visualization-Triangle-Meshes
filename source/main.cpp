@@ -215,13 +215,3 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
             Zoom = 45.0f;
 }
 
-// GAUSSIAN CURVATURE
-// get angle between 3 vertices
-float get_angle(float x, float y, float z){
-    // acos( dot( normalize(y-x), normalize(z-x) ) )
-    // normalize 
-    glm::vec3 vec1 = glm::vec3(y - x);
-    glm::vec3 vec2 = glm::vec3(z - x);
-
-    return acos(dot(normalize(vec1), normalize(vec2)));
-}
