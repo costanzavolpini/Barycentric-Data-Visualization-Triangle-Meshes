@@ -48,22 +48,22 @@
         return diffuse;
     }
 
-    vec4 get_result_color(vec3 pos, vec3 ambient, vec3 diffuse, vec3 specular) {
-        return vec4((ambient + diffuse + specular), 1.0);
+    vec4 get_result_color(vec3 ambient, vec3 diffuse, vec3 specular) {
+        return vec4(normalize(ambient + diffuse + specular), 1.0);
     }
 
     void main() {
         vec3 pos = vec3(model * vec4(aPos, 1.0));
         vec3 normal = mat3(transpose(inverse(model))) * aNormal;  
     
-       vertex_color = get_result_color(pos, light.ambient, get_diffuse(pos, normal), get_specular(pos, normal));
+       vertex_color = get_result_color(light.ambient, get_diffuse(pos, normal), get_specular(pos, normal));
     //    vertex_color = normalize(vec4(get_diffuse(pos, normal), 1.0)); //just for debug
 
-    vertex_color = vec4((pos + vec3(1.0,1.0,1.0))/2, 1.0f);  //works without ligthing
+    // vertex_color = vec4((pos + vec3(1.0,1.0,1.0))/2, 1.0f);  //works without ligthing
 
 
-        //just for debug
-        // if(vertex_color[0] >= 0.7){
+        // // just for debug
+        // if(vertex_color[0] < 0.0){
         //     vertex_color = vec4(1.0, 0.0, 0.0, 1.0); //red
         // }
 

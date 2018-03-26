@@ -118,6 +118,7 @@ double PI = atan(1)*4;
             }
 
 
+            // -------------- GAUSSIAN CURVATURE -----------------
             // find gaussian curvature
             map <int, double> gc_map;  //vertex_j, gc
             for(int i = 0; i < num_vertices; i++){
@@ -176,6 +177,7 @@ double PI = atan(1)*4;
                 double gaussian_curvature_j = 2 * PI - sum_angles;
                 gc_map.insert(pair <int, double> (vertex_j, gaussian_curvature_j));
             }
+           // -------------- END GAUSSIAN CURVATURE -----------------
 
 
             // output vectors ---
