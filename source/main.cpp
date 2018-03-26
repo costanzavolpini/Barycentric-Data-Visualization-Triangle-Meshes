@@ -107,6 +107,8 @@ int main() {
         (GLSL version 420 corresponds to OpenGL version 4.2 for example).
     */
     Shader ourShader("vertexShader.vs", "maxDiagramFragmentShader.fs", "geometryShader.gs");
+    Shader normalShader("normal.vs", "normals.fs", "normal.gs");
+
 
     /**
         NB. OpenGL works in 3D space we render a 2D triangle with each vertex having a z coordinate of 0.0.
@@ -158,6 +160,14 @@ int main() {
         ourShader.setMat4("projection", projection);
         ourShader.setMat4("view", rotated_view);
         ourShader.setMat4("model", rotated_model);
+
+        object.draw();
+
+        // then draw model with normal visualizing geometry shader
+        normalShader.use();
+        normalShader.setMat4("projection", projection);
+        normalShader.setMat4("view", rotated_view);
+        normalShader.setMat4("model", rotated_model);
 
         object.draw();
 

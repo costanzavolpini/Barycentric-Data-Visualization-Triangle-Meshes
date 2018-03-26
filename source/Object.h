@@ -104,6 +104,7 @@ class Object {
 
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
+        glBindVertexArray(0);
       }
 
 
