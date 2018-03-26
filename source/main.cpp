@@ -107,7 +107,7 @@ int main() {
         (GLSL version 420 corresponds to OpenGL version 4.2 for example).
     */
     Shader ourShader("vertexShader.vs", "maxDiagramFragmentShader.fs", "geometryShader.gs");
-    Shader normalShader("normal.vs", "normals.fs", "normal.gs");
+    Shader normalShader("normal.vs", "normal.fs", "normal.gs");
 
 
     /**
