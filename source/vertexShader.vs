@@ -49,7 +49,7 @@
     }
 
     vec4 get_result_color(vec3 ambient, vec3 diffuse, vec3 specular) {
-        return vec4(normalize(ambient + diffuse + specular), 1.0);
+        return vec4(ambient + diffuse + specular, 1.0);
     }
 
     void main() {
@@ -63,17 +63,17 @@
 
 
         // // just for debug
-        // if(vertex_color[0] < 0.0){
+        // if(vertex_color[0] == 0.2){
         //     vertex_color = vec4(1.0, 0.0, 0.0, 1.0); //red
         // }
 
-        // if(vertex_color[1] >= 0.5){
-        //     vertex_color = vec4(0.0, 1.0, 0.0, 1.0); //green
-        // }
+        // // if(vertex_color[1] >= 0.5){
+        // //     vertex_color = vec4(0.0, 1.0, 0.0, 1.0); //green
+        // // }
 
-        // if(vertex_color[2] >= 0.2){
-        //     vertex_color = vec4(0.0, 0.0, 1.0, 1.0); //blue
-        // }
+        // // if(vertex_color[2] >= 0.2){
+        // //     vertex_color = vec4(0.0, 0.0, 1.0, 1.0); //blue
+        // // }
     
         gl_Position = projection * view * model * vec4(aPos, 1.0); 
     }
