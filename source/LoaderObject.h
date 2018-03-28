@@ -58,7 +58,7 @@ double PI = atan(1)*4;
             // vertices array
             vector<float> vertices(num_triangles * 18);
             vector<Point3d> normals(num_vertices);
-            std::fill(normals.begin(), normals.end(), 0);
+            std::fill(normals.begin(), normals.end(), Point3d(0.0f, 0.0f, 0.0f));
 
             int index = 0;
             // int index_normal = 0;
@@ -111,10 +111,11 @@ double PI = atan(1)*4;
             // normalize every vertex normal
             // average of norms of adj triangle of a vertex (sum of triangle norms / number of triangles)
             for(int k = 0; k < num_vertices; k++){
-                if(v_counter[k] != 0){
-                    normals[k] = normals[k] / v_counter[k];
+                // if(v_counter[k] != 0){
+                    // normals[k] = normals[k] / v_counter[k];
                     normals[k].normalize();
-                }
+                // }
+                std::cout << v[k] << " " << normals[k] << std::endl;
             }
 
 
