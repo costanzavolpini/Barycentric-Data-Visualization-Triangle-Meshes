@@ -140,6 +140,7 @@ int main() {
     ourShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
     ourShader.setVec3("light.specular", 0.8f, 0.8f, 0.8f);
     ourShader.setFloat("shininess", 32.0f);
+    
     /**
         application to keep drawing images and handling user input until the program has been explicitly told to stop
         render loop
@@ -160,16 +161,17 @@ int main() {
         ourShader.setMat4("projection", projection);
         ourShader.setMat4("view", rotated_view);
         ourShader.setMat4("model", rotated_model);
-
+        
         object.draw();
+
 
         // then draw model with normal visualizing geometry shader
-        normalShader.use();
-        normalShader.setMat4("projection", projection);
-        normalShader.setMat4("view", rotated_view);
-        normalShader.setMat4("model", rotated_model);
+        // normalShader.use();
+        // normalShader.setMat4("projection", projection);
+        // normalShader.setMat4("view", rotated_view);
+        // normalShader.setMat4("model", rotated_model);
 
-        object.draw();
+        // object.draw();
 
         glfwSwapBuffers(window); // will swap the color buffer
         glfwPollEvents(); // function checks if any events are triggered (like keyboard input or mouse movement events) 
