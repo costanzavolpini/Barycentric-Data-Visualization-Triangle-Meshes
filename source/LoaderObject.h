@@ -65,8 +65,8 @@ int number_triangles;
             int index = 0;
             // int index_normal = 0;
 
-            vector<float> triangle_vertices(num_triangles * 3);
-            vector<float> triangle_normals(num_triangles * 3);
+            vector<float> triangle_vertices(num_triangles * 9);
+            vector<float> triangle_normals(num_triangles * 9);
 
             // save normals
             vector<int> v_counter(num_vertices);
@@ -135,7 +135,7 @@ int number_triangles;
 
 
 
-        //     // -------------- GAUSSIAN CURVATURE -----------------
+        //     // -------------- GAUSSIAN CURVATURE ----------------- REIMPLEMENT
         //     // find gaussian curvature
         //     map <int, double> gc_map;  //vertex_j, gc
         //     for(int i = 0; i < num_vertices; i++){
