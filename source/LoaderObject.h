@@ -22,8 +22,9 @@ vector<Point3d> v;
 struct Triangle { int v[3]; };
 vector<Triangle> t;
 double PI = atan(1)*4;
+int number_triangles;
 
-        bool load (const char * path, vector<Point3d> &out_vertices, vector<Point3d> &out_normals) {
+        bool load (const char * path, vector<float> &out_vertices, vector<float> &out_normals) {
             /**
                 Read .OFF file
             */ 
@@ -54,17 +55,21 @@ double PI = atan(1)*4;
                 in >> dummy >> t[i].v[0] >> t[i].v[1] >> t[i].v[2];
 
             in.close();
+            number_triangles = num_triangles;
 
             // vertices array
-            vector<Point3d> vertices(num_triangles * 3);
-            vector<Point3d> normals(num_triangles * 3);
+            vector<Point3d> vertices(num_vertices);
+            vector<Point3d> normals(num_vertices);
             std::fill(normals.begin(), normals.end(), Point3d(0.0f, 0.0f, 0.0f));
 
             int index = 0;
             // int index_normal = 0;
 
+            vector<float> triangle_vertices(num_triangles * 3);
+            vector<float> triangle_normals(num_triangles * 3);
+
             // save normals
-            vector<int> v_counter(num_triangles * 3);
+            vector<int> v_counter(num_vertices);
             std::fill(v_counter.begin(), v_counter.end(), 0); // initialize every vertex normal to (0,0,0)
 
             // save everything with the color into vertices --- 
@@ -74,45 +79,60 @@ double PI = atan(1)*4;
                 Point3d v2 = v[t[k].v[1]];
                 Point3d v3 = v[t[k].v[2]];
 
-                // insert values in vertices
-                // first vertex
-                vertices[3 * k] = v1;
-                vertices[3 * k + 1] = v2;
-                vertices[3 * k + 2] = v3;
-
                 // for every triangle face compute face normal and normalize it
                 Point3d n = (v2-v1)^(v3-v1);
                 n.normalize();
 
-                // for every vertex of the face add n to the vertex normal
-                // cout << t[k].v[0] << " " << t[k].v[1] << " " << t[k].v[2] << endl;
+                normals[t[k].v[0]] += n;
+                v_counter[t[k].v[0]]++; // update counter
 
-                normals[3 * k] += n;
-                v_counter[3 * k]++; // update counter
+                normals[t[k].v[1]] += n;
+                v_counter[t[k].v[1]]++; // update counter
 
-                normals[3 * k + 1] += n;
-                v_counter[3 * k + 1]++;
-
-                normals[3 * k + 2] += n;
-                v_counter[3 * k + 2]++;
+                normals[t[k].v[2]] += n;
+                v_counter[t[k].v[2]]++; // update counter
             }
 
 
             // normalize every vertex normal
             // average of norms of adj triangle of a vertex (sum of triangle norms / number of triangles)
-            for(int k = 0; k < num_triangles; k++){
-                if(v_counter[3 * k] != 0){ 
-                    normals[3 * k] = normals[3 * k] / v_counter[3 * k]; 
-                }
-                if(v_counter[3 * k + 1] != 0){ 
-                    normals[3 * k + 1] = normals[3 * k + 1] / v_counter[3 * k + 1]; 
-                }
-                if(v_counter[3 * k + 2] != 0){ 
-                    normals[3 * k + 2] = normals[3 * k + 2] / v_counter[3 * k + 2]; 
-                }
+            for(int k = 0; k < num_vertices; k++){
                 // normals[k].normalize();
-                // std::cout << vertices[k] << " " << normals[k] << std::endl;
+                if(v_counter[k] != 0){ 
+                    normals[k] = normals[k] / v_counter[k]; 
+               }
+                normals[k].normalize();
+                std::cout << v[k] << " " << normals[k] << std::endl;
             }
+
+            for (int k = 0; k < num_triangles; k++) {
+                // insert vertice values in triangles
+                triangle_vertices[9*k] = v[t[k].v[0]].x();
+                triangle_vertices[9*k + 1] = v[t[k].v[0]].y();
+                triangle_vertices[9*k + 2] = v[t[k].v[0]].z();
+                
+                triangle_vertices[9*k + 3] = v[t[k].v[1]].x();
+                triangle_vertices[9*k + 4] = v[t[k].v[1]].y();
+                triangle_vertices[9*k + 5] = v[t[k].v[1]].z();
+
+                triangle_vertices[9*k + 6] = v[t[k].v[2]].x();
+                triangle_vertices[9*k + 7] = v[t[k].v[2]].y();
+                triangle_vertices[9*k + 8] = v[t[k].v[2]].z();
+
+                // insert normal values in triangles
+                triangle_normals[9*k] = normals[t[k].v[0]].x();
+                triangle_normals[9*k + 1] = normals[t[k].v[0]].y();
+                triangle_normals[9*k + 2] = normals[t[k].v[0]].z();
+                
+                triangle_normals[9*k + 3] = normals[t[k].v[1]].x();
+                triangle_normals[9*k + 4] = normals[t[k].v[1]].y();
+                triangle_normals[9*k + 5] = normals[t[k].v[1]].z();
+
+                triangle_normals[9*k + 6] = normals[t[k].v[2]].x();
+                triangle_normals[9*k + 7] = normals[t[k].v[2]].y();
+                triangle_normals[9*k + 8] = normals[t[k].v[2]].z();
+            }
+
 
 
         //     // -------------- GAUSSIAN CURVATURE -----------------
@@ -177,31 +197,25 @@ double PI = atan(1)*4;
         //    // -------------- END GAUSSIAN CURVATURE -----------------
 
 
-            // output vectors ---
-            // For each vertex of each triangle
-            for (unsigned int i = 0; i < vertices.size(); i++) {
+            // output vectors
+            //For each vertex of each triangle
+            out_vertices.clear();
+            out_normals.clear();
+            for (unsigned int i = 0; i < triangle_vertices.size(); i++) {
                 // get value
-                Point3d value = vertices[i];
-                out_vertices.push_back(value);
+                out_vertices.push_back(triangle_vertices[i]);
+                out_normals.push_back(triangle_normals[i]);
             }
 
-            for (unsigned int i = 0; i < normals.size(); i++) {
-                // get value
-                Point3d value = normals[i];
-                out_normals.push_back(value);
-            }
 
             cout << "Object loaded" << endl;
             return true;
         }
 
-void vecPoint3dToFloat(vector<Point3d> &_vec, vector<float> &_out) {
-    _out.clear();
-    for (auto i = _vec.begin(); i != _vec.end(); ++i) {
-        _out.push_back(i->x());
-        _out.push_back(i->y());
-        _out.push_back(i->z());
-    }
+
+int get_number_triangles(){
+    return number_triangles;
 }
+
 
 #endif

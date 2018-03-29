@@ -15,10 +15,8 @@ Comment:  This file contains all Object definitions to construct and draw an obj
 
 class Object {
   public:
-    vector<float> fvertices; // vector containing all vertices and colors
-    vector<Point3d> normals;
-    vector<float> fnormals;
-    vector<Point3d> vertices;
+    vector<float> triangle_vertices;
+    vector<float> triangle_normals;
     
     /**
         Memory on the GPU where we store the vertex data
@@ -28,18 +26,10 @@ class Object {
 
     // Constructor
       Object(const std::string &_path) {
-        if(!load(_path.c_str(), vertices, normals)){
+        if(!load(_path.c_str(), triangle_vertices, triangle_normals)){
             cout << "error loading file" << endl;
             return;
         }
-
-        fnormals.resize(normals.size() * 3);
-        std::fill(fnormals.begin(), fnormals.end(), 0.0f);
-        vecPoint3dToFloat(normals, fnormals);
-
-        fvertices.resize(vertices.size() * 3);
-        std::fill(fvertices.begin(), fvertices.end(), 0.0f);
-        vecPoint3dToFloat(vertices, fvertices);
       }
 
      // Function to initialize VBO and VAO
@@ -56,14 +46,14 @@ class Object {
               GL_DYNAMIC_DRAW: the data is likely to change a lot.
               GL_STREAM_DRAW: the data will change every time it is drawn.
           */
-          glBufferData(GL_ARRAY_BUFFER, sizeof(float) * fvertices.size(), &fvertices[0], GL_STATIC_DRAW); // copies the previously defined vertex data into the buffer's memor
+          glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_vertices.size(), &triangle_vertices[0], GL_STATIC_DRAW); // copies the previously defined vertex data into the buffer's memor
 
           // VBO NORMALS
           glGenBuffers(1, &VBO_NORMAL); //generate buffer, bufferID = 1
 
           glBindBuffer(GL_ARRAY_BUFFER, VBO_NORMAL); 
 
-          glBufferData(GL_ARRAY_BUFFER, sizeof(float) * fnormals.size(), &fnormals[0], GL_STATIC_DRAW);
+          glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_normals.size(), &triangle_normals[0], GL_STATIC_DRAW);
 
           // ------------- VAO -------------
           glGenVertexArrays(1, &VAO);
@@ -108,10 +98,8 @@ class Object {
             to the corresponding pixels on the final screen, resulting in fragments for the fragment shader to use.  
             + Clipping (discards all fragments that are outside your view, increasing performance).
         */
-        int num_triangles = vertices.size();
-
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
+        glDrawArrays(GL_TRIANGLES, 0, triangle_vertices.size());
         glBindVertexArray(0);
       }
 
