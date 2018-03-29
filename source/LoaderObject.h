@@ -58,12 +58,8 @@ int number_triangles;
             number_triangles = num_triangles;
 
             // vertices array
-            vector<Point3d> vertices(num_vertices);
             vector<Point3d> normals(num_vertices);
             std::fill(normals.begin(), normals.end(), Point3d(0.0f, 0.0f, 0.0f));
-
-            int index = 0;
-            // int index_normal = 0;
 
             vector<float> triangle_vertices(num_triangles * 9);
             vector<float> triangle_normals(num_triangles * 9);
@@ -102,7 +98,6 @@ int number_triangles;
                     normals[k] = normals[k] / v_counter[k]; 
                }
                 normals[k].normalize();
-                std::cout << v[k] << " " << normals[k] << std::endl;
             }
 
             for (int k = 0; k < num_triangles; k++) {
@@ -201,12 +196,12 @@ int number_triangles;
             //For each vertex of each triangle
             out_vertices.clear();
             out_normals.clear();
+
             for (unsigned int i = 0; i < triangle_vertices.size(); i++) {
                 // get value
                 out_vertices.push_back(triangle_vertices[i]);
-                out_normals.push_back(triangle_normals[i]);
+                out_normals.push_back(triangle_normals[i]);           
             }
-
 
             cout << "Object loaded" << endl;
             return true;
