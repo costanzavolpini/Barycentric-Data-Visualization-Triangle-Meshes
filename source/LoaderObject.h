@@ -56,19 +56,20 @@ double PI = atan(1)*4;
             in.close();
 
             // vertices array
-            vector<Point3d> vertices(num_triangles * 3 + 2);
-            vector<Point3d> normals(num_vertices);
+            vector<Point3d> vertices(num_triangles * 3);
+            vector<Point3d> normals(num_triangles * 3);
             std::fill(normals.begin(), normals.end(), Point3d(0.0f, 0.0f, 0.0f));
 
             int index = 0;
             // int index_normal = 0;
 
             // save normals
-            vector<int> v_counter(num_vertices);
+            vector<int> v_counter(num_triangles * 3);
             std::fill(v_counter.begin(), v_counter.end(), 0); // initialize every vertex normal to (0,0,0)
 
             // save everything with the color into vertices --- 
             for (int k = 0; k < num_triangles; k++) {    
+
                 Point3d v1 = v[t[k].v[0]];
                 Point3d v2 = v[t[k].v[1]];
                 Point3d v3 = v[t[k].v[2]];
@@ -84,24 +85,33 @@ double PI = atan(1)*4;
                 n.normalize();
 
                 // for every vertex of the face add n to the vertex normal
-                normals[t[k].v[0]] += n;
-                v_counter[t[k].v[0]]++; // update counter
+                // cout << t[k].v[0] << " " << t[k].v[1] << " " << t[k].v[2] << endl;
 
-                normals[t[k].v[1]] += n;
-                v_counter[t[k].v[1]]++;
+                normals[3 * k] += n;
+                v_counter[3 * k]++; // update counter
 
-                normals[t[k].v[2]] += n;
-                v_counter[t[k].v[2]]++;
+                normals[3 * k + 1] += n;
+                v_counter[3 * k + 1]++;
 
+                normals[3 * k + 2] += n;
+                v_counter[3 * k + 2]++;
             }
 
-            cout << num_triangles * 3 + 2 << endl;
 
             // normalize every vertex normal
             // average of norms of adj triangle of a vertex (sum of triangle norms / number of triangles)
-            for(int k = 0; k < num_vertices; k++){
-                    normals[k].normalize();
-                // std::cout << v[k] << " " << normals[k] << std::endl;
+            for(int k = 0; k < num_triangles; k++){
+                if(v_counter[3 * k] != 0){ 
+                    normals[3 * k] = normals[3 * k] / v_counter[3 * k]; 
+                }
+                if(v_counter[3 * k + 1] != 0){ 
+                    normals[3 * k + 1] = normals[3 * k + 1] / v_counter[3 * k + 1]; 
+                }
+                if(v_counter[3 * k + 2] != 0){ 
+                    normals[3 * k + 2] = normals[3 * k + 2] / v_counter[3 * k + 2]; 
+                }
+                // normals[k].normalize();
+                // std::cout << vertices[k] << " " << normals[k] << std::endl;
             }
 
 
