@@ -136,10 +136,10 @@ int main() {
     ourShader.setVec3("viewPos", glm::vec3(0.0f, 0.0f, 3.0f));
 
     // light properties
-    ourShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
-    ourShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
-    ourShader.setVec3("light.specular", 0.8f, 0.8f, 0.8f);
-    ourShader.setFloat("shininess", 32.0f);
+    ourShader.setVec3("light.ambient", 0.8f, 0.8f, 0.8f);
+    ourShader.setVec3("light.diffuse", 0.2f, 0.2f, 0.2f);
+    ourShader.setVec3("light.specular", 0.2f, 0.2f, 0.2f);
+    ourShader.setFloat("shininess", 12.0f);
     
     /**
         application to keep drawing images and handling user input until the program has been explicitly told to stop
@@ -165,7 +165,7 @@ int main() {
         object.draw();
 
 
-        // then draw model with normal visualizing geometry shader
+        // then draw model with normal visualizing geometry shader (FOR DEBUG)
         // normalShader.use();
         // normalShader.setMat4("projection", projection);
         // normalShader.setMat4("view", rotated_view);

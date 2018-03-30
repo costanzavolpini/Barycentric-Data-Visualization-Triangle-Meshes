@@ -62,8 +62,8 @@
     // vertex_color = vec4((pos + vec3(1.0,1.0,1.0))/2, 1.0f);  //works without ligthing
 
 
-        // // just for debug
-        // if(vertex_color[0] == 0.2){
+        // just for debug
+        // if(vertex_color[0] < 0.0){
         //     vertex_color = vec4(1.0, 0.0, 0.0, 1.0); //red
         // }
 
