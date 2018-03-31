@@ -24,7 +24,7 @@ vector<Triangle> t;
 double PI = atan(1)*4;
 int number_triangles;
 
-        bool load (const char * path, vector<float> &out_vertices, vector<float> &out_normals) {
+        bool load (const char * path, vector<float> &out_vertices, vector<float> &out_normals, vector<float> &gc) {
             /**
                 Read .OFF file
             */ 
@@ -206,7 +206,8 @@ int number_triangles;
             for (unsigned int i = 0; i < triangle_vertices.size(); i++) {
                 // get value
                 out_vertices.push_back(triangle_vertices[i]);
-                out_normals.push_back(triangle_normals[i]);           
+                out_normals.push_back(triangle_normals[i]);      
+                gc.push_back(triangle_gc[i]);     
             }
 
             cout << "Object loaded" << endl;

@@ -17,16 +17,17 @@ class Object {
   public:
     vector<float> triangle_vertices;
     vector<float> triangle_normals;
+    vector<float> triangle_gc;
     
     /**
         Memory on the GPU where we store the vertex data
         VBO: manage this memory via so called vertex buffer objects (VBO) that can store a large number of vertices in the GPU's memory
     */
-    unsigned int VBO, VAO, VBO_NORMAL, VBO_LAMP, VAO_LAMP;
+    unsigned int VBO, VAO, VBO_NORMAL, VBO_GAUSSIANCURVATURE;
 
     // Constructor
       Object(const std::string &_path) {
-        if(!load(_path.c_str(), triangle_vertices, triangle_normals)){
+        if(!load(_path.c_str(), triangle_vertices, triangle_normals, triangle_gc)){
             cout << "error loading file" << endl;
             return;
         }
@@ -55,6 +56,15 @@ class Object {
 
           glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_normals.size(), &triangle_normals[0], GL_STATIC_DRAW);
 
+
+          // VBO_GAUSSIANCURVATURE
+          glGenBuffers(1, &VBO_GAUSSIANCURVATURE); //generate buffer, bufferID = 1
+
+          glBindBuffer(GL_ARRAY_BUFFER, VBO_GAUSSIANCURVATURE); 
+
+          glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_gc.size(), &triangle_gc[0], GL_STATIC_DRAW);
+
+
           // ------------- VAO -------------
           glGenVertexArrays(1, &VAO);
 
@@ -80,6 +90,11 @@ class Object {
           //normal attribute
           glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float))); 
           glEnableVertexAttribArray(1); //this 1 is referred to the layout on shader
+
+          glBindBuffer(GL_ARRAY_BUFFER, VBO_GAUSSIANCURVATURE);
+          //normal attribute
+          glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float))); 
+          glEnableVertexAttribArray(2); //this 2 is referred to the layout on shader
 
           /**
             Unbind the VAO so other VAO calls won't accidentally modify this VAO, but this rarely happens. 
