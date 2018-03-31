@@ -102,94 +102,71 @@ int number_triangles;
 
             for (int k = 0; k < num_triangles; k++) {
                 // insert vertice values in triangles
-                triangle_vertices[9*k] = v[t[k].v[0]].x();
-                triangle_vertices[9*k + 1] = v[t[k].v[0]].y();
-                triangle_vertices[9*k + 2] = v[t[k].v[0]].z();
+                triangle_vertices[9 * k] = v[t[k].v[0]].x();
+                triangle_vertices[9 * k + 1] = v[t[k].v[0]].y();
+                triangle_vertices[9 * k + 2] = v[t[k].v[0]].z();
                 
-                triangle_vertices[9*k + 3] = v[t[k].v[1]].x();
-                triangle_vertices[9*k + 4] = v[t[k].v[1]].y();
-                triangle_vertices[9*k + 5] = v[t[k].v[1]].z();
+                triangle_vertices[9 * k + 3] = v[t[k].v[1]].x();
+                triangle_vertices[9 * k + 4] = v[t[k].v[1]].y();
+                triangle_vertices[9 * k + 5] = v[t[k].v[1]].z();
 
-                triangle_vertices[9*k + 6] = v[t[k].v[2]].x();
-                triangle_vertices[9*k + 7] = v[t[k].v[2]].y();
-                triangle_vertices[9*k + 8] = v[t[k].v[2]].z();
+                triangle_vertices[9 * k + 6] = v[t[k].v[2]].x();
+                triangle_vertices[9 * k + 7] = v[t[k].v[2]].y();
+                triangle_vertices[9 * k + 8] = v[t[k].v[2]].z();
 
                 // insert normal values in triangles
-                triangle_normals[9*k] = normals[t[k].v[0]].x();
-                triangle_normals[9*k + 1] = normals[t[k].v[0]].y();
-                triangle_normals[9*k + 2] = normals[t[k].v[0]].z();
+                triangle_normals[9 * k] = normals[t[k].v[0]].x();
+                triangle_normals[9 * k + 1] = normals[t[k].v[0]].y();
+                triangle_normals[9 * k + 2] = normals[t[k].v[0]].z();
                 
-                triangle_normals[9*k + 3] = normals[t[k].v[1]].x();
-                triangle_normals[9*k + 4] = normals[t[k].v[1]].y();
-                triangle_normals[9*k + 5] = normals[t[k].v[1]].z();
+                triangle_normals[9 * k + 3] = normals[t[k].v[1]].x();
+                triangle_normals[9 * k + 4] = normals[t[k].v[1]].y();
+                triangle_normals[9 * k + 5] = normals[t[k].v[1]].z();
 
-                triangle_normals[9*k + 6] = normals[t[k].v[2]].x();
-                triangle_normals[9*k + 7] = normals[t[k].v[2]].y();
-                triangle_normals[9*k + 8] = normals[t[k].v[2]].z();
+                triangle_normals[9 * k + 6] = normals[t[k].v[2]].x();
+                triangle_normals[9 * k + 7] = normals[t[k].v[2]].y();
+                triangle_normals[9 * k + 8] = normals[t[k].v[2]].z();
             }
 
 
 
-        //     // -------------- GAUSSIAN CURVATURE ----------------- REIMPLEMENT
-        //     // find gaussian curvature
-        //     map <int, double> gc_map;  //vertex_j, gc
-        //     for(int i = 0; i < num_vertices; i++){
-        //         int vertex_j = i;
-        //         Point3d vertex_value = vertices[i];
+            // -------------- GAUSSIAN CURVATURE ----------------- REIMPLEMENT
+            // find gaussian curvature
+            vector<float> triangle_gc(num_triangles * 9);
 
-        //         double sum_angles = 0;
+            // iterate inside triangles
+            for(int i = 0; i < num_triangles; i++){
+                Point3d v0 = Point3d(triangle_vertices[9 * i], triangle_vertices[9 * i + 1], triangle_vertices[9 * i + 2]);
+                Point3d v1 = Point3d(triangle_vertices[9 * i + 3], triangle_vertices[9 * i + 4], triangle_vertices[9 * i + 5]);
+                Point3d v2 = Point3d(triangle_vertices[9 * i + 6], triangle_vertices[9 * i + 7], triangle_vertices[9 * i + 8]);
 
-        //         // for each vertex j, search all triangles adjacent k
-        //         for(int k = 0; k < num_triangles; k++){
+                // calculate gc for each vertex of triangle
+                // VERTEX 1
+                // v1 -> v0 -> v2
+                Point3d v1v0 = v0 - v1;
+                Point3d v0v2 = v2 - v0;
+                double sum_angles_1 = v1v0.getAngle(v0v2);
 
-        //             if(t[k].v[0] == vertex_j){
-        //                 // v1 -> v0 -> v2
-        //                 // 2 vectors v1v0 and v0v2 that means v0-v1 and v2-v0
-        //                 Point3d v0 = vertex_value; //vertex in which I want to find the angle is j
-        //                 Point3d v1 = Point3d(vertices[t[k].v[1]], vertices[t[k].v[1] + 1], vertices[t[k].v[1] + 2]);
-        //                 Point3d v2 = Point3d(vertices[t[k].v[2]], vertices[t[k].v[2] + 1], vertices[t[k].v[2] + 2]);
+                // VERTEX 2
+                // v2 -> v1 -> v0
+                Point3d v2v1 = v1 - v2;
+                double sum_angles_2 = v2v1.getAngle(v1v0);
 
-        //                 // vectors
-        //                 Point3d v1v0 = Point3d(v0.x() - v1.x(), v0.y() - v1.y(), v0.z() - v1.z());
-        //                 Point3d v0v2 = Point3d(v2.x() - v0.x(), v2.y() - v0.y(), v2.z() - v0.z());
 
-        //                 double angle = v1v0.getAngle(v0v2);
-        //                 sum_angles += angle;
+                // VERTEX 3
+                // v0 -> v2 -> v1
+                double sum_angles_3 = v0v2.getAngle(v2v1);
 
-        //             } else if(t[k].v[1] == vertex_j){
-        //                 // v2 -> v1 -> v0
-        //                 // 2 vectors v2v1 and v1v0 that means v1-v2 and v0-v1
-        //                 Point3d v0 = Point3d(vertices[t[k].v[0]], vertices[t[k].v[0] + 1], vertices[t[k].v[0] + 2]);
-        //                 Point3d v1 = vertex_value; //vertex in which I want to find the angle is j
-        //                 Point3d v2 = Point3d(vertices[t[k].v[2]], vertices[t[k].v[2] + 1], vertices[t[k].v[2] + 2]);
-
-        //                 // vectors
-        //                 Point3d v2v1 = Point3d(v1.x() - v2.x(), v1.y() - v2.y(), v1.z() - v2.z());
-        //                 Point3d v1v0 = Point3d(v0.x() - v1.x(), v0.y() - v1.y(), v0.z() - v1.z());
-
-        //                 double angle = v2v1.getAngle(v1v0);
-        //                 sum_angles += angle;
-
-        //             }else if(t[k].v[2] == vertex_j){
-        //                 // v0 -> v2 -> v1
-        //                 // 2 vectors v0v2 and v2v1 that means v2-v0 and v1-v2
-        //                 Point3d v0 = Point3d(vertices[t[k].v[0]], vertices[t[k].v[0] + 1], vertices[t[k].v[0] + 2]);
-        //                 Point3d v1 = Point3d(vertices[t[k].v[1]], vertices[t[k].v[1] + 1], vertices[t[k].v[1] + 2]);
-        //                 Point3d v2 = vertex_value; //vertex in which I want to find the angle is j
-
-        //                 // vectors
-        //                 Point3d v0v2 = Point3d(v2.x() - v0.x(), v2.y() - v0.y(), v2.z() - v0.z());
-        //                 Point3d v2v1 = Point3d(v1.x() - v2.x(), v1.y() - v2.y(), v1.z() - v2.z());
-
-        //                 double angle = v0v2.getAngle(v2v1);
-        //                 sum_angles += angle;
-        //             }
-        //         }
-
-        //         double gaussian_curvature_j = 2 * PI - sum_angles;
-        //         gc_map.insert(pair <int, double> (vertex_j, gaussian_curvature_j));
-        //     }
-        //    // -------------- END GAUSSIAN CURVATURE -----------------
+                // // for each triangle-vertex selected, search all vertices
+                // for(int k = 0; k < num_vertices; k++){
+                //     if(v[k] ==  v0){
+                        
+                //     }
+                    
+                // }
+                // double gaussian_curvature_j = 2 * PI - sum_angles;
+            }
+           // -------------- END GAUSSIAN CURVATURE -----------------
 
 
             // output vectors
