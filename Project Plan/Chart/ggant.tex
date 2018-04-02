@@ -63,7 +63,7 @@
         y unit chart=1.145cm, 
         time slot format=little-endian,
         % progress=today,
-        today=25.3.18 
+        today=1.4.18 
         ]{19.2.2018}{31.5.2018}
   \gantttitlecalendar*{19.2.2018}{31.5.2018}{month=shortname, week} \\
   \ganttbar[
@@ -75,10 +75,13 @@
     bar/.append style={fill=black!43}
     ]{Add functionalities to\ganttalignnewline the GPU vertex program}{5.3.2018}{11.3.2018} \\
   \ganttbar[
-    progress=90,
-    bar/.append style={fill=darkred}
+    progress=100,
+    bar/.append style={fill=black!43}
     ]{Extend Flat Shading\ganttalignnewline on vertices and edges}{12.3.2018}{25.3.2018} \ganttnewline
-  \ganttbar{Split surface triangle mesh\ganttalignnewline into regions around vertices\ganttalignnewline and edges and color them \ganttalignnewline \textit{Gaussian Curvature}}{26.3.2018}{01.4.2018} \ganttnewline
+  \ganttbar[
+    progress=100,
+    bar/.append style={fill=black!43}
+    ]{Split surface triangle mesh\ganttalignnewline into regions around vertices\ganttalignnewline and edges and color them \ganttalignnewline \textit{Gaussian Curvature}}{26.3.2018}{01.4.2018} \ganttnewline
   \ganttbar{Develop a GPU\ganttalignnewline fragment program}{02.4.2018}{15.4.2018} \ganttnewline
   \ganttbar{Evaluation and\ganttalignnewline comparison\ganttalignnewline about the extension\ganttalignnewline of Flat Shading}{16.4.2018}{22.4.2018} \ganttnewline
   \ganttbar{Extend Gouraud\ganttalignnewline Shading for these new\ganttalignnewline mesh tessellations.}{23.4.2018}{6.5.2018} \ganttnewline
