@@ -53,15 +53,17 @@
         return vec4(ambient + diffuse + specular, 1.0);
     }
 
-    void get_result_color_gc(){
-        return;
+    vec4 get_result_color_gc(){
+       float val = gaussian_curvature[0]; // gaussian_curvature is a vec3 composed by same value
+       return vec4(min(2.0 * val, 1.0), min(2.0 * (1.0 - val), 1.0), 2.0 * min(val, 1.0 - val), 1.0);
     }
 
     void main() {
         vec3 pos = vec3(model * vec4(aPos, 1.0));
         vec3 normal = mat3(transpose(inverse(model))) * aNormal;  
     
-       vertex_color = get_result_color_lighting(light.ambient, get_diffuse(pos, normal), get_specular(pos, normal)); // color obtained with lighting calculations
+        vertex_color = get_result_color_lighting(light.ambient, get_diffuse(pos, normal), get_specular(pos, normal)); // color obtained with lighting calculations
+        vertex_color = get_result_color_gc(); //color obtained using gaussian curvature
 
         gl_Position = projection * view * model * vec4(aPos, 1.0); 
     }
