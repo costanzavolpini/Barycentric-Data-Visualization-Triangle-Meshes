@@ -125,6 +125,15 @@ class Object {
         glDeleteBuffers(1, &VBO);
 
       }
+
+    float get_minimum_gaussian_curvature_value(){
+        return *min_element(triangle_gc.begin(), triangle_gc.end());
+    }
+
+    float get_maximum_gaussian_curvature_value(){
+        return *max_element(triangle_gc.begin(), triangle_gc.end());
+    }
+
 };
 
 #endif

@@ -140,6 +140,14 @@ int main() {
     ourShader.setVec3("light.diffuse", 0.2f, 0.2f, 0.2f);
     ourShader.setVec3("light.specular", 0.2f, 0.2f, 0.2f);
     ourShader.setFloat("shininess", 12.0f);
+
+    // gaussian curvature
+    // ourShader.setFloat("min_gc", object.get_minimum_gaussian_curvature_value());
+    // ourShader.setFloat("max_gc", object.get_maximum_gaussian_curvature_value());
+
+    cout << "min " << object.get_minimum_gaussian_curvature_value() << endl;
+
+cout << "max " << object.get_maximum_gaussian_curvature_value() << endl;
     
     /**
         application to keep drawing images and handling user input until the program has been explicitly told to stop

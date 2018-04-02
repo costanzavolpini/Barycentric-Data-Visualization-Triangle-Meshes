@@ -219,5 +219,4 @@ int get_number_triangles(){
     return number_triangles;
 }
 
-
 #endif
