@@ -153,6 +153,7 @@ int number_triangles;
                 // v2 -> v1 -> v0
                 Point3d v2v1 = v1 - v2;
                 double sum_angles_2 = v2v1.getAngle(v1v0);
+                                
 
                 // VERTEX 3
                 // v0 -> v2 -> v1

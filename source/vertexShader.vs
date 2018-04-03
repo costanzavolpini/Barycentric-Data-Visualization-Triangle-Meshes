@@ -64,17 +64,18 @@
        vec3 red = vec3(1.0, 0.0, 0.0);
        vec3 green = vec3(0.0, 1.0, 0.0);
        vec3 blue = vec3(0.0, 0.0, 1.0);
-    //    if(val < 0) { //negative numbers until 0 -> map from red to green
-    //     return vec4((red - green) * val + red, 1.0);
-    //    } else { //map from green to blue, from 0 to positive
-    //     return vec4((green - blue) * val + green, 1.0);
-    //    }
 
-       if (val < 0) { //negative numbers until 0 -> map from red to green
-            return vec4(interpolation(red, green, val), 1.0);
-        } else { //map from green to blue, from 0 to positive
-            return vec4(interpolation(green, blue, val), 1.0);
-        }
+    //    if (val < 0) { //negative numbers until 0 -> map from red to green
+    //         return vec4(interpolation(red, green, val), 1.0);
+    //     } else { //map from green to blue, from 0 to positive
+    //         return vec4(interpolation(green, blue, val), 1.0);
+    //     }
+
+    if (val < 0) { //negative numbers until 0 -> map from red to green
+        return vec4(val,  val, 1.0, 1.0);
+    } else { //map from green to blue, from 0 to positive
+        return vec4(1.0,  (1.0 - val),  (1.0 - val), 1.0);
+    }
     }
 
     void main() {
