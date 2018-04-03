@@ -117,7 +117,7 @@ int main() {
         Send vertex data to vertex shader (load .off file). 
      */ 
     
-    Object object = Object("models/iCorsi/icosahedron_1.off");
+    Object object = Object("models/iCorsi/horse.off");
     object.init();
 
     /**
@@ -142,8 +142,8 @@ int main() {
     ourShader.setFloat("shininess", 12.0f);
 
     // gaussian curvature
-    // ourShader.setFloat("min_gc", object.get_minimum_gaussian_curvature_value());
-    // ourShader.setFloat("max_gc", object.get_maximum_gaussian_curvature_value());
+    ourShader.setFloat("min_gc", object.get_minimum_gaussian_curvature_value());
+    ourShader.setFloat("max_gc", object.get_maximum_gaussian_curvature_value());
 
     cout << "min " << object.get_minimum_gaussian_curvature_value() << endl;
 

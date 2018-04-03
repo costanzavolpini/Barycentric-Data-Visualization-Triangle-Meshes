@@ -145,28 +145,30 @@ int number_triangles;
                 // calculate gc for each vertex of triangle
                 // VERTEX 1
                 // v1 -> v0 -> v2
-                Point3d v1v0 = v0 - v1;
+                Point3d v0v1 = v1 - v0;
                 Point3d v0v2 = v2 - v0;
-                double sum_angles_1 = v1v0.getAngle(v0v2);
+                double sum_angles_1 = v0v1.getAngle(v0v2);
 
                 // VERTEX 2
                 // v2 -> v1 -> v0
-                Point3d v2v1 = v1 - v2;
-                double sum_angles_2 = v2v1.getAngle(v1v0);
+                Point3d v1v2 = v2 - v1;
+                double sum_angles_2 = v1v2.getAngle(-v0v1);
                                 
 
                 // VERTEX 3
                 // v0 -> v2 -> v1
-                double sum_angles_3 = v0v2.getAngle(v2v1);
+                double sum_angles_3 = v0v2.getAngle(v1v2);
+
+
 
                 // for each triangle-vertex selected, search all vertices the same vertices and add sum_angles
                 for(int k = 0; k < num_vertices; k++){
-                    if(v[k] ==  v0){
+                    if((v[k] - v0).norm() < 0.00001){
                         // add values
                         gc_counter[k] += sum_angles_1;
-                    } else if (v[k] ==  v1){
+                    } else if ((v[k] -  v1).norm() < 0.00001){
                         gc_counter[k] += sum_angles_2;
-                    } else if (v[k] ==  v2){
+                    } else if ((v[k] -  v2).norm() < 0.00001){
                         gc_counter[k] += sum_angles_3;
                     }   
                 }
@@ -179,19 +181,24 @@ int number_triangles;
                 Point3d v2 = Point3d(triangle_vertices[9 * i + 6], triangle_vertices[9 * i + 7], triangle_vertices[9 * i + 8]);
 
                 for(int k = 0; k < num_vertices; k++){
-                    if(v[k] ==  v0){
+                    if((v[k] - v0).norm() < 0.00001){
                         // add values
                         triangle_gc[9 * i] =  2 * PI - gc_counter[k];
                         triangle_gc[9 * i + 1] =  2 * PI - gc_counter[k];
                         triangle_gc[9 * i + 2] =  2 * PI - gc_counter[k];
-                    } else if (v[k] ==  v1){
+                        cout << 2 * PI - gc_counter[k] << endl;
+                    } else if ((v[k] -  v1).norm() < 0.00001){
                         triangle_gc[9 * i + 3] =  2 * PI - gc_counter[k];
                         triangle_gc[9 * i + 4] =  2 * PI - gc_counter[k];
                         triangle_gc[9 * i + 5] =  2 * PI - gc_counter[k];
-                    } else if (v[k] ==  v2){
+                        cout << 2 * PI - gc_counter[k] << endl;
+                        
+                    } else if ((v[k] -  v2).norm() < 0.00001){
                         triangle_gc[9 * i + 6] =  2 * PI - gc_counter[k];
                         triangle_gc[9 * i + 7] =  2 * PI - gc_counter[k];
                         triangle_gc[9 * i + 8] =  2 * PI - gc_counter[k];
+                        cout << 2 * PI - gc_counter[k] << endl;
+                        
                     }   
                 }
             }
