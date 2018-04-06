@@ -41,7 +41,6 @@ using namespace std;
 
     void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
     static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
-    // glm::vec3 get_arcball_vector(double x, double y);
     void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
     
 
@@ -107,7 +106,7 @@ int main() {
         (GLSL version 420 corresponds to OpenGL version 4.2 for example).
     */
     Shader ourShader("vertexShader.vs", "maxDiagramFragmentShader.fs", "geometryShader.gs");
-    Shader normalShader("normal.vs", "normal.fs", "normal.gs");
+    // Shader normalShader("normal.vs", "normal.fs", "normal.gs");
 
 
     /**
@@ -117,7 +116,7 @@ int main() {
         Send vertex data to vertex shader (load .off file). 
      */ 
     
-    Object object = Object("models/iCorsi/horse.off");
+    Object object = Object("models/iCorsi/icosahedron_1.off");
     object.init();
 
     /**
@@ -145,9 +144,6 @@ int main() {
     ourShader.setFloat("min_gc", object.get_minimum_gaussian_curvature_value());
     ourShader.setFloat("max_gc", object.get_maximum_gaussian_curvature_value());
 
-    cout << "min " << object.get_minimum_gaussian_curvature_value() << endl;
-
-cout << "max " << object.get_maximum_gaussian_curvature_value() << endl;
     
     /**
         application to keep drawing images and handling user input until the program has been explicitly told to stop

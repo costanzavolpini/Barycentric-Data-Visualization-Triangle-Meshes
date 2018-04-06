@@ -70,12 +70,6 @@
         } else { //map from green to blue, from 0 to positive
             return vec4(interpolation(green, blue, val/max_gc), 1.0);
         }
-
-    // if (val < 0) { //negative numbers until 0 -> map from red to green
-    //     return vec4(val,  val, 1.0, 1.0);
-    // } else { //map from green to blue, from 0 to positive
-    //     return vec4(1.0,  (1.0 - val),  (1.0 - val), 1.0);
-    // }
     }
 
     void main() {
@@ -83,7 +77,7 @@
         vec3 normal = mat3(transpose(inverse(model))) * aNormal;  
     
         vertex_color = get_result_color_lighting(light.ambient, get_diffuse(pos, normal), get_specular(pos, normal)); // color obtained with lighting calculations
-        vertex_color = get_result_color_gc(); //color obtained using gaussian curvature
+        // vertex_color = get_result_color_gc(); //color obtained using gaussian curvature
 
         gl_Position = projection * view * model * vec4(aPos, 1.0); 
     }

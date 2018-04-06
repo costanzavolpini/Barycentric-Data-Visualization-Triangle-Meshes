@@ -181,7 +181,7 @@ int number_triangles;
                 Point3d v2 = Point3d(triangle_vertices[9 * i + 6], triangle_vertices[9 * i + 7], triangle_vertices[9 * i + 8]);
 
                 for(int k = 0; k < num_vertices; k++){
-                    if((v[k] - v0).norm() < 0.00001){
+                    if((v[k] - v0).norm() < 0.00001){ //you know vertices YOU SHOULD NOT SEARCH FOR THEM
                         // add values
                         triangle_gc[9 * i] =  2 * PI - gc_counter[k];
                         triangle_gc[9 * i + 1] =  2 * PI - gc_counter[k];
