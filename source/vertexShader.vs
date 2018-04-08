@@ -76,8 +76,8 @@
         vec3 pos = vec3(model * vec4(aPos, 1.0));
         vec3 normal = mat3(transpose(inverse(model))) * aNormal;  
     
-        vertex_color = get_result_color_lighting(light.ambient, get_diffuse(pos, normal), get_specular(pos, normal)); // color obtained with lighting calculations
-        // vertex_color = get_result_color_gc(); //color obtained using gaussian curvature
+        // vertex_color = get_result_color_lighting(light.ambient, get_diffuse(pos, normal), get_specular(pos, normal)); // color obtained with lighting calculations
+        vertex_color = get_result_color_gc(); //color obtained using gaussian curvature
 
         gl_Position = projection * view * model * vec4(aPos, 1.0); 
     }

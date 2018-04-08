@@ -22,9 +22,10 @@ vector<Point3d> v;
 struct Triangle { int v[3]; };
 vector<Triangle> t;
 double PI = atan(1)*4;
-int number_triangles;
+int num_triangles;
 
         bool load (const char * path, vector<float> &out_vertices, vector<float> &out_normals, vector<float> &gc) {
+            // --------------------- COMPUTATIONS -----------------------------
             /**
                 Read .OFF file
             */ 
@@ -55,7 +56,54 @@ int number_triangles;
                 in >> dummy >> t[i].v[0] >> t[i].v[1] >> t[i].v[2];
 
             in.close();
-            number_triangles = num_triangles;
+
+            // -------------- GAUSSIAN CURVATURE ----------------- REIMPLEMENT
+            // find gaussian curvature
+            vector<float> triangle_gc(num_triangles * 9);
+            vector<float> gc_counter(num_vertices);
+            std::fill(gc_counter.begin(), gc_counter.end(), 0); 
+
+            // iterate inside triangles and calculates angle_defeact
+            for(int k = 0; k < num_triangles; k++){
+                Point3d v0 = v[t[k].v[0]];
+                Point3d v1 = v[t[k].v[1]];
+                Point3d v2 = v[t[k].v[2]];
+
+                // calculate gc for each vertex of triangle
+                // VERTEX 1
+                // v1 -> v0 -> v2
+                Point3d v0v1 = v1 - v0;
+                Point3d v0v2 = v2 - v0;
+                double sum_angles_1 = v0v1.getAngle(v0v2);
+
+                // VERTEX 2
+                // v2 -> v1 -> v0
+                Point3d v1v2 = v2 - v1;
+                double sum_angles_2 = v1v2.getAngle(-v0v1);        
+
+                // VERTEX 3
+                // v0 -> v2 -> v1
+                double sum_angles_3 = v0v2.getAngle(v1v2);
+
+                 // for each triangle-vertex selected add sum_angles
+                gc_counter[t[k].v[0]] += sum_angles_1;
+                gc_counter[t[k].v[1]] += sum_angles_2;
+                gc_counter[t[k].v[2]] += sum_angles_3;
+            }
+
+            // add everything to triangle gaussian curvature
+            for(int k = 0; k < num_triangles; k++){
+                Point3d v0 = v[t[k].v[0]];
+                Point3d v1 = v[t[k].v[1]];
+                Point3d v2 = v[t[k].v[2]];
+
+                triangle_gc[9*k] = triangle_gc[9*k + 1] = triangle_gc[9*k + 2] = 2 * PI - gc_counter[t[k].v[0]];
+                triangle_gc[9*k + 3] = triangle_gc[9*k + 4] = triangle_gc[9*k + 5] = 2 * PI - gc_counter[t[k].v[1]];
+                triangle_gc[9*k + 6] = triangle_gc[9*k + 7] = triangle_gc[9*k + 8] = 2 * PI - gc_counter[t[k].v[2]];
+            }
+
+           // -------------- END GAUSSIAN CURVATURE -----------------
+
 
             // vertices array
             vector<Point3d> normals(num_vertices);
@@ -130,80 +178,80 @@ int number_triangles;
 
 
 
-            // -------------- GAUSSIAN CURVATURE ----------------- REIMPLEMENT
-            // find gaussian curvature
-            vector<float> triangle_gc(num_triangles * 9);
-            vector<float> gc_counter(num_vertices);
-            std::fill(gc_counter.begin(), gc_counter.end(), 0); 
+        //     // -------------- GAUSSIAN CURVATURE ----------------- REIMPLEMENT
+        //     // find gaussian curvature
+        //     vector<float> triangle_gc(num_triangles * 9);
+        //     vector<float> gc_counter(num_vertices);
+        //     std::fill(gc_counter.begin(), gc_counter.end(), 0); 
 
-            // iterate inside triangles and calculates angle_defeact
-            for(int i = 0; i < num_triangles; i++){
-                Point3d v0 = Point3d(triangle_vertices[9 * i], triangle_vertices[9 * i + 1], triangle_vertices[9 * i + 2]);
-                Point3d v1 = Point3d(triangle_vertices[9 * i + 3], triangle_vertices[9 * i + 4], triangle_vertices[9 * i + 5]);
-                Point3d v2 = Point3d(triangle_vertices[9 * i + 6], triangle_vertices[9 * i + 7], triangle_vertices[9 * i + 8]);
+        //     // iterate inside triangles and calculates angle_defeact
+        //     for(int i = 0; i < num_triangles; i++){
+        //         Point3d v0 = Point3d(triangle_vertices[9 * i], triangle_vertices[9 * i + 1], triangle_vertices[9 * i + 2]);
+        //         Point3d v1 = Point3d(triangle_vertices[9 * i + 3], triangle_vertices[9 * i + 4], triangle_vertices[9 * i + 5]);
+        //         Point3d v2 = Point3d(triangle_vertices[9 * i + 6], triangle_vertices[9 * i + 7], triangle_vertices[9 * i + 8]);
 
-                // calculate gc for each vertex of triangle
-                // VERTEX 1
-                // v1 -> v0 -> v2
-                Point3d v0v1 = v1 - v0;
-                Point3d v0v2 = v2 - v0;
-                double sum_angles_1 = v0v1.getAngle(v0v2);
+        //         // calculate gc for each vertex of triangle
+        //         // VERTEX 1
+        //         // v1 -> v0 -> v2
+        //         Point3d v0v1 = v1 - v0;
+        //         Point3d v0v2 = v2 - v0;
+        //         double sum_angles_1 = v0v1.getAngle(v0v2);
 
-                // VERTEX 2
-                // v2 -> v1 -> v0
-                Point3d v1v2 = v2 - v1;
-                double sum_angles_2 = v1v2.getAngle(-v0v1);
+        //         // VERTEX 2
+        //         // v2 -> v1 -> v0
+        //         Point3d v1v2 = v2 - v1;
+        //         double sum_angles_2 = v1v2.getAngle(-v0v1);
                                 
 
-                // VERTEX 3
-                // v0 -> v2 -> v1
-                double sum_angles_3 = v0v2.getAngle(v1v2);
+        //         // VERTEX 3
+        //         // v0 -> v2 -> v1
+        //         double sum_angles_3 = v0v2.getAngle(v1v2);
 
 
 
-                // for each triangle-vertex selected, search all vertices the same vertices and add sum_angles
-                for(int k = 0; k < num_vertices; k++){
-                    if((v[k] - v0).norm() < 0.00001){
-                        // add values
-                        gc_counter[k] += sum_angles_1;
-                    } else if ((v[k] -  v1).norm() < 0.00001){
-                        gc_counter[k] += sum_angles_2;
-                    } else if ((v[k] -  v2).norm() < 0.00001){
-                        gc_counter[k] += sum_angles_3;
-                    }   
-                }
-            }
+        //         // for each triangle-vertex selected, search all vertices the same vertices and add sum_angles
+        //         for(int k = 0; k < num_vertices; k++){
+        //             if((v[k] - v0).norm() < 0.00001){
+        //                 // add values
+        //                 gc_counter[k] += sum_angles_1;
+        //             } else if ((v[k] -  v1).norm() < 0.00001){
+        //                 gc_counter[k] += sum_angles_2;
+        //             } else if ((v[k] -  v2).norm() < 0.00001){
+        //                 gc_counter[k] += sum_angles_3;
+        //             }   
+        //         }
+        //     }
 
-            // add everything to triangle gaussian curvature
-            for(int i = 0; i < num_triangles; i++){
-                Point3d v0 = Point3d(triangle_vertices[9 * i], triangle_vertices[9 * i + 1], triangle_vertices[9 * i + 2]);
-                Point3d v1 = Point3d(triangle_vertices[9 * i + 3], triangle_vertices[9 * i + 4], triangle_vertices[9 * i + 5]);
-                Point3d v2 = Point3d(triangle_vertices[9 * i + 6], triangle_vertices[9 * i + 7], triangle_vertices[9 * i + 8]);
+        //     // add everything to triangle gaussian curvature
+        //     for(int i = 0; i < num_triangles; i++){
+        //         Point3d v0 = Point3d(triangle_vertices[9 * i], triangle_vertices[9 * i + 1], triangle_vertices[9 * i + 2]);
+        //         Point3d v1 = Point3d(triangle_vertices[9 * i + 3], triangle_vertices[9 * i + 4], triangle_vertices[9 * i + 5]);
+        //         Point3d v2 = Point3d(triangle_vertices[9 * i + 6], triangle_vertices[9 * i + 7], triangle_vertices[9 * i + 8]);
 
-                for(int k = 0; k < num_vertices; k++){
-                    if((v[k] - v0).norm() < 0.00001){ //you know vertices YOU SHOULD NOT SEARCH FOR THEM
-                        // add values
-                        triangle_gc[9 * i] =  2 * PI - gc_counter[k];
-                        triangle_gc[9 * i + 1] =  2 * PI - gc_counter[k];
-                        triangle_gc[9 * i + 2] =  2 * PI - gc_counter[k];
-                        cout << 2 * PI - gc_counter[k] << endl;
-                    } else if ((v[k] -  v1).norm() < 0.00001){
-                        triangle_gc[9 * i + 3] =  2 * PI - gc_counter[k];
-                        triangle_gc[9 * i + 4] =  2 * PI - gc_counter[k];
-                        triangle_gc[9 * i + 5] =  2 * PI - gc_counter[k];
-                        cout << 2 * PI - gc_counter[k] << endl;
+        //         for(int k = 0; k < num_vertices; k++){
+        //             if((v[k] - v0).norm() < 0.00001){ //you know vertices YOU SHOULD NOT SEARCH FOR THEM
+        //                 // add values
+        //                 triangle_gc[9 * i] =  2 * PI - gc_counter[k];
+        //                 triangle_gc[9 * i + 1] =  2 * PI - gc_counter[k];
+        //                 triangle_gc[9 * i + 2] =  2 * PI - gc_counter[k];
+        //                 cout << 2 * PI - gc_counter[k] << endl;
+        //             } else if ((v[k] -  v1).norm() < 0.00001){
+        //                 triangle_gc[9 * i + 3] =  2 * PI - gc_counter[k];
+        //                 triangle_gc[9 * i + 4] =  2 * PI - gc_counter[k];
+        //                 triangle_gc[9 * i + 5] =  2 * PI - gc_counter[k];
+        //                 cout << 2 * PI - gc_counter[k] << endl;
                         
-                    } else if ((v[k] -  v2).norm() < 0.00001){
-                        triangle_gc[9 * i + 6] =  2 * PI - gc_counter[k];
-                        triangle_gc[9 * i + 7] =  2 * PI - gc_counter[k];
-                        triangle_gc[9 * i + 8] =  2 * PI - gc_counter[k];
-                        cout << 2 * PI - gc_counter[k] << endl;
+        //             } else if ((v[k] -  v2).norm() < 0.00001){
+        //                 triangle_gc[9 * i + 6] =  2 * PI - gc_counter[k];
+        //                 triangle_gc[9 * i + 7] =  2 * PI - gc_counter[k];
+        //                 triangle_gc[9 * i + 8] =  2 * PI - gc_counter[k];
+        //                 cout << 2 * PI - gc_counter[k] << endl;
                         
-                    }   
-                }
-            }
+        //             }   
+        //         }
+        //     }
 
-           // -------------- END GAUSSIAN CURVATURE -----------------
+        //    // -------------- END GAUSSIAN CURVATURE -----------------
 
 
             // output vectors
@@ -224,7 +272,7 @@ int number_triangles;
 
 
 int get_number_triangles(){
-    return number_triangles;
+    return num_triangles;
 }
 
 #endif
