@@ -50,6 +50,7 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
     string name_file = "models/iCorsi/icosahedron_1.off"; //default name
     string type = "efs"; //default type
     const char * vertex_shader = "vertexShader.vs";
+    int isGaussianCurvature = 0;
     /* 
        Take input
      */
@@ -64,6 +65,7 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
                 if(type == "gc"){
                     setGaussianCurvature(1);
                     vertex_shader = "vertexShaderGC.vs";
+                    isGaussianCurvature = 1;
                 }
             }
         }
@@ -152,19 +154,21 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
 
     ourShader.use(); //draw
 
-    // get matrix's uniform location and set matrix
-    ourShader.setVec3("light.position", 5.0f, 5.0f, 5.0f); 
-    ourShader.setVec3("viewPos", glm::vec3(0.0f, 0.0f, 3.0f));
+    if(!isGaussianCurvature){
+        // get matrix's uniform location and set matrix
+        ourShader.setVec3("light.position", 5.0f, 5.0f, 5.0f); 
+        ourShader.setVec3("viewPos", glm::vec3(0.0f, 0.0f, 3.0f));
 
-    // light properties
-    ourShader.setVec3("light.ambient", 0.8f, 0.8f, 0.8f);
-    ourShader.setVec3("light.diffuse", 0.2f, 0.2f, 0.2f);
-    ourShader.setVec3("light.specular", 0.2f, 0.2f, 0.2f);
-    ourShader.setFloat("shininess", 12.0f);
-
-    // gaussian curvature
-    ourShader.setFloat("min_gc", object.get_minimum_gaussian_curvature_value());
-    ourShader.setFloat("max_gc", object.get_maximum_gaussian_curvature_value());
+        // light properties
+        ourShader.setVec3("light.ambient", 0.8f, 0.8f, 0.8f);
+        ourShader.setVec3("light.diffuse", 0.2f, 0.2f, 0.2f);
+        ourShader.setVec3("light.specular", 0.2f, 0.2f, 0.2f);
+        ourShader.setFloat("shininess", 12.0f);
+    } else {
+        // gaussian curvature
+        ourShader.setFloat("min_gc", object.get_minimum_gaussian_curvature_value());
+        ourShader.setFloat("max_gc", object.get_maximum_gaussian_curvature_value());
+    }
 
     
     /**
@@ -189,7 +193,6 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         ourShader.setMat4("model", rotated_model);
         
         object.draw();
-
 
         // then draw model with normal visualizing geometry shader (FOR DEBUG)
         // normalShader.use();

@@ -3,23 +3,12 @@
     layout (location = 1) in vec3 aNormal; 
     layout (location = 2) in vec3 gaussian_curvature; 
 
-    struct Light {
-        vec3 position;
-    
-        vec3 ambient;
-        vec3 diffuse;
-        vec3 specular;
-    };
-
     out vec4 vertex_color;
     
     uniform mat4 model;
     uniform mat4 view;
     uniform mat4 projection;
 
-    uniform vec3 viewPos; 
-    uniform Light light;
-    uniform float shininess;
     uniform float min_gc;
     uniform float max_gc;
 
