@@ -23,6 +23,12 @@ struct Triangle { int v[3]; };
 vector<Triangle> t;
 double PI = atan(1)*4;
 int num_triangles;
+int isGaussianCurvature = 0; //default not
+
+        void setGaussianCurvature(int flag){
+            isGaussianCurvature = flag;
+        }
+
 
         bool load (const char * path, vector<float> &out_vertices, vector<float> &out_normals, vector<float> &gc) {
             // --------------------- COMPUTATIONS -----------------------------
@@ -95,37 +101,41 @@ int num_triangles;
                 v_counter[t[k].v[2]]++; // update counter
 
                 // GAUSSIAN CURVATURE
-                // calculate gc for each vertex of triangle
-                // VERTEX 1
-                // v1 -> v0 -> v2
-                Point3d v0v1 = v1 - v0;
-                Point3d v0v2 = v2 - v0;
-                double sum_angles_1 = v0v1.getAngle(v0v2);
+                if(isGaussianCurvature){
+                    // calculate gc for each vertex of triangle
+                    // VERTEX 1
+                    // v1 -> v0 -> v2
+                    Point3d v0v1 = v1 - v0;
+                    Point3d v0v2 = v2 - v0;
+                    double sum_angles_1 = v0v1.getAngle(v0v2);
 
-                // VERTEX 2
-                // v2 -> v1 -> v0
-                Point3d v1v2 = v2 - v1;
-                double sum_angles_2 = v1v2.getAngle(-v0v1);        
+                    // VERTEX 2
+                    // v2 -> v1 -> v0
+                    Point3d v1v2 = v2 - v1;
+                    double sum_angles_2 = v1v2.getAngle(-v0v1);        
 
-                // VERTEX 3
-                // v0 -> v2 -> v1
-                double sum_angles_3 = v0v2.getAngle(v1v2);
+                    // VERTEX 3
+                    // v0 -> v2 -> v1
+                    double sum_angles_3 = v0v2.getAngle(v1v2);
 
-                 // for each triangle-vertex selected add sum_angles
-                gc_counter[t[k].v[0]] += sum_angles_1;
-                gc_counter[t[k].v[1]] += sum_angles_2;
-                gc_counter[t[k].v[2]] += sum_angles_3;
+                    // for each triangle-vertex selected add sum_angles
+                    gc_counter[t[k].v[0]] += sum_angles_1;
+                    gc_counter[t[k].v[1]] += sum_angles_2;
+                    gc_counter[t[k].v[2]] += sum_angles_3;
+                }
             }
 
-            // add everything to triangle gaussian curvature
-            for(int k = 0; k < num_triangles; k++){
-                Point3d v0 = v[t[k].v[0]];
-                Point3d v1 = v[t[k].v[1]];
-                Point3d v2 = v[t[k].v[2]];
+            if(isGaussianCurvature){
+                // add everything to triangle gaussian curvature
+                for(int k = 0; k < num_triangles; k++){
+                    Point3d v0 = v[t[k].v[0]];
+                    Point3d v1 = v[t[k].v[1]];
+                    Point3d v2 = v[t[k].v[2]];
 
-                triangle_gc[9*k] = triangle_gc[9*k + 1] = triangle_gc[9*k + 2] = 2 * PI - gc_counter[t[k].v[0]];
-                triangle_gc[9*k + 3] = triangle_gc[9*k + 4] = triangle_gc[9*k + 5] = 2 * PI - gc_counter[t[k].v[1]];
-                triangle_gc[9*k + 6] = triangle_gc[9*k + 7] = triangle_gc[9*k + 8] = 2 * PI - gc_counter[t[k].v[2]];
+                    triangle_gc[9*k] = triangle_gc[9*k + 1] = triangle_gc[9*k + 2] = 2 * PI - gc_counter[t[k].v[0]];
+                    triangle_gc[9*k + 3] = triangle_gc[9*k + 4] = triangle_gc[9*k + 5] = 2 * PI - gc_counter[t[k].v[1]];
+                    triangle_gc[9*k + 6] = triangle_gc[9*k + 7] = triangle_gc[9*k + 8] = 2 * PI - gc_counter[t[k].v[2]];
+                }
             }
 
            // -------------- END GAUSSIAN CURVATURE -----------------

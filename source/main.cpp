@@ -10,7 +10,9 @@
 #include "Shader.h"
 #include "Arcball.h"
 #include "Object.h"
+#include "LoaderObject.h"
 #include <math.h>
+#include <string>
 
 //to test
 #include "glm/ext.hpp"
@@ -44,7 +46,27 @@ using namespace std;
     void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
     
 
-int main() {
+int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is gaussian curvature, li is linearly interpolated, efs is extension of flat shading)
+    string name_file = "models/iCorsi/icosahedron_1.off"; //default name
+    string type = "efs"; //default type
+    /* 
+       Take input
+     */
+    if (argc > 1) {
+        char * token;
+        for (int elem = 1; elem < argc; elem++) {
+            token = strtok(argv[elem], "=");
+            if (strcmp(token, "name") == 0) {
+                name_file = strtok(NULL, "=");
+            } else if (strcmp(token, "type") == 0) {
+                type = strtok(NULL, "=");
+                if(type == "gc")
+                    setGaussianCurvature(1);
+            }
+        }
+    }
+   
+
     /**
         ------------- GLFW -------------
         initialize glf library
@@ -116,7 +138,7 @@ int main() {
         Send vertex data to vertex shader (load .off file). 
      */ 
     
-    Object object = Object("models/iCorsi/icosahedron_1.off");
+    Object object = Object(name_file);
     object.init();
 
     /**
