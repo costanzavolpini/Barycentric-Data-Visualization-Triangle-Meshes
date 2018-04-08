@@ -102,7 +102,6 @@ int isGaussianCurvature = 0; //default not
                     v_counter[t[k].v[2]]++; // update counter
                 }
 
-
                 // GAUSSIAN CURVATURE
                 if(isGaussianCurvature){
                     // calculate gc for each vertex of triangle
@@ -143,7 +142,7 @@ int isGaussianCurvature = 0; //default not
 
            // -------------- END GAUSSIAN CURVATURE -----------------
 
-            if(!isGaussianCurvature){
+            if(!isGaussianCurvature){ //normals
                 // normalize every vertex normal
                 // average of norms of adj triangle of a vertex (sum of triangle norms / number of triangles)
                 for(int k = 0; k < num_vertices; k++){
@@ -169,18 +168,20 @@ int isGaussianCurvature = 0; //default not
                 triangle_vertices[9 * k + 7] = v[t[k].v[2]].y();
                 triangle_vertices[9 * k + 8] = v[t[k].v[2]].z();
 
-                // insert normal values in triangles
-                triangle_normals[9 * k] = normals[t[k].v[0]].x();
-                triangle_normals[9 * k + 1] = normals[t[k].v[0]].y();
-                triangle_normals[9 * k + 2] = normals[t[k].v[0]].z();
-                
-                triangle_normals[9 * k + 3] = normals[t[k].v[1]].x();
-                triangle_normals[9 * k + 4] = normals[t[k].v[1]].y();
-                triangle_normals[9 * k + 5] = normals[t[k].v[1]].z();
+                if(!isGaussianCurvature){
+                    // insert normal values in triangles
+                    triangle_normals[9 * k] = normals[t[k].v[0]].x();
+                    triangle_normals[9 * k + 1] = normals[t[k].v[0]].y();
+                    triangle_normals[9 * k + 2] = normals[t[k].v[0]].z();
+                    
+                    triangle_normals[9 * k + 3] = normals[t[k].v[1]].x();
+                    triangle_normals[9 * k + 4] = normals[t[k].v[1]].y();
+                    triangle_normals[9 * k + 5] = normals[t[k].v[1]].z();
 
-                triangle_normals[9 * k + 6] = normals[t[k].v[2]].x();
-                triangle_normals[9 * k + 7] = normals[t[k].v[2]].y();
-                triangle_normals[9 * k + 8] = normals[t[k].v[2]].z();
+                    triangle_normals[9 * k + 6] = normals[t[k].v[2]].x();
+                    triangle_normals[9 * k + 7] = normals[t[k].v[2]].y();
+                    triangle_normals[9 * k + 8] = normals[t[k].v[2]].z();
+                }
             }
 
             // output vectors
@@ -191,8 +192,11 @@ int isGaussianCurvature = 0; //default not
             for (unsigned int i = 0; i < triangle_vertices.size(); i++) {
                 // get value
                 out_vertices.push_back(triangle_vertices[i]);
-                out_normals.push_back(triangle_normals[i]);      
-                gc.push_back(triangle_gc[i]);     
+                if(!isGaussianCurvature) {
+                    out_normals.push_back(triangle_normals[i]);      
+                } else {
+                    gc.push_back(triangle_gc[i]);     
+                }
             }
 
             cout << "Object loaded" << endl;
