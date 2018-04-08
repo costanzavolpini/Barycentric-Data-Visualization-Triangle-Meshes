@@ -140,7 +140,8 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         Send vertex data to vertex shader (load .off file). 
      */ 
     
-    Object object = Object(name_file);
+    Object object = Object(name_file);    
+    object.setGaussianCurvature(isGaussianCurvature);
     object.init();
 
     /**

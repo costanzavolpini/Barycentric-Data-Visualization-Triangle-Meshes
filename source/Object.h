@@ -18,6 +18,8 @@ class Object {
     vector<float> triangle_vertices;
     vector<float> triangle_normals;
     vector<float> triangle_gc;
+
+    int isGaussianCurvature = 0;
     
     /**
         Memory on the GPU where we store the vertex data
@@ -56,13 +58,14 @@ class Object {
 
           glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_normals.size(), &triangle_normals[0], GL_STATIC_DRAW);
 
+          if(isGaussianCurvature){
+                // VBO_GAUSSIANCURVATURE
+                glGenBuffers(1, &VBO_GAUSSIANCURVATURE); //generate buffer, bufferID = 1
 
-          // VBO_GAUSSIANCURVATURE
-          glGenBuffers(1, &VBO_GAUSSIANCURVATURE); //generate buffer, bufferID = 1
+                glBindBuffer(GL_ARRAY_BUFFER, VBO_GAUSSIANCURVATURE); 
 
-          glBindBuffer(GL_ARRAY_BUFFER, VBO_GAUSSIANCURVATURE); 
-
-          glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_gc.size(), &triangle_gc[0], GL_STATIC_DRAW);
+                glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_gc.size(), &triangle_gc[0], GL_STATIC_DRAW);
+          }
 
 
           // ------------- VAO -------------
@@ -91,10 +94,12 @@ class Object {
           glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float))); 
           glEnableVertexAttribArray(1); //this 1 is referred to the layout on shader
 
-          glBindBuffer(GL_ARRAY_BUFFER, VBO_GAUSSIANCURVATURE);
-          //normal attribute
-          glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float))); 
-          glEnableVertexAttribArray(2); //this 2 is referred to the layout on shader
+          if(isGaussianCurvature){
+                glBindBuffer(GL_ARRAY_BUFFER, VBO_GAUSSIANCURVATURE);
+                //normal attribute
+                glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float))); 
+                glEnableVertexAttribArray(2); //this 2 is referred to the layout on shader
+          }
 
           /**
             Unbind the VAO so other VAO calls won't accidentally modify this VAO, but this rarely happens. 
@@ -132,6 +137,10 @@ class Object {
 
     float get_maximum_gaussian_curvature_value(){
         return *max_element(triangle_gc.begin(), triangle_gc.end());
+    }
+
+    void setGaussianCurvature(int flag){
+        isGaussianCurvature = flag;
     }
 
 };
