@@ -49,6 +49,7 @@ using namespace std;
 int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is gaussian curvature, li is linearly interpolated, efs is extension of flat shading)
     string name_file = "models/iCorsi/icosahedron_1.off"; //default name
     string type = "efs"; //default type
+    const char * vertex_shader = "vertexShader.vs";
     /* 
        Take input
      */
@@ -60,11 +61,16 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
                 name_file = strtok(NULL, "=");
             } else if (strcmp(token, "type") == 0) {
                 type = strtok(NULL, "=");
-                if(type == "gc")
+                if(type == "gc"){
                     setGaussianCurvature(1);
+                    vertex_shader = "vertexShaderGC.vs";
+                }
             }
         }
     }
+
+    cout << name_file << endl;
+    cout << type << endl;
    
 
     /**
@@ -96,18 +102,12 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
 
-    // mouse 
-    // glfwSetInputMode(window, GLFW_STICKY_MOUSE_BUTTONS, 1);
-
     // callback functions
     glfwSetScrollCallback(window, scroll_callback); //zoom
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback); // user resizes the window the viewport should be adjusted as well
     glfwSetMouseButtonCallback(window, mouse_button_callback); // call the callback when the user press a button. It corresponds to glutMouseFunc
     glfwSetCursorPosCallback(window, cursor_position_callback); // call the callback when the user move the cursor. It corresponds to glutMotionFunc
 
-    // tell GLFW to capture our mouse
-    // (GLFWwindow * window, int mode, int value)
-    // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     /**
         ------------- GLAD -------------
@@ -127,7 +127,7 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         Since OpenGL 3.3 and higher the version numbers of GLSL match the version of OpenGL 
         (GLSL version 420 corresponds to OpenGL version 4.2 for example).
     */
-    Shader ourShader("vertexShader.vs", "maxDiagramFragmentShader.fs", "geometryShader.gs");
+    Shader ourShader(vertex_shader, "maxDiagramFragmentShader.fs", "geometryShader.gs");
     // Shader normalShader("normal.vs", "normal.fs", "normal.gs");
 
 
