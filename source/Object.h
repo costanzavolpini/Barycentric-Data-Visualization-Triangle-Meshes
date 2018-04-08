@@ -51,12 +51,14 @@ class Object {
           */
           glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_vertices.size(), &triangle_vertices[0], GL_STATIC_DRAW); // copies the previously defined vertex data into the buffer's memor
 
-          // VBO NORMALS
-          glGenBuffers(1, &VBO_NORMAL); //generate buffer, bufferID = 1
+         if(!isGaussianCurvature){
+            // VBO NORMALS
+            glGenBuffers(1, &VBO_NORMAL); //generate buffer, bufferID = 1
 
-          glBindBuffer(GL_ARRAY_BUFFER, VBO_NORMAL); 
+            glBindBuffer(GL_ARRAY_BUFFER, VBO_NORMAL); 
 
-          glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_normals.size(), &triangle_normals[0], GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_normals.size(), &triangle_normals[0], GL_STATIC_DRAW);
+         }
 
           if(isGaussianCurvature){
                 // VBO_GAUSSIANCURVATURE
@@ -89,10 +91,12 @@ class Object {
           glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float))); // 72-bit floating point values, each position is composed of 3 of those values (3 points (one for each vertex))
           glEnableVertexAttribArray(0); //this 0 is referred to the layout on shader
 
-          glBindBuffer(GL_ARRAY_BUFFER, VBO_NORMAL);
-          //normal attribute
-          glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float))); 
-          glEnableVertexAttribArray(1); //this 1 is referred to the layout on shader
+         if(!isGaussianCurvature){
+                glBindBuffer(GL_ARRAY_BUFFER, VBO_NORMAL);
+                //normal attribute
+                glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float))); 
+                glEnableVertexAttribArray(1); //this 1 is referred to the layout on shader
+         }
 
           if(isGaussianCurvature){
                 glBindBuffer(GL_ARRAY_BUFFER, VBO_GAUSSIANCURVATURE);

@@ -87,18 +87,21 @@ int isGaussianCurvature = 0; //default not
                 Point3d v1 = v[t[k].v[1]];
                 Point3d v2 = v[t[k].v[2]];
 
-                // for every triangle face compute face normal and normalize it
-                Point3d n = (v1-v0)^(v2-v0);
-                n.normalize();
+                if(!isGaussianCurvature){ //normals
+                    // for every triangle face compute face normal and normalize it
+                    Point3d n = (v1-v0)^(v2-v0);
+                    n.normalize();
 
-                normals[t[k].v[0]] += n;
-                v_counter[t[k].v[0]]++; // update counter
+                    normals[t[k].v[0]] += n;
+                    v_counter[t[k].v[0]]++; // update counter
 
-                normals[t[k].v[1]] += n;
-                v_counter[t[k].v[1]]++; // update counter
+                    normals[t[k].v[1]] += n;
+                    v_counter[t[k].v[1]]++; // update counter
 
-                normals[t[k].v[2]] += n;
-                v_counter[t[k].v[2]]++; // update counter
+                    normals[t[k].v[2]] += n;
+                    v_counter[t[k].v[2]]++; // update counter
+                }
+
 
                 // GAUSSIAN CURVATURE
                 if(isGaussianCurvature){
@@ -140,15 +143,16 @@ int isGaussianCurvature = 0; //default not
 
            // -------------- END GAUSSIAN CURVATURE -----------------
 
-
-            // normalize every vertex normal
-            // average of norms of adj triangle of a vertex (sum of triangle norms / number of triangles)
-            for(int k = 0; k < num_vertices; k++){
-                // normals[k].normalize();
-                if(v_counter[k] != 0){ 
-                    normals[k] = normals[k] / v_counter[k]; 
-               }
-                normals[k].normalize();
+            if(!isGaussianCurvature){
+                // normalize every vertex normal
+                // average of norms of adj triangle of a vertex (sum of triangle norms / number of triangles)
+                for(int k = 0; k < num_vertices; k++){
+                    // normals[k].normalize();
+                    if(v_counter[k] != 0){ 
+                        normals[k] = normals[k] / v_counter[k]; 
+                }
+                    normals[k].normalize();
+                }
             }
 
             for (int k = 0; k < num_triangles; k++) {
