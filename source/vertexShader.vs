@@ -16,19 +16,19 @@
     uniform mat4 view;
     uniform mat4 projection;
 
-    uniform vec3 viewPos;
+    uniform vec3 view_position;
     uniform Light light;
     uniform float shininess;
 
 
     // get specular color at current Pos
-    vec3 get_specular(vec3 pos, vec3 normal, vec3 lightDir) {
+    vec3 get_specular(vec3 pos, vec3 normal, vec3 light_direction) {
         // get directional vector to the camera from pos
-        vec3 viewDir = normalize(viewPos - pos); //view direction
+        vec3 view_direction = normalize(view_position - pos); //view direction
 
         // specular shading
-        vec3 reflectDir = - normalize(reflect(lightDir, normal)); //reflection
-        float specular_intensity = pow(max(dot(reflectDir, viewDir), 0.0), shininess);
+        vec3 reflect_direction = - normalize(reflect(light_direction, normal)); //reflection
+        float specular_intensity = pow(max(dot(reflect_direction, view_direction), 0.0), shininess);
 
         // get resulting colour
         return light.specular * specular_intensity;
@@ -42,14 +42,14 @@
     }
 
     vec4 get_result_color_lighting(vec3 pos, vec3 normal, vec3 light_position) {
-        vec3 lightDir = normalize(light_position - pos); //light direction
-        float diffuse_intensity = max(dot(lightDir, normal), 0.0);
+        vec3 light_direction = normalize(light_position - pos); //light direction
+        float diffuse_intensity = max(dot(light_direction, normal), 0.0);
 
         vec3 ambient = light.ambient;
         vec3 diffuse = get_diffuse(diffuse_intensity);
 
         if(diffuse_intensity > 0.0){
-            vec3 specular = get_specular(pos, normal, lightDir);
+            vec3 specular = get_specular(pos, normal, light_direction);
             return vec4(ambient + diffuse + specular, 1.0);
         }
 
