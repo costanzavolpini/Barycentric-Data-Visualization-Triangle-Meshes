@@ -10,7 +10,9 @@
 #include "Shader.h"
 #include "Arcball.h"
 #include "Object.h"
+#include "LoaderObject.h"
 #include <math.h>
+#include <string>
 
 //to test
 #include "glm/ext.hpp"
@@ -41,11 +43,38 @@ using namespace std;
 
     void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
     static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
-    // glm::vec3 get_arcball_vector(double x, double y);
     void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
     
 
-int main() {
+int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is gaussian curvature, li is linearly interpolated, efs is extension of flat shading)
+    string name_file = "models/iCorsi/icosahedron_1.off"; //default name
+    string type = "efs"; //default type
+    const char * vertex_shader = "vertexShader.vs";
+    int isGaussianCurvature = 0;
+    /* 
+       Take input
+     */
+    if (argc > 1) {
+        char * token;
+        for (int elem = 1; elem < argc; elem++) {
+            token = strtok(argv[elem], "=");
+            if (strcmp(token, "name") == 0) {
+                name_file = strtok(NULL, "=");
+            } else if (strcmp(token, "type") == 0) {
+                type = strtok(NULL, "=");
+                if(type == "gc"){
+                    setGaussianCurvature(1);
+                    vertex_shader = "vertexShaderGC.vs";
+                    isGaussianCurvature = 1;
+                }
+            }
+        }
+    }
+
+    cout << name_file << endl;
+    cout << type << endl;
+   
+
     /**
         ------------- GLFW -------------
         initialize glf library
@@ -75,18 +104,12 @@ int main() {
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
 
-    // mouse 
-    // glfwSetInputMode(window, GLFW_STICKY_MOUSE_BUTTONS, 1);
-
     // callback functions
     glfwSetScrollCallback(window, scroll_callback); //zoom
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback); // user resizes the window the viewport should be adjusted as well
     glfwSetMouseButtonCallback(window, mouse_button_callback); // call the callback when the user press a button. It corresponds to glutMouseFunc
     glfwSetCursorPosCallback(window, cursor_position_callback); // call the callback when the user move the cursor. It corresponds to glutMotionFunc
 
-    // tell GLFW to capture our mouse
-    // (GLFWwindow * window, int mode, int value)
-    // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     /**
         ------------- GLAD -------------
@@ -106,7 +129,9 @@ int main() {
         Since OpenGL 3.3 and higher the version numbers of GLSL match the version of OpenGL 
         (GLSL version 420 corresponds to OpenGL version 4.2 for example).
     */
-    Shader ourShader("vertexShader.vs", "maxDiagramFragmentShader.fs", "geometryShader.gs");
+    Shader ourShader(vertex_shader, "maxDiagramFragmentShader.fs", "geometryShader.gs");
+    // Shader normalShader("normal.vs", "normal.fs", "normal.gs");
+
 
     /**
         NB. OpenGL works in 3D space we render a 2D triangle with each vertex having a z coordinate of 0.0.
@@ -115,7 +140,8 @@ int main() {
         Send vertex data to vertex shader (load .off file). 
      */ 
     
-    Object object = Object("models/iCorsi/icosahedron_1.off");
+    Object object = Object(name_file);    
+    object.setGaussianCurvature(isGaussianCurvature);
     object.init();
 
     /**
@@ -129,15 +155,23 @@ int main() {
 
     ourShader.use(); //draw
 
-    // get matrix's uniform location and set matrix
-    ourShader.setVec3("light.position", 5.0f, 5.0f, 5.0f); 
-    ourShader.setVec3("viewPos", glm::vec3(0.0f, 0.0f, 3.0f));
+    if(!isGaussianCurvature){
+        // get matrix's uniform location and set matrix
+        ourShader.setVec3("light.position", 5.0f, 5.0f, 5.0f); 
+        ourShader.setVec3("viewPos", glm::vec3(0.0f, 0.0f, 3.0f));
 
-    // light properties
-    ourShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
-    ourShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
-    ourShader.setVec3("light.specular", 0.8f, 0.8f, 0.8f);
-    ourShader.setFloat("shininess", 32.0f);
+        // light properties
+        ourShader.setVec3("light.ambient", 0.8f, 0.8f, 0.8f);
+        ourShader.setVec3("light.diffuse", 0.2f, 0.2f, 0.2f);
+        ourShader.setVec3("light.specular", 0.2f, 0.2f, 0.2f);
+        ourShader.setFloat("shininess", 12.0f);
+    } else {
+        // gaussian curvature
+        ourShader.setFloat("min_gc", object.get_minimum_gaussian_curvature_value());
+        ourShader.setFloat("max_gc", object.get_maximum_gaussian_curvature_value());
+    }
+
+    
     /**
         application to keep drawing images and handling user input until the program has been explicitly told to stop
         render loop
@@ -158,8 +192,16 @@ int main() {
         ourShader.setMat4("projection", projection);
         ourShader.setMat4("view", rotated_view);
         ourShader.setMat4("model", rotated_model);
-
+        
         object.draw();
+
+        // then draw model with normal visualizing geometry shader (FOR DEBUG)
+        // normalShader.use();
+        // normalShader.setMat4("projection", projection);
+        // normalShader.setMat4("view", rotated_view);
+        // normalShader.setMat4("model", rotated_model);
+
+        // object.draw();
 
         glfwSwapBuffers(window); // will swap the color buffer
         glfwPollEvents(); // function checks if any events are triggered (like keyboard input or mouse movement events) 
@@ -215,13 +257,3 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
             Zoom = 45.0f;
 }
 
-// GAUSSIAN CURVATURE
-// get angle between 3 vertices
-float get_angle(float x, float y, float z){
-    // acos( dot( normalize(y-x), normalize(z-x) ) )
-    // normalize 
-    glm::vec3 vec1 = glm::vec3(y - x);
-    glm::vec3 vec2 = glm::vec3(z - x);
-
-    return acos(dot(normalize(vec1), normalize(vec2)));
-}

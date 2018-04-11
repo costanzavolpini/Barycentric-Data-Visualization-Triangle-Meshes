@@ -15,23 +15,24 @@ Comment:  This file contains all Object definitions to construct and draw an obj
 
 class Object {
   public:
-    vector<float> vertices; // vector containing all vertices and colors
-    vector<Point3d> normals;
-    vector<float> fnormals;
+    vector<float> triangle_vertices;
+    vector<float> triangle_normals;
+    vector<float> triangle_gc;
+
+    int isGaussianCurvature = 0;
     
     /**
         Memory on the GPU where we store the vertex data
         VBO: manage this memory via so called vertex buffer objects (VBO) that can store a large number of vertices in the GPU's memory
     */
-    unsigned int VBO, VAO, VBO_NORMAL, VBO_LAMP, VAO_LAMP;
+    unsigned int VBO, VAO, VBO_NORMAL, VBO_GAUSSIANCURVATURE;
 
     // Constructor
       Object(const std::string &_path) {
-        if(!load(_path.c_str(), vertices, normals)){
+        if(!load(_path.c_str(), triangle_vertices, triangle_normals, triangle_gc)){
             cout << "error loading file" << endl;
             return;
         }
-        vecPoint3dToFloat(normals, fnormals);
       }
 
      // Function to initialize VBO and VAO
@@ -48,14 +49,26 @@ class Object {
               GL_DYNAMIC_DRAW: the data is likely to change a lot.
               GL_STREAM_DRAW: the data will change every time it is drawn.
           */
-          glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices.size(), &vertices[0], GL_STATIC_DRAW); // copies the previously defined vertex data into the buffer's memor
+          glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_vertices.size(), &triangle_vertices[0], GL_STATIC_DRAW); // copies the previously defined vertex data into the buffer's memor
 
-          // VBO NORMALS
-          glGenBuffers(1, &VBO_NORMAL); //generate buffer, bufferID = 1
+         if(!isGaussianCurvature){
+            // VBO NORMALS
+            glGenBuffers(1, &VBO_NORMAL); //generate buffer, bufferID = 1
 
-          glBindBuffer(GL_ARRAY_BUFFER, VBO_NORMAL); 
+            glBindBuffer(GL_ARRAY_BUFFER, VBO_NORMAL); 
 
-          glBufferData(GL_ARRAY_BUFFER, sizeof(float) * fnormals.size(), &fnormals[0], GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_normals.size(), &triangle_normals[0], GL_STATIC_DRAW);
+         }
+
+          if(isGaussianCurvature){
+                // VBO_GAUSSIANCURVATURE
+                glGenBuffers(1, &VBO_GAUSSIANCURVATURE); //generate buffer, bufferID = 1
+
+                glBindBuffer(GL_ARRAY_BUFFER, VBO_GAUSSIANCURVATURE); 
+
+                glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_gc.size(), &triangle_gc[0], GL_STATIC_DRAW);
+          }
+
 
           // ------------- VAO -------------
           glGenVertexArrays(1, &VAO);
@@ -75,13 +88,22 @@ class Object {
 
           glBindBuffer(GL_ARRAY_BUFFER, VBO);
           //position attribute
-          glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float))); // 72-bit floating point values, each position is composed of 6 of those values (3 points + 3 colours (one for each vertex))
+          glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float))); // 72-bit floating point values, each position is composed of 3 of those values (3 points (one for each vertex))
           glEnableVertexAttribArray(0); //this 0 is referred to the layout on shader
 
-          glBindBuffer(GL_ARRAY_BUFFER, VBO_NORMAL);
-          //normal attribute
-          glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float))); 
-          glEnableVertexAttribArray(1); //this 1 is referred to the layout on shader
+         if(!isGaussianCurvature){
+                glBindBuffer(GL_ARRAY_BUFFER, VBO_NORMAL);
+                //normal attribute
+                glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float))); 
+                glEnableVertexAttribArray(1); //this 1 is referred to the layout on shader
+         }
+
+          if(isGaussianCurvature){
+                glBindBuffer(GL_ARRAY_BUFFER, VBO_GAUSSIANCURVATURE);
+                //normal attribute
+                glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float))); 
+                glEnableVertexAttribArray(2); //this 2 is referred to the layout on shader
+          }
 
           /**
             Unbind the VAO so other VAO calls won't accidentally modify this VAO, but this rarely happens. 
@@ -100,10 +122,9 @@ class Object {
             to the corresponding pixels on the final screen, resulting in fragments for the fragment shader to use.  
             + Clipping (discards all fragments that are outside your view, increasing performance).
         */
-        int num_triangles = vertices.size() / 18;
-
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
+        glDrawArrays(GL_TRIANGLES, 0, triangle_vertices.size());
+        glBindVertexArray(0);
       }
 
 
@@ -113,6 +134,19 @@ class Object {
         glDeleteBuffers(1, &VBO);
 
       }
+
+    float get_minimum_gaussian_curvature_value(){
+        return *min_element(triangle_gc.begin(), triangle_gc.end());
+    }
+
+    float get_maximum_gaussian_curvature_value(){
+        return *max_element(triangle_gc.begin(), triangle_gc.end());
+    }
+
+    void setGaussianCurvature(int flag){
+        isGaussianCurvature = flag;
+    }
+
 };
 
 #endif
