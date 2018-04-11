@@ -70,9 +70,6 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
             }
         }
     }
-
-    cout << name_file << endl;
-    cout << type << endl;
    
 
     /**
