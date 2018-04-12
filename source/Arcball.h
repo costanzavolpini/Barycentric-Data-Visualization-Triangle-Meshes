@@ -37,7 +37,7 @@ class Arcball {
 
             if(x_axis)
                 P.x =  (2 * x - WIDTH ) / WIDTH;
-    
+
             if(y_axis)
                 P.y = -(2 * y - HEIGHT) / HEIGHT;
 
@@ -71,10 +71,10 @@ class Arcball {
 
             // not the first time that we have pressed the btn
             cur_pos = get_screen_coord(xpos, ypos); //get current pos
-            
+
             // angle in radians and clip [0, 90]
             angle = acos(std::min(1.0f, glm::dot(prev_pos, cur_pos)));
-            
+
             // cross product to get rotation axis (in camera coords)
             camera_axis = glm::cross(prev_pos, cur_pos);
         }

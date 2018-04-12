@@ -63,7 +63,8 @@
         vec3 world_normal = mat3(transpose(inverse(model))) * aNormal;
 
         // vec3 light_pos = vec3(light.position - world_position);
-        vec3 light_pos = vec3(model * vec4(light.position, 1.0));
+        vec3 light_pos = vec3(projection * vec4(light.position, 1.0));
+        // light_pos = light.position;
 
         vertex_color = get_result_color_lighting(world_position, world_normal, light_pos); // color obtained with lighting calculations
 

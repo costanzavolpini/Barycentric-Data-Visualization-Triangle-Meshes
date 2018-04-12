@@ -11,6 +11,9 @@
 
     uniform float min_gc;
     uniform float max_gc;
+    uniform float mean_negative_gc;
+    uniform float mean_positive_gc;
+
 
     vec3 interpolation(vec3 v0, vec3 v1, float t) {
         return (1 - t) * v0 + t * v1;
@@ -23,9 +26,9 @@
        vec3 blue = vec3(0.0, 0.0, 1.0);
 
        if (val < 0) { //negative numbers until 0 -> map from red to green
-            return vec4(interpolation(red, green, val/min_gc), 1.0);
+            return vec4(interpolation(red, green, val/min_gc)/(mean_negative_gc/5), 1.0);
         } else { //map from green to blue, from 0 to positive
-            return vec4(interpolation(green, blue, val/max_gc), 1.0);
+            return vec4(interpolation(green, blue, val/max_gc)/(mean_positive_gc/5), 1.0);
         }
     }
 

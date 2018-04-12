@@ -217,6 +217,7 @@ int isLinearInterpolation = 0;
                     out_normals.push_back(triangle_normals[i]);
                 } else if(isGaussianCurvature) {
                     gc.push_back(triangle_gc[i]);
+                    cout << triangle_gc[i] << endl;
                 }
             }
 

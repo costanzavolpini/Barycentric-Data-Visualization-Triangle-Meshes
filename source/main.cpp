@@ -179,6 +179,12 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         // gaussian curvature
         ourShader.setFloat("min_gc", object.get_minimum_gaussian_curvature_value());
         ourShader.setFloat("max_gc", object.get_maximum_gaussian_curvature_value());
+        ourShader.setFloat("mean_negative_gc", object.get_negative_mean_gaussian_curvature_value());
+                ourShader.setFloat("mean_positive_gc", object.get_positive_mean_gaussian_curvature_value());
+        // cout << "MIN " << object.get_minimum_gaussian_curvature_value() << endl;
+
+        // cout << "MAX " << object.get_maximum_gaussian_curvature_value() << endl;
+
     }
 
 
@@ -203,7 +209,6 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         ourShader.setMat4("view", rotated_view);
         ourShader.setMat4("model", rotated_model);
         object.draw();
-        std::cout << "ehi"<< std::endl;
 
 
         // then draw model with normal visualizing geometry shader (FOR DEBUG)
