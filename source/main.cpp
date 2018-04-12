@@ -49,7 +49,7 @@ using namespace std;
 int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is gaussian curvature, li is linearly interpolated, efs is extension of flat shading)
     string name_file = "models/iCorsi/icosahedron_1.off"; //default name
     string type = "efs"; //default type
-    const char * vertex_shader = "vertexShader.vs";
+    const char * vertex_shader = "vertexShaderEF.vs";
     const char * geometry_shader = "geometryShader.gs";
     const char * fragment_shader = "maxDiagramFragmentShader.fs";
     int isGaussianCurvature = 0;
