@@ -1,5 +1,5 @@
 #version 330 core
-// Vertex Shader for extend flat shading
+// Vertex Shader for gaussian curvature
     layout (location = 0) in vec3 aPos;
     layout (location = 2) in vec3 gaussian_curvature;
 
@@ -26,6 +26,7 @@
        vec3 blue = vec3(0.0, 0.0, 1.0);
 
        if (val < 0) { //negative numbers until 0 -> map from red to green
+            // division by 5 to get more smooth (otherwise we cannot see some values)
             return vec4(interpolation(red, green, val/min_gc)/(mean_negative_gc/5), 1.0);
         } else { //map from green to blue, from 0 to positive
             return vec4(interpolation(green, blue, val/max_gc)/(mean_positive_gc/5), 1.0);
