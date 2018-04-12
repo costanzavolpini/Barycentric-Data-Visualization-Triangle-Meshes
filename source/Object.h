@@ -22,6 +22,7 @@ class Object {
 
     int isGaussianCurvature = 0;
     int isLinearInterpolation = 0;
+    int isExtendFlatShading = 1;
 
     /**
         Memory on the GPU where we store the vertex data
@@ -101,7 +102,7 @@ class Object {
           glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float))); // 72-bit floating point values, each position is composed of 3 of those values (3 points (one for each vertex))
           glEnableVertexAttribArray(0); //this 0 is referred to the layout on shader
 
-         if(!isGaussianCurvature && !isLinearInterpolation){
+         if(isExtendFlatShading){
                 glBindBuffer(GL_ARRAY_BUFFER, VBO_NORMAL);
                 //normal attribute
                 glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float)));
@@ -229,8 +230,12 @@ class Object {
         isGaussianCurvature = flag;
     }
 
-    void setLinearIntepolation(int flag){
+    void setLinearInterpolation(int flag){
         isLinearInterpolation = flag;
+    }
+
+    void setExtendFlatShading(int flag){
+        isExtendFlatShading = flag;
     }
 
 };

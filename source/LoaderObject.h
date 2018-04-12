@@ -24,7 +24,8 @@ vector<Triangle> t;
 double PI = atan(1)*4;
 int num_triangles;
 int isGaussianCurvature = 0; //default not
-int isLinearInterpolation = 0;
+int isLinearInterpolation = 0; //default not
+int isExtendFlatShading = 1; //default yes
 
         void setGaussianCurvature(int flag){
             isGaussianCurvature = flag;
@@ -32,6 +33,10 @@ int isLinearInterpolation = 0;
 
         void setLinearInterpolation(int flag){
             isLinearInterpolation = flag;
+        }
+
+        void setExtendFlatShading(int flag){
+            isExtendFlatShading = flag;
         }
 
 
@@ -98,7 +103,7 @@ int isLinearInterpolation = 0;
                 Point3d v1 = v[t[k].v[1]];
                 Point3d v2 = v[t[k].v[2]];
 
-                if(!isGaussianCurvature && !isLinearInterpolation){ //normals
+                if(isExtendFlatShading){ //normals
                     // for every triangle face compute face normal and normalize it
                     Point3d n = (v1-v0)^(v2-v0);
                     n.normalize();
@@ -166,7 +171,7 @@ int isLinearInterpolation = 0;
 
            // -------------- END GAUSSIAN CURVATURE -----------------
 
-            if(!isGaussianCurvature && !isLinearInterpolation){ //normals
+            if(isExtendFlatShading){ //normals
                 // normalize every vertex normal
                 // average of norms of adj triangle of a vertex (sum of triangle norms / number of triangles)
                 for(int k = 0; k < num_vertices; k++){
@@ -192,7 +197,7 @@ int isLinearInterpolation = 0;
                 triangle_vertices[9 * k + 7] = v[t[k].v[2]].y();
                 triangle_vertices[9 * k + 8] = v[t[k].v[2]].z();
 
-                if(!isGaussianCurvature && !isLinearInterpolation){
+                if(isExtendFlatShading){
                     // insert normal values in triangles
                     triangle_normals[9 * k] = normals[t[k].v[0]].x();
                     triangle_normals[9 * k + 1] = normals[t[k].v[0]].y();
@@ -213,11 +218,10 @@ int isLinearInterpolation = 0;
             for (unsigned int i = 0; i < triangle_vertices.size(); i++) {
                 // get value
                 out_vertices.push_back(triangle_vertices[i]);
-                if(!isGaussianCurvature && !isLinearInterpolation) {
+                if(isExtendFlatShading) {
                     out_normals.push_back(triangle_normals[i]);
                 } else if(isGaussianCurvature) {
                     gc.push_back(triangle_gc[i]);
-                    cout << triangle_gc[i] << endl;
                 }
             }
 

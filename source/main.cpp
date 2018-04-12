@@ -54,6 +54,7 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
     const char * fragment_shader = "maxDiagramFragmentShader.fs";
     int isGaussianCurvature = 0;
     int isLinearInterpolation = 0;
+    int isExtendFlatShading = 1;
 
     /*
        Take input
@@ -67,15 +68,19 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
             } else if (strcmp(token, "type") == 0) {
                 type = strtok(NULL, "=");
                 if(type == "gc"){
-                    setGaussianCurvature(1);
+                    setGaussianCurvature(1); //pass to LoaderObject
+                    setExtendFlatShading(0); //pass to LoaderObject
                     vertex_shader = "vertexShaderGC.vs";
                     isGaussianCurvature = 1;
+                    isExtendFlatShading = 0;
                 } else if(type == "li"){
-                    setLinearInterpolation(1);
+                    setLinearInterpolation(1); //pass to LoaderObject
+                    setExtendFlatShading(0); //pass to LoaderObject
                     vertex_shader = "vertexShaderLI.vs";
                     fragment_shader = "fragmentShaderLI.fs";
                     geometry_shader = NULL;
                     isLinearInterpolation = 1;
+                    isExtendFlatShading = 0;
                 }
             }
         }
@@ -150,6 +155,8 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
 
     Object object = Object(name_file);
     object.setGaussianCurvature(isGaussianCurvature);
+    object.setExtendFlatShading(isExtendFlatShading);
+    object.setLinearInterpolation(isLinearInterpolation);
     object.init();
 
     /**
@@ -164,7 +171,7 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
     ourShader.use(); //draw
 
 
-    if(!isGaussianCurvature && !isLinearInterpolation){
+    if(isExtendFlatShading){
         // get matrix's uniform location and set matrix
         ourShader.setVec3("light.position", 5.0f, 5.0f, 5.0f);
         ourShader.setVec3("viewPos", glm::vec3(0.0f, 0.0f, 3.0f));
