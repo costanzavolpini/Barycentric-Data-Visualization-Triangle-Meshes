@@ -143,7 +143,7 @@ int isExtendFlatShading = 1; //default yes
                 }
 
                 //LINEAR INTERPOLATION
-                if(isLinearInterpolation) {
+                if(isLinearInterpolation || isExtendFlatShading) {
                     color_li[9 * k] = 1.0f; //red x
                     color_li[9 * k + 1] = 0.0f; // red y
                     color_li[9 * k + 2] = 0.0f; // red z

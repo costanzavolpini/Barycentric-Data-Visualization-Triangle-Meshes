@@ -2,7 +2,7 @@
 // Vertex Shader for extend flat shading
     layout (location = 0) in vec3 aPos;
     layout (location = 1) in vec3 aNormal;
-    // layout (location = 2) in vec3 aColor;
+    layout (location = 2) in vec3 aColor;
 
     struct Light {
         vec3 position;
@@ -52,10 +52,12 @@
 
         if(diffuse_intensity > 0.0){
             vec3 specular = get_specular(pos, normal, light_direction);
-            return vec4(ambient + diffuse + specular, 1.0);
+            return vec4((ambient + diffuse + specular), 1.0);
+            return vec4((ambient + diffuse + specular) * aColor, 1.0);
         }
 
-        return vec4(ambient + diffuse, 1.0);
+        // return vec4((ambient + diffuse) * aColor, 1.0);
+                return vec4((ambient + diffuse), 1.0);
     }
 
 

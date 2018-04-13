@@ -119,7 +119,6 @@ public:
         glDeleteShader(fragmentShader);
         if(pathGeometryShader != nullptr)
             glDeleteShader(geometry);
-
     }
     // activate the shader
     // ------------------------------------------------------------------------

@@ -179,7 +179,7 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         // light properties
         ourShader.setVec3("light.ambient", 0.8f, 0.8f, 0.8f);
         ourShader.setVec3("light.diffuse", 0.2f, 0.2f, 0.2f);
-        ourShader.setVec3("light.specular", 0.2f, 0.2f, 0.2f);
+        ourShader.setVec3("light.specular", 0.5f, 0.5f, 0.5f);
         ourShader.setFloat("shininess", 12.0f);
 
     } else if(isGaussianCurvature) {
@@ -187,7 +187,7 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         ourShader.setFloat("min_gc", object.get_minimum_gaussian_curvature_value());
         ourShader.setFloat("max_gc", object.get_maximum_gaussian_curvature_value());
         ourShader.setFloat("mean_negative_gc", object.get_negative_mean_gaussian_curvature_value());
-                ourShader.setFloat("mean_positive_gc", object.get_positive_mean_gaussian_curvature_value());
+        ourShader.setFloat("mean_positive_gc", object.get_positive_mean_gaussian_curvature_value());
         // cout << "MIN " << object.get_minimum_gaussian_curvature_value() << endl;
 
         // cout << "MAX " << object.get_maximum_gaussian_curvature_value() << endl;
