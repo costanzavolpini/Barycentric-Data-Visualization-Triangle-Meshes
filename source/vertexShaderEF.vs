@@ -53,7 +53,7 @@
         if(diffuse_intensity > 0.0){
             vec3 specular = get_specular(pos, normal, light_direction);
             return vec4((ambient + diffuse + specular), 1.0);
-            return vec4((ambient + diffuse + specular) * aColor, 1.0);
+            // return vec4((ambient + diffuse + specular) * aColor, 1.0);
         }
 
         // return vec4((ambient + diffuse) * aColor, 1.0);
