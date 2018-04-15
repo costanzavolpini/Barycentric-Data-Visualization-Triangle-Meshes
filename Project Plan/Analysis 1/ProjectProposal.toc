@@ -3,6 +3,7 @@
 \contentsline {section}{\numberline {1.2}Linear Interpolation}{7}
 \contentsline {section}{\numberline {1.3}Flat Shading}{7}
 \contentsline {section}{\numberline {1.4}Gouraud Shading}{7}
+\contentsline {section}{\numberline {1.5}Gaussian Curvature}{7}
 \contentsline {chapter}{\numberline {2}GPU program}{8}
 \contentsline {section}{\numberline {2.1}Geometry Shader}{8}
 \contentsline {chapter}{\numberline {3}Flat shading extension}{9}

@@ -27,3 +27,48 @@ The standard linear interpolated visualisation is made passing three attributes 
 \section{Flat Shading}
 
 \section{Gouraud Shading}
+
+\section{Gaussian Curvature}
+\textit{Gaussian Curvature} works like a logical \texttt{AND}, it will check if there is a curvature along both directions.
+
+\begin{figure}[h]
+  \minipage[b]{.5\linewidth}
+  \centering
+  \scalebox{0.7}{\begin{tikzpicture}
+  \begin{axis}[view={60}{30}]
+      \addplot3[surf,shader=flat,
+          samples=20,
+          domain=1:0,y domain=0:2*pi,
+          z buffer=sort]
+          ({sqrt(1-x^2) * cos(deg(y))},
+       {sqrt( 1-x^2 ) * sin(deg(y))},
+       x);
+  \end{axis}
+  \end{tikzpicture}}
+  \caption{Positive gaussian curvature}\label{fig:positive-gaussian}
+  \endminipage
+  \minipage[b]{.5\linewidth}
+  \centering
+  \begin{tikzpicture}[scale=0.7]
+    \begin{axis}[view={60}{30}]
+    \addplot3[patch,patch refines=3,
+    shader=faceted interp,
+    patch type=biquadratic]
+    table[z expr=x^2-y^2]
+    {
+        x  y
+        -2 -2
+        2  -2
+        2  2
+        -2 2
+        0  -2
+        2  0
+        0  2
+        -2 0
+        0  0
+    };
+  \end{axis}
+  \end{tikzpicture}
+  \endminipage
+  \caption{Negative gaussian curvature}\label{fig:negative-gaussian}
+\end{figure}

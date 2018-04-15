@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2018.1.19)  15 APR 2018 19:54
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2018.1.19)  15 APR 2018 20:13
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -882,13 +882,135 @@ Package: dsfont 1995/08/01 v0.1 Double stroke roman fonts
 Package: sectsty 2002/02/25 v2.0.2 Commands to change all sectional heading sty
 les
 )
+(/usr/local/texlive/2017/texmf-dist/tex/latex/pgfplots/pgfplots.sty
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgfplots/pgfplots.revision.tex)
+Package: pgfplots 2017/06/05 v1.15 Data Visualization (1.15)
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgfplots/pgfplots.code.tex
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgfplots/pgfplotscore.code.tex
+\t@pgfplots@toka=\toks44
+\t@pgfplots@tokb=\toks45
+\t@pgfplots@tokc=\toks46
+\pgfplots@tmpa=\dimen165
+\c@pgfplots@coordindex=\count146
+\c@pgfplots@scanlineindex=\count147
+
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgfplots/sys/pgfplotssysgeneric
+.code.tex))
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgfplots/libs/pgfplotslibrary.c
+ode.tex)
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgfplots/oldpgfcompatib/pgfplot
+soldpgfsupp_loader.code.tex
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgf/libraries/pgflibraryfpu.cod
+e.tex)
+Package pgfplots: loading complementary arithmetics for your pgf version...
+
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgfplots/oldpgfcompatib/pgfplot
+soldpgfsupp_pgflibraryfpu.code.tex)
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgfplots/oldpgfcompatib/pgfplot
+soldpgfsupp_pgfmathfloat.code.tex
+\c@pgfmathroundto@lastzeros=\count148
+))
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgfplots/util/pgfplotsutil.code
+.tex
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgfplots/liststructure/pgfplots
+liststructure.code.tex)
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgfplots/liststructure/pgfplots
+liststructureext.code.tex)
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgfplots/liststructure/pgfplots
+array.code.tex
+\c@pgfplotsarray@tmp=\count149
+)
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgfplots/liststructure/pgfplots
+matrix.code.tex)
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgfplots/numtable/pgfplotstable
+shared.code.tex
+\c@pgfplotstable@counta=\count150
+\t@pgfplotstable@a=\toks47
+)
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgfplots/liststructure/pgfplots
+deque.code.tex)
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgfplots/util/pgfplotsbinary.co
+de.tex
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgfplots/util/pgfplotsbinary.da
+ta.code.tex))
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgfplots/util/pgfplotsutil.verb
+.code.tex)
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgfplots/libs/pgflibrarypgfplot
+s.surfshading.code.tex
+\c@pgfplotslibrarysurf@no=\count151
+
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgfplots/sys/pgflibrarypgfplots
+.surfshading.pgfsys-pdftex.def)))
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgfplots/util/pgfplotscolormap.
+code.tex
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgfplots/util/pgfplotscolor.cod
+e.tex))
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgfplots/pgfplotsstackedplots.c
+ode.tex)
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgfplots/pgfplotsplothandlers.c
+ode.tex
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgfplots/pgfplotsmeshplothandle
+r.code.tex
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgfplots/pgfplotsmeshplotimage.
+code.tex)))
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgfplots/pgfplots.scaling.code.
+tex)
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgfplots/pgfplotscoordprocessin
+g.code.tex)
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgfplots/pgfplots.errorbars.cod
+e.tex)
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgfplots/pgfplots.markers.code.
+tex)
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgfplots/pgfplotsticks.code.tex
+)
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgfplots/pgfplots.paths.code.te
+x)
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgf/frontendlayer/tikz/librarie
+s/tikzlibrarydecorations.code.tex
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgf/modules/pgfmoduledecoration
+s.code.tex
+\pgfdecoratedcompleteddistance=\dimen166
+\pgfdecoratedremainingdistance=\dimen167
+\pgfdecoratedinputsegmentcompleteddistance=\dimen168
+\pgfdecoratedinputsegmentremainingdistance=\dimen169
+\pgf@decorate@distancetomove=\dimen170
+\pgf@decorate@repeatstate=\count152
+\pgfdecorationsegmentamplitude=\dimen171
+\pgfdecorationsegmentlength=\dimen172
+)
+\tikz@lib@dec@box=\box45
+)
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgf/frontendlayer/tikz/librarie
+s/tikzlibrarydecorations.pathmorphing.code.tex
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgf/libraries/decorations/pgfli
+brarydecorations.pathmorphing.code.tex))
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgf/frontendlayer/tikz/librarie
+s/tikzlibrarydecorations.pathreplacing.code.tex
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgf/libraries/decorations/pgfli
+brarydecorations.pathreplacing.code.tex))
+\pgfplots@numplots=\count153
+\pgfplots@xmin@reg=\dimen173
+\pgfplots@xmax@reg=\dimen174
+\pgfplots@ymin@reg=\dimen175
+\pgfplots@ymax@reg=\dimen176
+\pgfplots@zmin@reg=\dimen177
+\pgfplots@zmax@reg=\dimen178
+)
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgf/frontendlayer/tikz/librarie
+s/tikzlibraryplotmarks.code.tex
+File: tikzlibraryplotmarks.code.tex 2008/01/09 v3.0.1a (rcs-revision 1.1)
+
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgf/libraries/pgflibraryplotmar
+ks.code.tex
+File: pgflibraryplotmarks.code.tex 2015/08/03 v3.0.1a (rcs-revision 1.14)
+)))
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgfplots/libs/tikzlibrarypgfplo
+ts.patchplots.code.tex)
 (/usr/local/texlive/2017/texmf-dist/tex/generic/pgf/frontendlayer/tikz/librarie
 s/tikzlibraryintersections.code.tex
 (/usr/local/texlive/2017/texmf-dist/tex/generic/pgf/libraries/pgflibraryinterse
 ctions.code.tex
-(/usr/local/texlive/2017/texmf-dist/tex/generic/pgf/libraries/pgflibraryfpu.cod
-e.tex)
-\pgf@intersect@solutions=\count146
+\pgf@intersect@solutions=\count154
 ))
 (/usr/local/texlive/2017/texmf-dist/tex/generic/pgf/frontendlayer/tikz/librarie
 s/tikzlibrarytrees.code.tex
@@ -898,29 +1020,6 @@ File: tikzlibrarytrees.code.tex 2008/02/24 v3.0.1a (rcs-revision 1.2)
 s/tikzlibrarychains.code.tex
 File: tikzlibrarychains.code.tex 2013/07/15 v3.0.1a (rcs-revision 1.6)
 )
-(/usr/local/texlive/2017/texmf-dist/tex/generic/pgf/frontendlayer/tikz/librarie
-s/tikzlibrarydecorations.pathreplacing.code.tex
-(/usr/local/texlive/2017/texmf-dist/tex/generic/pgf/frontendlayer/tikz/librarie
-s/tikzlibrarydecorations.code.tex
-(/usr/local/texlive/2017/texmf-dist/tex/generic/pgf/modules/pgfmoduledecoration
-s.code.tex
-\pgfdecoratedcompleteddistance=\dimen165
-\pgfdecoratedremainingdistance=\dimen166
-\pgfdecoratedinputsegmentcompleteddistance=\dimen167
-\pgfdecoratedinputsegmentremainingdistance=\dimen168
-\pgf@decorate@distancetomove=\dimen169
-\pgf@decorate@repeatstate=\count147
-\pgfdecorationsegmentamplitude=\dimen170
-\pgfdecorationsegmentlength=\dimen171
-)
-\tikz@lib@dec@box=\box45
-)
-(/usr/local/texlive/2017/texmf-dist/tex/generic/pgf/libraries/decorations/pgfli
-brarydecorations.pathreplacing.code.tex))
-(/usr/local/texlive/2017/texmf-dist/tex/generic/pgf/frontendlayer/tikz/librarie
-s/tikzlibrarydecorations.pathmorphing.code.tex
-(/usr/local/texlive/2017/texmf-dist/tex/generic/pgf/libraries/decorations/pgfli
-brarydecorations.pathmorphing.code.tex))
 (/usr/local/texlive/2017/texmf-dist/tex/generic/pgf/frontendlayer/tikz/librarie
 s/tikzlibraryshapes.code.tex
 File: tikzlibraryshapes.code.tex 2008/01/09 v3.0.1a (rcs-revision 1.1)
@@ -987,6 +1086,10 @@ File: pgflibraryshapes.multipart.code.tex 2010/01/07 v3.0.1a (rcs-revision 1.2)
 s/tikzlibrarymatrix.code.tex
 File: tikzlibrarymatrix.code.tex 2013/07/12 v3.0.1a (rcs-revision 1.4)
 )
+(/usr/local/texlive/2017/texmf-dist/tex/generic/pgf/frontendlayer/tikz/librarie
+s/tikzlibrary3d.code.tex
+File: tikzlibrary3d.code.tex 2013/07/17 v3.0.1a (rcs-revision 1.2)
+)
 (/usr/local/texlive/2017/texmf-dist/tex/latex/geometry/geometry.sty
 Package: geometry 2010/09/12 v5.6 Page Geometry
 
@@ -1000,49 +1103,49 @@ Package ifvtex Info: VTeX not detected.
 (/usr/local/texlive/2017/texmf-dist/tex/generic/ifxetex/ifxetex.sty
 Package: ifxetex 2010/09/12 v0.6 Provides ifxetex conditional
 )
-\Gm@cnth=\count148
-\Gm@cntv=\count149
-\c@Gm@tempcnt=\count150
-\Gm@bindingoffset=\dimen172
-\Gm@wd@mp=\dimen173
-\Gm@odd@mp=\dimen174
-\Gm@even@mp=\dimen175
-\Gm@layoutwidth=\dimen176
-\Gm@layoutheight=\dimen177
-\Gm@layouthoffset=\dimen178
-\Gm@layoutvoffset=\dimen179
-\Gm@dimlist=\toks44
+\Gm@cnth=\count155
+\Gm@cntv=\count156
+\c@Gm@tempcnt=\count157
+\Gm@bindingoffset=\dimen179
+\Gm@wd@mp=\dimen180
+\Gm@odd@mp=\dimen181
+\Gm@even@mp=\dimen182
+\Gm@layoutwidth=\dimen183
+\Gm@layoutheight=\dimen184
+\Gm@layouthoffset=\dimen185
+\Gm@layoutvoffset=\dimen186
+\Gm@dimlist=\toks48
 )
 (./ProjectProposal.aux)
 \openout1 = `ProjectProposal.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 74.
-LaTeX Font Info:    ... okay on input line 74.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 74.
-LaTeX Font Info:    ... okay on input line 74.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 74.
-LaTeX Font Info:    ... okay on input line 74.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 74.
-LaTeX Font Info:    ... okay on input line 74.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 74.
-LaTeX Font Info:    ... okay on input line 74.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 74.
-LaTeX Font Info:    ... okay on input line 74.
-\c@lstlisting=\count151
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 76.
+LaTeX Font Info:    ... okay on input line 76.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 76.
+LaTeX Font Info:    ... okay on input line 76.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 76.
+LaTeX Font Info:    ... okay on input line 76.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 76.
+LaTeX Font Info:    ... okay on input line 76.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 76.
+LaTeX Font Info:    ... okay on input line 76.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 76.
+LaTeX Font Info:    ... okay on input line 76.
+\c@lstlisting=\count158
 
 (/usr/local/texlive/2017/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count152
-\scratchdimen=\dimen180
+\scratchcounter=\count159
+\scratchdimen=\dimen187
 \scratchbox=\box66
-\nofMPsegments=\count153
-\nofMParguments=\count154
-\everyMPshowfont=\toks45
-\MPscratchCnt=\count155
-\MPscratchDim=\dimen181
-\MPnumerator=\count156
-\makeMPintoPDFobject=\count157
-\everyMPtoPDFconversion=\toks46
+\nofMPsegments=\count160
+\nofMParguments=\count161
+\everyMPshowfont=\toks49
+\MPscratchCnt=\count162
+\MPscratchDim=\dimen188
+\MPnumerator=\count163
+\makeMPintoPDFobject=\count164
+\everyMPtoPDFconversion=\toks50
 ) (/usr/local/texlive/2017/texmf-dist/tex/latex/oberdiek/epstopdf-base.sty
 Package: epstopdf-base 2016/05/15 v2.6 Base part for package epstopdf
 
@@ -1096,6 +1199,9 @@ File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
 ABD: EveryShipout initializing macros
+Package pgfplots notification 'compat/show suggested version=true': document ha
+s been generated with the most recent feature set (\pgfplotsset{compat=1.15}).
+
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
 *geometry* verbose mode - [ preamble ] result:
@@ -1133,13 +1239,13 @@ ABD: EveryShipout initializing macros
 <header.png, id=4, 640.3925pt x 117.43875pt>
 File: header.png Graphic file (type png)
 <use header.png>
-Package pdftex.def Info: header.png  used on input line 78.
+Package pdftex.def Info: header.png  used on input line 80.
 (pdftex.def)             Requested size: 359.01776pt x 65.8387pt.
-LaTeX Font Info:    Try loading font information for U+msa on input line 78.
+LaTeX Font Info:    Try loading font information for U+msa on input line 80.
 (/usr/local/texlive/2017/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 78.
+LaTeX Font Info:    Try loading font information for U+msb on input line 80.
 
 (/usr/local/texlive/2017/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
@@ -1220,12 +1326,12 @@ Chapter 2.
 ]
 Chapter 3.
 (./chapters/flatshading.tex
-<images/max.png, id=44, 803.0pt x 601.24625pt>
+<images/max.png, id=302, 803.0pt x 601.24625pt>
 File: images/max.png Graphic file (type png)
 <use images/max.png>
 Package pdftex.def Info: images/max.png  used on input line 14.
 (pdftex.def)             Requested size: 160.59715pt x 120.24712pt.
-<images/vertex-area.png, id=45, 803.0pt x 800.9925pt>
+<images/vertex-area.png, id=303, 803.0pt x 800.9925pt>
 File: images/vertex-area.png Graphic file (type png)
 <use images/vertex-area.png>
 Package pdftex.def Info: images/vertex-area.png  used on input line 19.
@@ -1306,27 +1412,27 @@ Package pdftex.def Info: images/vertex-area.png  used on input line 181.
 (pdftex.def)             Requested size: 160.59715pt x 160.19566pt.
 ) [13]
 Appendix A.
-<gaussian-ball.png, id=67, 804.00375pt x 604.2575pt>
+<gaussian-ball.png, id=324, 804.00375pt x 604.2575pt>
 File: gaussian-ball.png Graphic file (type png)
 <use gaussian-ball.png>
-Package pdftex.def Info: gaussian-ball.png  used on input line 119.
+Package pdftex.def Info: gaussian-ball.png  used on input line 121.
 (pdftex.def)             Requested size: 359.01776pt x 269.82037pt.
-<gaussian.png, id=68, 704.6325pt x 467.7475pt>
+<gaussian.png, id=325, 704.6325pt x 467.7475pt>
 File: gaussian.png Graphic file (type png)
 <use gaussian.png>
-Package pdftex.def Info: gaussian.png  used on input line 133.
+Package pdftex.def Info: gaussian.png  used on input line 135.
 (pdftex.def)             Requested size: 114.8883pt x 76.26143pt.
 [14
 
  <./gaussian-ball.png>] [15 <./gaussian.png>] (./ProjectProposal.aux) ) 
 Here is how much of TeX's memory you used:
- 20327 strings out of 492980
- 422537 string characters out of 6132509
- 519755 words of memory out of 5000000
- 23438 multiletter control sequences out of 15000+600000
+ 30238 strings out of 492980
+ 756999 string characters out of 6132509
+ 993793 words of memory out of 5000000
+ 33228 multiletter control sequences out of 15000+600000
  13525 words of font info for 52 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 62i,12n,99p,493b,1768s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 74i,12n,128p,798b,2678s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/lo
 cal/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/loc
 al/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/loca
@@ -1338,10 +1444,10 @@ ve/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/
 2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2
 017/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/local/texlive/20
 17/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb>
-Output written on ProjectProposal.pdf (16 pages, 411263 bytes).
+Output written on ProjectProposal.pdf (16 pages, 490111 bytes).
 PDF statistics:
- 110 PDF objects out of 1000 (max. 8388607)
- 71 compressed objects within 1 object stream
+ 367 PDF objects out of 1000 (max. 8388607)
+ 199 compressed objects within 2 object streams
  0 named destinations out of 1000 (max. 500000)
- 38 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 934 words of extra memory for PDF output out of 10000 (max. 10000000)
 
