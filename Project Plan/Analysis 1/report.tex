@@ -18,6 +18,8 @@
 \usepackage{sectsty}
 \usepackage{tikz}
 \usepackage{pgfplots}
+\usepackage[backend=biber]{biblatex}
+\addbibresource{report.bib}
 \pgfplotsset{compat=newest}
 \usepgfplotslibrary{patchplots}
 \usetikzlibrary{calc,intersections,trees,positioning,arrows,chains,shapes.geometric,%
@@ -57,14 +59,11 @@
     }
   }
 }
-% \usetikzlibrary{fadings}
 \usepackage[paper=a4paper,top=0.58in,left=1.65in, right=1.65in, bottom=1.65in]{geometry}
 
 \definecolor{lightorange}{RGB}{251,211,168}
 \definecolor{darkred}{RGB}{153,0,0}
 \definecolor{darkgreen}{RGB}{0,51,25}
-
-% \sectionfont{\fontsize{12}{15}\selectfont}
 
 \title{ \includegraphics[width=\linewidth]{header.png}~
 \\[0.5cm]
@@ -110,6 +109,9 @@ I want to thank...
 
 % \chapter{Conclusion}
 % \input{chapters/conclusion}
+% See~\cite{DUMMY:1}.
+\printbibliography
+
 
 \appendix
 \chapter{Appendix Title}
