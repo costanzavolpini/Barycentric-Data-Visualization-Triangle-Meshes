@@ -64,3 +64,126 @@ We want to avoid an automatic interpolation of colors, in order to return the re
        \node[punktchain, join] (gs)  {Geometry Shader};
        \node[punktchain, join] (fs)  {Fragment Shader};
 \end{tikzpicture}}
+\\
+\\
+Vertex Shader for extend flat shading:
+\begin{lstlisting}[language=C++,
+    directivestyle={\color{black}}
+    emph={int,char,double,float,unsigned},
+    emphstyle={\color{blue}}
+   ]
+    #version 330 core
+    layout (location = 0) in vec3 aPos;
+    layout (location = 1) in vec3 aNormal;
+    layout (location = 2) in vec3 aColor;
+
+    struct Light {
+        // ...
+    };
+
+    out vec4 vertex_color;
+
+    uniform mat4 model;
+    uniform mat4 view;
+    uniform mat4 projection;
+
+    void main() {
+        vec3 world_position = vec3(model * vec4(aPos, 1.0));
+        vec3 world_normal = mat3(transpose(inverse(model)))
+                            * aNormal;
+
+        // color obtained with lighting calculations
+        vertex_color = get_result_color_lighting(...);
+
+        gl_Position = projection * view
+                      * model * vec4(aPos, 1.0);
+    }
+\end{lstlisting}
+
+Geometry Shader for extend flat shading:
+\begin{lstlisting}[language=C++,
+    directivestyle={\color{black}}
+    emph={int,char,double,float,unsigned},
+    emphstyle={\color{blue}}
+   ]
+    #version 330 core
+    layout (triangles) in;
+    layout (triangle_strip, max_vertices = 3) out;
+
+    in vec4 vertex_color[3];
+    out vec3 coords;
+    out vec4 wedge_color[3];
+
+    void main() {
+        wedge_color[0] = vertex_color[0];
+        wedge_color[1] = vertex_color[1];
+        wedge_color[2] = vertex_color[2];
+
+        coords = vec3(1.0, 0.0, 0.0);
+        gl_Position = gl_in[0].gl_Position;
+        EmitVertex();
+
+        coords = vec3(0.0, 1.0, 0.0);
+        gl_Position = gl_in[1].gl_Position;
+        EmitVertex();
+
+        coords = vec3(0.0, 0.0, 1.0);
+        gl_Position = gl_in[2].gl_Position;
+        EmitVertex();
+
+        EndPrimitive();
+    }
+\end{lstlisting}
+
+Fragment Shader for extend flat shading:
+\begin{lstlisting}[language=C++,
+    directivestyle={\color{black}}
+    emph={int,char,double,float,unsigned},
+    emphstyle={\color{blue}}
+   ]
+    #version 330 core
+    in vec3 coords;
+    in vec4 wedge_color[3];
+    out vec4 fragColor;
+
+    void main() {
+        // max diagram
+        if (coords[0] > coords[1]) {
+            if (coords[0] > coords[2]) {
+                fragColor = wedge_color[0];
+            }
+            else {
+                fragColor = wedge_color[2];
+            }
+        }
+        else {
+            if (coords[1] > coords[2]) {
+                fragColor = wedge_color[1];
+            }
+            else {
+                fragColor = wedge_color[2];
+            }
+        }
+    }
+\end{lstlisting}
+
+\section{Gaussian Curvature}
+We want to compute the \textit{Gaussian curvature} per vertex. We want to sum up, for each vertex, angles at this vertex with adjacent triangles and then we subtract this value to $2\pi$.
+After having obtain this value, called \textit{angle defect}, we map linearly this value to a color range.
+
+Then we can pass this color to the \textit{vertex shader} to see the color vertex flat shading visualisation of Gaussian curvature.
+$$G = 2\pi - \sum_j \theta_j$$
+\begin{figure}[!h]
+    \centering
+    \begin{tikzpicture}
+        \coordinate (J) at (3.1,2.9);
+        \coordinate (circle) at (3.1,2.9);
+        \node[anchor=south west,inner sep=0] at (0,0) {\includegraphics[scale=0.2]{images/vertex-area.png}};
+        % \draw[red,ultra thick,rounded corners] (7.5,5.3) rectangle (9.4,6.2);
+        \draw (J) node [below left] {$j$};
+        \filldraw (2.8, 2.2) circle (2pt);
+        \begin{scope}[line width=0.4mm, line cap=round]
+            \draw (3.2,1.7) arc (295:360:0.7cm) node[near start,right] {$\theta_j$};
+        \end{scope}
+    \end{tikzpicture}
+\end{figure}

@@ -22,6 +22,7 @@
     decorations.pathreplacing,decorations.pathmorphing,shapes,%
     matrix,shapes.symbols}
 
+
 \tikzset{
 >=stealth',
   punktchain/.style={
@@ -48,6 +49,11 @@
   decoration={brace},
   tuborg/.style={decorate},
   tubnode/.style={midway, right=2pt},
+  pics/carc/.style args={#1:#2:#3}{
+    code={
+      \draw[pic actions] (#1:#3) arc(#1:#2:#3);
+    }
+  }
 }
 % \usetikzlibrary{fadings}
 \usepackage[paper=a4paper,top=0.58in,left=1.65in, right=1.65in, bottom=1.65in]{geometry}

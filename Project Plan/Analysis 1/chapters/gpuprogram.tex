@@ -1,5 +1,12 @@
 shaders (geometry, vertex, fragment) + model view etc.
 arcball/trackball
 
+Shader program is written in \textit{GLSL}.
+
 Vertex shader is done on every vertex (before rasterization).
 Fragment shader is done on every pixel (coloring per fragment).
+
+\section{Geometry Shader}
+\textit{Geometry shader} is used for layered rendering. It takes as input a set of vertices (single primitive, example: triangle or a point) and it transforms them before sending to the next shader stage. In this way, we can obtain different primitives.
+
+Each time we call the function \texttt{EmitVertex()} the vector currently set to \texttt{gl\_Position} is added to the primitive. All emitted vertices are combined for the primitive and output when we call the function \texttt{EndPrimitive()}.
