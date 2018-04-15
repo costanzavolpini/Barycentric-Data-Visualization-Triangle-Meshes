@@ -392,6 +392,9 @@ INPUT ./images/vertex-area.png
 INPUT images/gaussian-ball.png
 INPUT ./images/gaussian-ball.png
 INPUT ./images/gaussian-ball.png
+INPUT images/gaussian-horse.png
+INPUT ./images/gaussian-horse.png
+INPUT ./images/gaussian-horse.png
 INPUT ProjectProposal.aux
 INPUT /usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb
 INPUT /usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb

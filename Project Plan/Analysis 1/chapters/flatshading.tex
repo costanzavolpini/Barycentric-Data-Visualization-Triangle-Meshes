@@ -22,7 +22,7 @@ An example of this vertex data is the discrete Gaussian curvature.
 \end{figure}
 
 
-\section{Max diagram - Vertex based area}
+\subsection{Max diagram - Vertex based area}
 Passing barycentric coordinates to the fragment shader will clearly demonstrate that we can get results different from the classic color interpolation.
 
 There are different approaches to color interpolation focusing on the distance from vertices. For each point in a triangle, we can easily determine its closest vertex, which we use as a cue for coloring.
@@ -47,7 +47,7 @@ if (Coords.x > Coords.y && Coords.x > Coords.z) {
 }
 \end{lstlisting}
 
-\section{Implementation}
+\subsection{Implementation}
 Suppose now that you want each vertex area to be in one constant color. This color can be taken from shading interpolation using the normal at the vertex and the vertex position. Then you can compute the color has it be done in \textit{Gouraud Shading}.
 
 The idea is to compute the color per vertex but instead of linearly interpolated it in each triangle (as \textit{Gouraud shading} does) we color regions around a vertex with that constant color.
@@ -248,3 +248,19 @@ Vertex Shader for gaussian curvature:
                       vec4(aPos, 1.0);
     }
 \end{lstlisting}
+
+\section{Evaluation and Comparison}
+\begin{figure}[!htb]
+%   \minipage{0.32\textwidth}
+%     \includegraphics[width=\linewidth]{interpolation.png}
+%     \caption{Interpolation.}\label{fig:interpolation}
+%   \endminipage\hfill
+%   \minipage{0.32\textwidth}
+%     \includegraphics[width=\linewidth]{flat.png}
+%     \caption{Min Diagram.}\label{fig:min}
+%   \endminipage\hfill
+  \minipage{0.32\textwidth}%
+    \includegraphics[width=\linewidth]{images/gaussian-horse.png}
+    \caption{Gaussian Curvature}\label{fig:gaussian-horse}
+  \endminipage
+  \end{figure}
