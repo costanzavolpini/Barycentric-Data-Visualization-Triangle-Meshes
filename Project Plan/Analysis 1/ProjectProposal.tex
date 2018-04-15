@@ -1,5 +1,6 @@
 
-\documentclass[11pt]{article}
+\documentclass[12pt]{report}
+\usepackage[utf8]{inputenc}
 
 \usepackage{listings}
 \usepackage{graphicx}
@@ -15,38 +16,47 @@
 \usepackage{dsfont}
 \usepackage{xcolor}
 \usepackage{sectsty}
+\usepackage{tikz}
+
+\usetikzlibrary{calc,intersections,trees,positioning,arrows,chains,shapes.geometric,%
+    decorations.pathreplacing,decorations.pathmorphing,shapes,%
+    matrix,shapes.symbols}
+
+\tikzset{
+>=stealth',
+  punktchain/.style={
+    rectangle,
+    rounded corners,
+    % fill=black!10,
+    draw=black, very thick,
+    text width=10em,
+    minimum height=3em,
+    text centered,
+    on chain},
+  line/.style={draw, thick, <-},
+  element/.style={
+    tape,
+    top color=white,
+    bottom color=blue!50!black!60!,
+    minimum width=8em,
+    draw=blue!40!black!90, very thick,
+    text width=10em,
+    minimum height=3.5em,
+    text centered,
+    on chain},
+  every join/.style={->, thick,shorten >=1pt},
+  decoration={brace},
+  tuborg/.style={decorate},
+  tubnode/.style={midway, right=2pt},
+}
+% \usetikzlibrary{fadings}
 \usepackage[paper=a4paper,top=0.58in,left=1.65in, right=1.65in, bottom=1.65in]{geometry}
 
 \definecolor{lightorange}{RGB}{251,211,168}
 \definecolor{darkred}{RGB}{153,0,0}
 \definecolor{darkgreen}{RGB}{0,51,25}
 
-\sectionfont{\fontsize{12}{15}\selectfont}
-%\usepackage{ifpdf}
-  %\ifpdf
-    %  \usepackage[pdftex]{graphicx}   % to include graphics
-      %\pdfcompresslevel=9
-      %\usepackage[pdftex,     % sets up hyperref to use pdftex driver
-         %     plainpages=false,   % allows page i and 1 to exist in the same document
-            %  breaklinks=true,    % link texts can be broken at the end of line
-      %        colorlinks=true,
-       %       pdftitle=My Document
-        %      pdfauthor=My Good Self
-            % ]{hyperref}
-   %   \usepackage{thumbpdf}
- % \else
-  %    \usepackage{graphicx}       % to include graphics
-   %   \usepackage{hyperref}       % to simplify the use of \href
- % \fi
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% radix:
-% not: $\neg$
-% and: $\land$
-%  fraction:
-% potenza:
+% \sectionfont{\fontsize{12}{15}\selectfont}
 
 \title{ \includegraphics[width=\linewidth]{header.png}~
 \\[0.5cm]
@@ -54,6 +64,7 @@
 \textbf{\Large{Barycentric Data Visualization for Triangle Meshes}}}
 \date{Spring Semester 2018}
 \author{Costanza \textbf{Volpini} \\ \textcolor{gray}{costanza.volpini@usi.ch} \\ \\ Professor: Kai \textbf{Hormann} \\ Assistant: Jan \textbf{Svoboda}}
+
 \begin{document}
 \pagestyle{fancy}
 \rhead{\bfseries  Costanza Volpini}
@@ -61,9 +72,42 @@
 \maketitle
 \newgeometry{paper=a4paper,margin=1.65in}
 
+%%%%%%% ref: https://it.sharelatex.com/blog/2013/08/02/thesis-series-pt1.html
+\chapter*{Abstract}
+Abstract goes here
+
+\chapter*{Dedication}
+to somebody
+
+\chapter*{Declaration}
+I declare that..
+
+\chapter*{Acknowledgements}
+I want to thank...
+
+\tableofcontents
 %%%%%%%
-\section{Linear Interpolation}
-\section{Extend Flat Shading}
+\chapter{Introduction}
+\input{chapters/introduction}
+
+\chapter{GPU program}
+\input{chapters/gpuprogram}
+
+\chapter{Flat shading extension}
+\input{chapters/flatshading}
+
+% \subsection{Min diagram - Edge based area}
+% A different approach from interpolating, can be found coloring edge areas based on the minimum barycentric coordinate.
+% The color is given by the region closest to the vertex.
+
+% \chapter{Conclusion}
+% \input{chapters/conclusion}
+
+\appendix
+\chapter{Appendix Title}
+% \input{chapters/appendix}
+
+  \section{Extend Flat Shading}
 \section{Gaussian Curvature}
 \begin{figure}[!htb]
     \includegraphics[width=\linewidth]{gaussian-ball.png}
@@ -84,29 +128,6 @@
     \caption{Gaussian Curvature}\label{fig:gaussian-horse}
   \endminipage
   \end{figure}
-
-% Using the power of barycentric coordinates we can figure out to which area a pixel belongs and which
-% color it should be painted with.
-
-% Passing barycentric coordinates to the fragment shader will clearly demonstrate that we can get results different from the classic
-% color interpolation (Fig.\ref{fig:interpolation}).
-% \begin{figure}[!htb]
-%   \minipage{0.32\textwidth}
-%     \includegraphics[width=\linewidth]{interpolation.png}
-%     \caption{Interpolation.}\label{fig:interpolation}
-%   \endminipage\hfill
-%   \minipage{0.32\textwidth}
-%     \includegraphics[width=\linewidth]{min.png}
-%     \caption{Min Diagram.}\label{fig:min}
-%   \endminipage\hfill
-%   \minipage{0.32\textwidth}%
-%     \includegraphics[width=\linewidth]{max.png}
-%     \caption{Max Diagram.}\label{fig:max}
-%   \endminipage
-%   \end{figure}
-
-% vec3(0.001839, -0.029033, 0.004951) mettere questo come valore della matrice per fare la foto
-
 
 \end{document}
 
