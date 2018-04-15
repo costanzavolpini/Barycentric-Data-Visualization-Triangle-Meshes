@@ -11,7 +11,5 @@
 \contentsline {section}{\numberline {3.2}Max diagram - Vertex based area}{9}
 \contentsline {section}{\numberline {3.3}Implementation}{10}
 \contentsline {section}{\numberline {3.4}Gaussian Curvature}{13}
-\contentsline {chapter}{\numberline {A}Appendix Title}{14}
-\contentsline {section}{\numberline {A.1}Extend Flat Shading}{14}
-\contentsline {section}{\numberline {A.2}Gaussian Curvature}{14}
-\contentsline {section}{\numberline {A.3}Evaluation and comparison}{15}
+\contentsline {chapter}{\numberline {A}Appendix Title}{16}
+\contentsline {section}{\numberline {A.1}Extend Flat Shading}{16}

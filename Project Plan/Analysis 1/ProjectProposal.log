@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2018.1.19)  15 APR 2018 20:13
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2018.1.19)  15 APR 2018 22:25
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1312,7 +1312,12 @@ Underfull \hbox (badness 10000) in paragraph at lines 2--23
 
 [6
 
-])
+]
+Overfull \hbox (71.80792pt too wide) in paragraph at lines 35--74
+[][][] 
+ []
+
+)
 
 Package Fancyhdr Warning: \headheight is too small (12.0pt): 
  Make it at least 14.49998pt.
@@ -1410,44 +1415,79 @@ File: images/vertex-area.png Graphic file (type png)
 <use images/vertex-area.png>
 Package pdftex.def Info: images/vertex-area.png  used on input line 181.
 (pdftex.def)             Requested size: 160.59715pt x 160.19566pt.
-) [13]
-Appendix A.
-<gaussian-ball.png, id=324, 804.00375pt x 604.2575pt>
-File: gaussian-ball.png Graphic file (type png)
-<use gaussian-ball.png>
-Package pdftex.def Info: gaussian-ball.png  used on input line 121.
-(pdftex.def)             Requested size: 359.01776pt x 269.82037pt.
-<gaussian.png, id=325, 704.6325pt x 467.7475pt>
-File: gaussian.png Graphic file (type png)
-<use gaussian.png>
-Package pdftex.def Info: gaussian.png  used on input line 135.
-(pdftex.def)             Requested size: 114.8883pt x 76.26143pt.
-[14
+<images/gaussian-ball.png, id=319, 758.835pt x 797.98125pt>
+File: images/gaussian-ball.png Graphic file (type png)
+<use images/gaussian-ball.png>
+Package pdftex.def Info: images/gaussian-ball.png  used on input line 194.
+(pdftex.def)             Requested size: 151.76431pt x 159.59341pt.
 
- <./gaussian-ball.png>] [15 <./gaussian.png>] (./ProjectProposal.aux) ) 
+Underfull \hbox (badness 10000) in paragraph at lines 191--204
+
+ []
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+Overfull \hbox (14.63159pt too wide) in paragraph at lines 207--209
+[][][][][][][][][][][][][][][][][][] 
+ []
+
+[13]
+Overfull \hbox (0.53162pt too wide) in paragraph at lines 221--222
+[][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+LaTeX Font Info:    Font shape `OML/cmr/m/it' in size <12> not available
+(Font)              Font shape `OML/cmm/m/it' tried instead on input line 231.
+
+Overfull \hbox (49.88153pt too wide) in paragraph at lines 231--232
+[][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (49.88153pt too wide) in paragraph at lines 234--235
+[][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (35.78156pt too wide) in paragraph at lines 236--237
+[][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+[14 <./images/gaussian-ball.png>]
+Overfull \hbox (49.88153pt too wide) in paragraph at lines 238--239
+[][][][][][][][][][][] 
+ []
+
+) [15]
+Appendix A.
+[16
+
+] (./ProjectProposal.aux) ) 
 Here is how much of TeX's memory you used:
- 30238 strings out of 492980
- 756999 string characters out of 6132509
- 993793 words of memory out of 5000000
- 33228 multiletter control sequences out of 15000+600000
+ 30942 strings out of 492980
+ 771888 string characters out of 6132509
+ 1218829 words of memory out of 5000000
+ 33933 multiletter control sequences out of 15000+600000
  13525 words of font info for 52 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 74i,12n,128p,798b,2678s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/lo
-cal/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/loc
-al/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/loca
-l/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/local
-/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/local/t
-exlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/local/tex
-live/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/local/texli
-ve/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/
-2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2
-017/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/local/texlive/20
-17/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb>
-Output written on ProjectProposal.pdf (16 pages, 490111 bytes).
+ 74i,15n,128p,798b,3719s stack positions out of 5000i,500n,10000p,200000b,80000s
+</usr/local/texlive/2017/texmf-dist/fonts/type1/publ
+ic/amsfonts/cm/cmbx12.pfb></usr/local/texlive/2017/texmf-dist/fonts/type1/publi
+c/amsfonts/cm/cmex10.pfb></usr/local/texlive/2017/texmf-dist/fonts/type1/public
+/amsfonts/cm/cmmi12.pfb></usr/local/texlive/2017/texmf-dist/fonts/type1/public/
+amsfonts/cm/cmmi8.pfb></usr/local/texlive/2017/texmf-dist/fonts/type1/public/am
+sfonts/cm/cmr12.pfb></usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsf
+onts/cm/cmr17.pfb></usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfon
+ts/cm/cmr8.pfb></usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/
+cm/cmsy10.pfb></usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/c
+m/cmti12.pfb></usr/local/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm
+/cmtt12.pfb>
+Output written on ProjectProposal.pdf (17 pages, 459835 bytes).
 PDF statistics:
- 367 PDF objects out of 1000 (max. 8388607)
- 199 compressed objects within 2 object streams
+ 369 PDF objects out of 1000 (max. 8388607)
+ 201 compressed objects within 3 object streams
  0 named destinations out of 1000 (max. 500000)
- 934 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 929 words of extra memory for PDF output out of 10000 (max. 10000000)
 
