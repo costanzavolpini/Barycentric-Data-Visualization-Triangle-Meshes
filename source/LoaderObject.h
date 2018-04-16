@@ -8,6 +8,8 @@
 #include <stdlib.h>
 #include <map>
 #include <iterator>
+#include "glm/ext.hpp"
+
 
 using namespace std;
 
@@ -26,6 +28,13 @@ int num_triangles;
 int isGaussianCurvature = 0; //default not
 int isLinearInterpolation = 0; //default not
 int isExtendFlatShading = 1; //default yes
+double max_val_x = 0;
+double max_val_y = 0;
+double max_val_z = 0;
+
+double min_val_x = 0;
+double min_val_y = 0;
+double min_val_z = 0;
 
         void setGaussianCurvature(int flag){
             isGaussianCurvature = flag;
@@ -37,6 +46,52 @@ int isExtendFlatShading = 1; //default yes
 
         void setExtendFlatShading(int flag){
             isExtendFlatShading = flag;
+        }
+
+        void set_min(Point3d current){
+            if(current.x() < min_val_x)
+                min_val_x = current.x();
+
+            if(current.y() < min_val_y)
+                min_val_y = current.y();
+
+            if(current.z() < min_val_z)
+                min_val_z = current.z();
+        }
+
+        void set_max(Point3d current){
+            if(current.x() > max_val_x)
+                max_val_x = current.x();
+
+            if(current.y() > max_val_y)
+                max_val_y = current.y();
+
+            if(current.z() > max_val_z)
+                max_val_z = current.z();
+        }
+
+        double get_max_x(){
+            return max_val_x;
+        }
+
+        double get_max_y(){
+            return max_val_y;
+        }
+
+        double get_max_z(){
+            return max_val_z;
+        }
+
+        double get_min_x(){
+            return min_val_x;
+        }
+
+        double get_min_y(){
+            return min_val_y;
+        }
+
+        double get_min_z(){
+            return min_val_z;
         }
 
 
@@ -90,6 +145,8 @@ int isExtendFlatShading = 1; //default yes
             vector<int> v_counter(num_vertices);
             std::fill(v_counter.begin(), v_counter.end(), 0); // initialize every vertex normal to (0,0,0)
 
+
+
             // -------------- GAUSSIAN CURVATURE and VERTICES TRIANGLES -----------------
             // find gaussian curvature
             vector<float> triangle_gc(num_triangles * 9);
@@ -102,6 +159,17 @@ int isExtendFlatShading = 1; //default yes
                 Point3d v0 = v[t[k].v[0]];
                 Point3d v1 = v[t[k].v[1]];
                 Point3d v2 = v[t[k].v[2]];
+
+                // Update max and min
+                set_min(v0);
+                set_max(v0);
+
+                set_min(v1);
+                set_max(v1);
+
+                set_min(v2);
+                set_max(v2);
+
 
                 if(isExtendFlatShading){ //normals
                     // for every triangle face compute face normal and normalize it

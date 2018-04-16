@@ -152,7 +152,6 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
 
         Send vertex data to vertex shader (load .off file).
      */
-
     Object object = Object(name_file);
     object.setGaussianCurvature(isGaussianCurvature);
     object.setExtendFlatShading(isExtendFlatShading);
@@ -189,10 +188,12 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         ourShader.setFloat("mean_negative_gc", object.get_negative_mean_gaussian_curvature_value());
         ourShader.setFloat("mean_positive_gc", object.get_positive_mean_gaussian_curvature_value());
         // cout << "MIN " << object.get_minimum_gaussian_curvature_value() << endl;
-
         // cout << "MAX " << object.get_maximum_gaussian_curvature_value() << endl;
 
     }
+
+        view = glm::translate(view, glm::vec3(-(get_max_x() + get_min_x())/2.0f,-(get_max_y() + get_min_y())/2.0f,-(get_max_z() + get_min_z())/2.0f));
+
 
 
     /**
@@ -207,6 +208,7 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); //black screen
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the depth buffer before each render iteration (otherwise the depth information of the previous frame stays in the buffer).
 
+
         // arcball
         glm::mat4 rotated_view = view * arcball.rotation_matrix_view();
         glm::mat4 rotated_model = model * arcball.rotation_matrix_model(view);
@@ -216,7 +218,7 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         ourShader.setMat4("view", rotated_view);
         ourShader.setMat4("model", rotated_model);
 
-        glm::mat4 transform = glm::mat4(1.0f);
+
         // transform = model * glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
         // ourShader.setMat4("model", transform);
         object.draw();
