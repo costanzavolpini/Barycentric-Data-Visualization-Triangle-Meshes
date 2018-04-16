@@ -67,9 +67,9 @@ $$G = 2\pi - \sum_j \theta_j$$
 \end{figure}
 
 
-\section{Evaluation and Comparison}
-We want now to compare the classic linear interpolation visualisation (Fig. \ref{fig:interpolation-horse}) with two possible way to extend the flat shading. In Fig. \ref{fig:lighting-horse} and Fig. \ref{fig:gaussian-horse} we have color each vertex area following the method \textit{max diagram} described in the above subsection \ref{section:max-diagram}, this extension of the flat shading returns a more 3-dimensional model.
-In fact, as we can see in Fig. \ref{fig:lighting-horse} and Fig. \ref{fig:gaussian-horse}, the horse get more realistic thanks to the lighting calculation for Fig. \ref{fig:lighting-horse} and to the \textit{Gaussian curvature} for Fig. \ref{fig:gaussian-horse}, in particular this last result in a more detailed model.
+\section{Comparison}
+We want now to compare the classic linear interpolation visualisation (Fig. \ref{fig:interpolation-horse}) with two possible way to extend the flat shading. In Fig. \ref{fig:lighting-horse} and Fig. \ref{fig:gaussian-horse} we have color each vertex area applying the method \textit{max diagram} described in the above subsection \ref{section:max-diagram}.
+As we can see in Fig. \ref{fig:lighting-horse} and Fig. \ref{fig:gaussian-horse}, the horse get a more realistic shape thanks to the lighting calculation for Fig. \ref{fig:lighting-horse} and to the \textit{Gaussian curvature} for Fig. \ref{fig:gaussian-horse}.
 \begin{figure}[!htb]
   \minipage{0.32\textwidth}
     \includegraphics[width=\linewidth]{images/linear-horse.png}
@@ -84,4 +84,7 @@ In fact, as we can see in Fig. \ref{fig:lighting-horse} and Fig. \ref{fig:gaussi
     \caption{Gaussian Curvature}\label{fig:gaussian-horse}
   \endminipage
   \end{figure}
-  Visualization of the principal curvatures as colors (Fig. \ref{fig:gaussian-horse}), marking then every change of signs highlighting the 3-dimensionality of the model.
+
+Visualization of the principal curvatures of the model as colors from blue (highest values of curvature) to red (lower values of curvature), Fig. \ref{fig:gaussian-horse}, better highlighs the geometry of the horse.
+These changes of curvature, positive (blue), flat (green) and negative regions (red), better emphasises the 3-dimensionality of the model. \textit{Gaussian curvature} better shows the muscle constrasts given a more realistic character to the horse than the model obtained using the lighting calculation.
+
