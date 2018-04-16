@@ -2,3 +2,19 @@
 \.DS_Store
 
 *.o
+
+*.aux
+
+*.bcf
+
+Project Plan/Analysis 1/report\.fdb_latexmk
+
+Project Plan/Analysis 1/report\.fls
+
+Project Plan/Analysis 1/report\.log
+
+*.synctex(busy)
+
+*.gz
+
+Project Plan/Analysis 1/report\.toc
