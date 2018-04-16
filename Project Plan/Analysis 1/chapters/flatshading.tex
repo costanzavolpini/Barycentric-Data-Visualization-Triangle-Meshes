@@ -9,14 +9,12 @@ These regions can be determined using barycentric coordinates and GPU fragment p
 An example of this vertex data is the discrete Gaussian curvature.
 \begin{figure}[h]
     \centering
-    \minipage[b]{.5\linewidth}
-    \centering
-    \includegraphics[scale=0.2]{images/max.png}
+    \minipage[b]{.4\linewidth}
+    \includegraphics[scale=0.15]{images/max.png}
     \caption{Vertex based area}\label{fig:max-diagram}
-    \endminipage
-    \minipage[b]{.5\linewidth}
-    \centering
-    \includegraphics[scale=0.2]{images/vertex-area.png}
+    \endminipage\hfill
+    \minipage[b]{.4\linewidth}
+    \includegraphics[scale=0.15]{images/vertex-area.png}
     \caption{Region around a vertex}\label{fig:vertex-area}
     \endminipage
 \end{figure}
@@ -47,7 +45,7 @@ if (Coords.x > Coords.y && Coords.x > Coords.z) {
 }
 \end{lstlisting}
 
-\subsection{Implementation}
+\section{Color vertex area by lighting}
 Suppose now that you want each vertex area to be in one constant color. This color can be taken from shading interpolation using the normal at the vertex and the vertex position. Then you can compute the color has it be done in \textit{Gouraud Shading}.
 
 The idea is to compute the color per vertex but instead of linearly interpolated it in each triangle (as \textit{Gouraud shading} does) we color regions around a vertex with that constant color.
@@ -55,15 +53,6 @@ The idea is to compute the color per vertex but instead of linearly interpolated
 To implement that we need to pass the barycentric coordinates, the vertex color, the normal at the vertex and the lighting calculations to the \textit{fragment shader}.
 
 We want to avoid an automatic interpolation of colors, in order to return the resulting color using the \textit{max diagram}, to do that we have used a \textit{Geometry shader} in order to access to all three vertex colors in fragment shader.
-\\
-\\
-\scalebox{0.85}{\begin{tikzpicture}
-    [node distance=.8cm,
-    start chain=going right,]
-       \node[punktchain, join] (vs) {Vertex Shader};
-       \node[punktchain, join] (gs)  {Geometry Shader};
-       \node[punktchain, join] (fs)  {Fragment Shader};
-\end{tikzpicture}}
 \\
 \\
 Vertex Shader for extend flat shading:
@@ -167,7 +156,7 @@ Fragment Shader for extend flat shading:
     }
 \end{lstlisting}
 
-\section{Gaussian Curvature}
+\section{Color vertex area by Gaussian Curvature}
 We want to compute the \textit{Gaussian curvature} per vertex. We want to sum up, for each vertex, angles at this vertex with adjacent triangles and then we subtract this value to $2\pi$.
 After having obtain this value, called \textit{angle defect} (Fig. \ref{fig:gc-angle}), we map linearly this value to a color range.
 
@@ -266,4 +255,4 @@ In fact, as we can see in Fig. \ref{fig:lighting-horse} and Fig. \ref{fig:gaussi
     \caption{Gaussian Curvature}\label{fig:gaussian-horse}
   \endminipage
   \end{figure}
-  Coloring vertex areas looking if the value of \textit{Gaussian curvature} is positive or negative will mark every change of signs highlighting the 3-dimensionality of the model.
+  Visualization of the principal curvatures as colors (Fig. \ref{fig:gaussian-horse}), marking then every change of signs highlighting the 3-dimensionality of the model.

@@ -19,7 +19,14 @@ Let us consider a triangle with top, bottom left and bottom right vertices to wh
     \end{tikzpicture}
     \\
     Let call the red area $w_1$, the blue green one $w_2$ and the blue one $w_3$. Normalazing each of them by the area of the triangle, we will get three values ($\lambda_1, \lambda_2, \lambda_3$) that are the barycentric coordinates of $p$ with respect to the triangle [$v_1, v_2, v_3$].
-\\ \\ WRITE!!!!!!! introduction and all properties
+\\ \\ WRITE introduction of Barycentric coordinate (inventor and history) and all properties
+
+\section{Triangle mesh}
+See book
+
+
+\section{Lighting}
+formula + draw and explanation of angle (like at 90 degree some light..e.tc.)
 
 \section{Linear Interpolation}
 The standard linear interpolated visualisation is made passing three attributes (colors) for each vertex of a triangle. OpenGL will interpolate linearly the colors. That is possible thanks to the barycentric coordinates that will tell how much of each color is being mixed at any position.
@@ -29,8 +36,8 @@ The standard linear interpolated visualisation is made passing three attributes 
 \section{Gouraud Shading}
 \textit{Gouraud Shading} can be calculated in the \textit{vertex shader}. The main idea is to compute a normal at the vertex and an intensity for each vertex.
 
-
-\section{Gaussian Curvature}
+\section{Curvature}
+\subsection{Gaussian Curvature}
 \textit{Gaussian Curvature} works like a logical \texttt{AND}, it will check if there is a curvature along both directions.
 
 \begin{figure}[h]
@@ -76,6 +83,6 @@ The standard linear interpolated visualisation is made passing three attributes 
 \end{figure}
 Surfaces that have a zero gaussian curvature are called \textit{developable surfaces} because they can be flattened out into the plane without any stretching. Gaussian curvature should be zero inside each mesh triangle and the same along edges since it can be flattened symmetrically into the plane.
 
+\subsection{Mean Curvature}
 
-\section{Lighting}
-formula + draw and explanation of angle (like at 90 degree some light..e.tc.)
+
