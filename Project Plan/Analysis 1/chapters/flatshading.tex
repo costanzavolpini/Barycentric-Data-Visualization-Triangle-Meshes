@@ -22,7 +22,7 @@ An example of this vertex data is the discrete Gaussian curvature.
 \end{figure}
 
 
-\subsection{Max diagram - Vertex based area}
+\subsection{Max diagram - Vertex based area} \label{section:max-diagram}
 Passing barycentric coordinates to the fragment shader will clearly demonstrate that we can get results different from the classic color interpolation.
 
 There are different approaches to color interpolation focusing on the distance from vertices. For each point in a triangle, we can easily determine its closest vertex, which we use as a cue for coloring.
@@ -231,11 +231,11 @@ Vertex Shader for gaussian curvature:
        //negative numbers until 0 -> map from red to green
        if (val < 0) {
             return vec4(interpolation(red, green,
-                   val/min_gc)/(mean_negative_gc/5), 1.0);
+                val/min_gc)/(mean_negative_gc/5), 1.0);
         } else {
             //map from green to blue, from 0 to positive
             return vec4(interpolation(green, blue,
-                   val/max_gc)/(mean_positive_gc/5), 1.0);
+                val/max_gc)/(mean_positive_gc/5), 1.0);
         }
     }
 
@@ -250,17 +250,20 @@ Vertex Shader for gaussian curvature:
 \end{lstlisting}
 
 \section{Evaluation and Comparison}
+We want now to compare the classic linear interpolation visualisation (Fig. \ref{fig:interpolation-horse}) with two possible way to extend the flat shading. In Fig. \ref{fig:lighting-horse} and Fig. \ref{fig:gaussian-horse} we have color each vertex area following the method \textit{max diagram} described in the above subsection \ref{section:max-diagram}, this extension of the flat shading returns a more 3-dimensional model.
+In fact, as we can see in Fig. \ref{fig:lighting-horse} and Fig. \ref{fig:gaussian-horse}, the horse get more realistic thanks to the lighting calculation for Fig. \ref{fig:lighting-horse} and to the \textit{Gaussian curvature} for Fig. \ref{fig:gaussian-horse}, in particular this last result in a more detailed model.
 \begin{figure}[!htb]
   \minipage{0.32\textwidth}
     \includegraphics[width=\linewidth]{images/linear-horse.png}
     \caption{Interpolation}\label{fig:interpolation-horse}
   \endminipage\hfill
-%   \minipage{0.32\textwidth}
+  \minipage{0.32\textwidth}
 %     \includegraphics[width=\linewidth]{flat.png}
-%     \caption{Min Diagram.}\label{fig:min}
-%   \endminipage\hfill
+    \caption{Lighting calculation}\label{fig:lighting-horse}
+  \endminipage\hfill
   \minipage{0.32\textwidth}%
     \includegraphics[width=\linewidth]{images/gaussian-horse.png}
     \caption{Gaussian Curvature}\label{fig:gaussian-horse}
   \endminipage
   \end{figure}
+  Coloring vertex areas looking if the value of \textit{Gaussian curvature} is positive or negative will mark every change of signs highlighting the 3-dimensionality of the model.

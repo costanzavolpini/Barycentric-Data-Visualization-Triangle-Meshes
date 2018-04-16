@@ -1,10 +1,10 @@
 # Fdb version 3
-["biber report"] 1523829036 "report.bcf" "report.bbl" "report" 1523829046
-  "report.bcf" 1523829046 88295 3f07404b7b21e92a93ded8fe4eb8f3ce ""
+["biber report"] 1523835693 "report.bcf" "report.bbl" "report" 1523836738
+  "report.bcf" 1523836738 88295 3f07404b7b21e92a93ded8fe4eb8f3ce ""
   (generated)
-  "report.blg"
   "report.bbl"
-["pdflatex"] 1523829041 "/Users/costanzavolpini/Git/Thesis/Project Plan/Analysis 1/report.tex" "report.pdf" "report" 1523829046
+  "report.blg"
+["pdflatex"] 1523836733 "/Users/costanzavolpini/Git/Thesis/Project Plan/Analysis 1/report.tex" "report.pdf" "report" 1523836738
   "/Users/costanzavolpini/Git/Thesis/Project Plan/Analysis 1/report.tex" 1523829024 2984 8af2ab0136c02d8a67b3cdcf7e33d2a3 ""
   "/usr/local/texlive/2017/texmf-dist/fonts/map/fontname/texfonts.map" 1511824771 3332 103109f5612ad95229751940c61aada0 ""
   "/usr/local/texlive/2017/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1480098698 1004 54797486969f23fa377b128694d548df ""
@@ -248,7 +248,7 @@
   "/usr/local/texlive/2017/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1516373780 2536335 879cd2202d4b7d061c3a5c0b5c68185a ""
   "/usr/local/texlive/2017/texmf-var/web2c/pdftex/pdflatex.fmt" 1516373813 4131535 12dd87a0155b1b747899130557d8c3b2 ""
   "/usr/local/texlive/2017/texmf.cnf" 1495593465 577 2b71d4d888f9e5560b2e99985915a9fa ""
-  "chapters/flatshading.tex" 1523826574 9343 78e9d72bae5c950549c6447bc42f1eca ""
+  "chapters/flatshading.tex" 1523836733 10307 49c66987324ad0f964dedb207d9d9aa1 ""
   "chapters/gpuprogram.tex" 1523825298 770 50479de0bd68b5c327f49957c0a64149 ""
   "chapters/introduction.tex" 1523825298 3357 8e8a77faf26e303571248b0822b97af7 ""
   "header.png" 1523825298 31685 0aceab5f39cbe55b1e54a949645da47d ""
@@ -257,15 +257,15 @@
   "images/linear-horse.png" 1523825237 552258 7cdfb0eaf0cdd9062dc96a9ad6173cf0 ""
   "images/max.png" 1523825298 6740 d12475a54edd21f8853152a8a4e1a5c7 ""
   "images/vertex-area.png" 1523825298 175716 384efc0a349ec01080e6717d275020f1 ""
-  "report.aux" 1523829046 4834 eb1ca4b2d063e692cbd816a8a1ddfd0a ""
-  "report.bbl" 1523829037 466 5e94f251ea8a419bbae6173a1e9a9c1d "biber report"
-  "report.run.xml" 1523829046 2315 a48ac8bebdb8940ec6c3379918ea7ad0 ""
+  "report.aux" 1523836737 5071 392de8558df6dbfeab78c134a8d18cb9 ""
+  "report.bbl" 1523835694 466 5e94f251ea8a419bbae6173a1e9a9c1d "biber report"
+  "report.run.xml" 1523836738 2315 a48ac8bebdb8940ec6c3379918ea7ad0 ""
   "report.tex" 1523829024 2984 8af2ab0136c02d8a67b3cdcf7e33d2a3 ""
-  "report.toc" 1523829046 1689 acd7c22d655607ef3606578318d1fb71 ""
+  "report.toc" 1523836738 1689 acd7c22d655607ef3606578318d1fb71 ""
   (generated)
-  "report.pdf"
-  "report.toc"
-  "report.bcf"
-  "report.log"
-  "report.aux"
   "report.run.xml"
+  "report.pdf"
+  "report.aux"
+  "report.log"
+  "report.bcf"
+  "report.toc"
