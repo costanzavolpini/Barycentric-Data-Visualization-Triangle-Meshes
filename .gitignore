@@ -18,3 +18,5 @@ Project Plan/Analysis 1/report\.log
 *.gz
 
 Project Plan/Analysis 1/report\.toc
+
+*.blg

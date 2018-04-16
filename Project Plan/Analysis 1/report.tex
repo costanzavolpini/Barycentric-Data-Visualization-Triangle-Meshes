@@ -59,6 +59,21 @@
     }
   }
 }
+
+% set the default code style
+\lstset{
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=left, % display line numbers on the left
+    basicstyle=\ttfamily,
+    language=C++,
+    breaklines=true,
+    commentstyle=\color{gray}\ttfamily,, % comment color
+    keywordstyle=\color{blue}\ttfamily,, % keyword color
+    stringstyle=\color{red}\ttfamily, % string color
+}
+
 \usepackage[paper=a4paper,top=0.58in,left=1.65in, right=1.65in, bottom=1.65in]{geometry}
 
 \definecolor{lightorange}{RGB}{251,211,168}
@@ -114,8 +129,8 @@ I want to thank...
 
 
 \appendix
-\chapter{Appendix Title}
-% \input{chapters/appendix}
+\chapter{Pseudocodes}
+\input{chapters/pseudocodes}
 
 \end{document}
 
