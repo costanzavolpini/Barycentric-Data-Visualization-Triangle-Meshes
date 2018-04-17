@@ -1,3 +1,4 @@
+\label{section:vertex-area-chapter}
 Alternative data visualization techniques can be found using the power of barycentric coordinates and GPU programming.
 
 The usual way to visualize data for a triangle mesh is to associate data to vertices and then interpolating over the mesh triangles, that does not work in case of edges and triangles.
@@ -28,8 +29,7 @@ There are different approaches to color interpolation focusing on the distance f
 A different approach from interpolating, can be found coloring vertex areas based on the minimum barycentric coordinate.
 The color is given by the region farthest from a vertex (Fig. \ref{fig:max-diagram}, Pseudocode \ref{appendix:max-diagram}).
 
-
-\section{Color vertex area by lighting} \label{section:extend-flat-shading-lighting}
+\section{Flat shading extension} \label{section:extend-flat-shading-lighting}
 Suppose now that you want each vertex area to be in one constant color. This color can be taken from shading interpolation using the normal at the vertex and the vertex position. Then you can compute the color has it be done in \textit{Gouraud Shading}.
 
 The idea is to compute the color per vertex but instead of linearly interpolated it in each triangle (as \textit{Gouraud shading} does) we color regions around a vertex with that constant color.
@@ -37,8 +37,13 @@ The idea is to compute the color per vertex but instead of linearly interpolated
 To implement that we need to pass the barycentric coordinates, the vertex color, the normal at the vertex and the lighting calculations to the \textit{fragment shader}.
 
 We want to avoid an automatic interpolation of colors, in order to return the resulting color using the \textit{max diagram}, to do that we have used a \textit{Geometry shader} in order to access to all three vertex colors in fragment shader. (Pseudocodes: \ref{appendix:vs-flat-shading-lighting}, \ref{appendix:gs-flat-shading-lighting}, \ref{appendix:fs-flat-shading-lighting})
+
+\subsection{Comparison}
+Gouraud shading vs extension flat shading.
+
 %%%
-\section{Color vertex area by Gaussian Curvature}\label{extend-flat-gaussian-curvature}
+\section{Discrete Gaussian Curvature}
+\label{section:vertex-area-gaussian-curvature}
 We want to compute the \textit{Gaussian curvature} per vertex. We want to sum up, for each vertex, angles at this vertex with adjacent triangles and then we subtract this value to $2\pi$.
 After having obtain this value, called \textit{angle defect} (Fig. \ref{fig:gc-angle}), we map linearly this value to a color range.
 
@@ -67,7 +72,7 @@ $$G = 2\pi - \sum_j \theta_j$$
 \end{figure}
 
 
-\section{Comparison}
+\subsection{Comparison}
 We want now to compare the classic linear interpolation visualisation (Fig. \ref{fig:interpolation-horse}) with two possible way to extend the flat shading. In Fig. \ref{fig:lighting-horse} and Fig. \ref{fig:gaussian-horse} we have color each vertex area applying the method \textit{max diagram} described in the above subsection \ref{section:max-diagram}.
 As we can see in Fig. \ref{fig:lighting-horse} and Fig. \ref{fig:gaussian-horse}, the horse get a more realistic shape thanks to the lighting calculation for Fig. \ref{fig:lighting-horse} and to the \textit{Gaussian curvature} for Fig. \ref{fig:gaussian-horse}.
 \begin{figure}[!htb]
