@@ -164,7 +164,6 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         instead of the identity matrix. From that version it is required to initialize matrix types as: glm::mat4 mat = glm::mat4(1.0f).
     */
     glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0., 0., 0.), glm::vec3(0., 1., 0.));
-    glm::mat4 projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, 3.0f, 10.0f); //near plane must be close of the the camera location (aound 3.0f)
     glm::mat4 model = glm::mat4(1.0f);
 
     ourShader.use(); //draw
@@ -172,13 +171,13 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
 
     if(isExtendFlatShading){
         // get matrix's uniform location and set matrix
-        ourShader.setVec3("light.position", 5.0f, 5.0f, 5.0f);
+        ourShader.setVec3("light.position", 0.5f, 0.5f, 0.5f);
         ourShader.setVec3("viewPos", glm::vec3(0.0f, 0.0f, 3.0f));
 
         // light properties
-        ourShader.setVec3("light.ambient", 0.8f, 0.8f, 0.8f);
-        ourShader.setVec3("light.diffuse", 0.2f, 0.2f, 0.2f);
-        ourShader.setVec3("light.specular", 0.5f, 0.5f, 0.5f);
+        ourShader.setVec3("light.ambient", 0.1f, 0.1f, 0.1f);
+        ourShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
+        ourShader.setVec3("light.specular", 0.2f, 0.2f, 0.2f);
         ourShader.setFloat("shininess", 12.0f);
 
     } else if(isGaussianCurvature) {
@@ -189,12 +188,9 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         ourShader.setFloat("mean_positive_gc", object.get_positive_mean_gaussian_curvature_value());
         // cout << "MIN " << object.get_minimum_gaussian_curvature_value() << endl;
         // cout << "MAX " << object.get_maximum_gaussian_curvature_value() << endl;
-
     }
-
         view = glm::translate(view, glm::vec3(-(get_max_x() + get_min_x())/2.0f,-(get_max_y() + get_min_y())/2.0f,-(get_max_z() + get_min_z())/2.0f));
-
-
+        std::cout << glm::to_string(view) << std::endl;
 
     /**
         application to keep drawing images and handling user input until the program has been explicitly told to stop
@@ -212,13 +208,15 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         // arcball
         glm::mat4 rotated_view = view * arcball.rotation_matrix_view();
         glm::mat4 rotated_model = model * arcball.rotation_matrix_model(view);
-        projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, 3.0f, 10.0f);
+        // glm::mat4 projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, (float) get_min_z(), (float) get_max_z()); //near plane must be close of the the camera location (aound 3.0f)
+        glm::mat4 projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, 3.0f, 10.0f);
+        // std::cout << get_min_z() << " " << get_max_z() << std::endl;
 
         ourShader.setMat4("projection", projection);
         ourShader.setMat4("view", rotated_view);
         ourShader.setMat4("model", rotated_model);
 
-
+        // glm::mat4 transform = glm::mat4(1.0f);
         // transform = model * glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
         // ourShader.setMat4("model", transform);
         object.draw();
