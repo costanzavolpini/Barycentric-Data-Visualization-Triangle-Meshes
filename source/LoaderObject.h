@@ -25,9 +25,12 @@ struct Triangle { int v[3]; };
 vector<Triangle> t;
 double PI = atan(1)*4;
 int num_triangles;
+
 int isGaussianCurvature = 0; //default not
 int isLinearInterpolation = 0; //default not
 int isExtendFlatShading = 1; //default yes
+int isGouraudShading = 0; // default not
+
 double max_val_x = 0;
 double max_val_y = 0;
 double max_val_z = 0;
@@ -46,6 +49,10 @@ double min_val_z = 0;
 
         void setExtendFlatShading(int flag){
             isExtendFlatShading = flag;
+        }
+
+        void setGouraudShading(int flag){
+            isGouraudShading = flag;
         }
 
         void set_min(Point3d current){
@@ -171,7 +178,7 @@ double min_val_z = 0;
                 set_max(v2);
 
 
-                if(isExtendFlatShading){ //normals
+                if(isExtendFlatShading || isGouraudShading){ //normals
                     // for every triangle face compute face normal and normalize it
                     Point3d n = (v1-v0)^(v2-v0);
                     n.normalize();
@@ -211,7 +218,7 @@ double min_val_z = 0;
                 }
 
                 //LINEAR INTERPOLATION
-                if(isLinearInterpolation || isExtendFlatShading) {
+                if(isLinearInterpolation) {
                     color_li[9 * k] = 1.0f; //red x
                     color_li[9 * k + 1] = 0.0f; // red y
                     color_li[9 * k + 2] = 0.0f; // red z
@@ -239,7 +246,7 @@ double min_val_z = 0;
 
            // -------------- END GAUSSIAN CURVATURE -----------------
 
-            if(isExtendFlatShading){ //normals
+            if(isExtendFlatShading || isGouraudShading){ //normals
                 // normalize every vertex normal
                 // average of norms of adj triangle of a vertex (sum of triangle norms / number of triangles)
                 for(int k = 0; k < num_vertices; k++){
@@ -265,7 +272,7 @@ double min_val_z = 0;
                 triangle_vertices[9 * k + 7] = v[t[k].v[2]].y();
                 triangle_vertices[9 * k + 8] = v[t[k].v[2]].z();
 
-                if(isExtendFlatShading){
+                if(isExtendFlatShading || isGouraudShading){
                     // insert normal values in triangles
                     triangle_normals[9 * k] = normals[t[k].v[0]].x();
                     triangle_normals[9 * k + 1] = normals[t[k].v[0]].y();
@@ -286,7 +293,7 @@ double min_val_z = 0;
             for (unsigned int i = 0; i < triangle_vertices.size(); i++) {
                 // get value
                 out_vertices.push_back(triangle_vertices[i]);
-                if(isExtendFlatShading) {
+                if(isExtendFlatShading || isGouraudShading) {
                     out_normals.push_back(triangle_normals[i]);
                 } else if(isGaussianCurvature) {
                     gc.push_back(triangle_gc[i]);

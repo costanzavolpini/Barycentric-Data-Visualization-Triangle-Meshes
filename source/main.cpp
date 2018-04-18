@@ -55,6 +55,7 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
     int isGaussianCurvature = 0;
     int isLinearInterpolation = 0;
     int isExtendFlatShading = 1;
+    int isGouraudShading = 1;
 
     /*
        Take input
@@ -67,21 +68,35 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
                 name_file = strtok(NULL, "=");
             } else if (strcmp(token, "type") == 0) {
                 type = strtok(NULL, "=");
-                if(type == "gc"){
+                if(type == "gc"){ // GAUSSIAN CURVATURE
                     setGaussianCurvature(1); //pass to LoaderObject
                     setExtendFlatShading(0); //pass to LoaderObject
+                    setGouraudShading(0); //pass to LoaderObject
                     vertex_shader = "vertexShaderGC.vs";
                     isGaussianCurvature = 1;
                     isExtendFlatShading = 0;
-                } else if(type == "li"){
+                    isGouraudShading = 0;
+                } else if(type == "li"){ // LINEAR INTERPOLATION
                     setLinearInterpolation(1); //pass to LoaderObject
                     setExtendFlatShading(0); //pass to LoaderObject
+                    setGouraudShading(0); //pass to LoaderObject
                     vertex_shader = "vertexShaderLI.vs";
-                    fragment_shader = "fragmentShaderLI.fs";
+                    fragment_shader = "fragmentShader.fs";
                     geometry_shader = NULL;
                     isLinearInterpolation = 1;
                     isExtendFlatShading = 0;
-                }
+                    isGouraudShading = 0;
+                } else if(type == "li"){
+                    setLinearInterpolation(0); //pass to LoaderObject
+                    setExtendFlatShading(0); //pass to LoaderObject
+                    setGouraudShading(1); //pass to LoaderObject
+                    vertex_shader = "vertexShaderGS.vs";
+                    fragment_shader = "fragmentShader.fs";
+                    geometry_shader = NULL;
+                    isGouraudShading = 1;
+                    isLinearInterpolation = 0;
+                    isExtendFlatShading = 0;
+                } // else EXTEND FLAT SHADING
             }
         }
     }
@@ -169,7 +184,7 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
     ourShader.use(); //draw
 
 
-    if(isExtendFlatShading){
+    if(isExtendFlatShading || isGouraudShading){
         // get matrix's uniform location and set matrix
         ourShader.setVec3("light.position", 0.5f, 0.5f, 0.5f);
         ourShader.setVec3("viewPos", glm::vec3(0.0f, 0.0f, 3.0f));

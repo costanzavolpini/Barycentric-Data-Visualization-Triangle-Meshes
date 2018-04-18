@@ -23,6 +23,7 @@ class Object {
     int isGaussianCurvature = 0;
     int isLinearInterpolation = 0;
     int isExtendFlatShading = 1;
+    int isGouraudShading = 0;
 
     /**
         Memory on the GPU where we store the vertex data
@@ -54,7 +55,7 @@ class Object {
           */
           glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_vertices.size(), &triangle_vertices[0], GL_STATIC_DRAW); // copies the previously defined vertex data into the buffer's memor
 
-         if(isExtendFlatShading){
+         if(isExtendFlatShading || isGouraudShading){
             // VBO NORMALS
             glGenBuffers(1, &VBO_NORMAL); //generate buffer, bufferID = 1
 
@@ -71,7 +72,7 @@ class Object {
 
                 glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_gc.size(), &triangle_gc[0], GL_STATIC_DRAW);
 
-          } else if(isLinearInterpolation || isExtendFlatShading){
+          } else if(isLinearInterpolation){
               // VBO_LINEARINTERPOLATION
                 glGenBuffers(1, &VBO_LINEARINTERPOLATION); //generate buffer, bufferID = 1
 
@@ -102,7 +103,7 @@ class Object {
           glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float))); // 72-bit floating point values, each position is composed of 3 of those values (3 points (one for each vertex))
           glEnableVertexAttribArray(0); //this 0 is referred to the layout on shader
 
-         if(isExtendFlatShading){
+         if(isExtendFlatShading || isGouraudShading){
                 glBindBuffer(GL_ARRAY_BUFFER, VBO_NORMAL);
                 //normal attribute
                 glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float)));
@@ -116,7 +117,7 @@ class Object {
                 glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float)));
                 glEnableVertexAttribArray(2); //this 2 is referred to the layout on shader
 
-          } else if(isLinearInterpolation || isExtendFlatShading){
+          } else if(isLinearInterpolation){
 
                 glBindBuffer(GL_ARRAY_BUFFER, VBO_LINEARINTERPOLATION);
 
@@ -238,6 +239,9 @@ class Object {
         isExtendFlatShading = flag;
     }
 
+    void setGouraudFlatShading(int flag){
+        isGouraudShading = flag;
+    }
 };
 
 #endif
