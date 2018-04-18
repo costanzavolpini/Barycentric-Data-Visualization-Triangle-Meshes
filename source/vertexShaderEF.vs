@@ -52,11 +52,9 @@
         if(diffuse_intensity > 0.0001){
             vec3 specular = get_specular(pos, normal, light_direction);
             return vec4((ambient + diffuse + specular), 1.0);
-            // return vec4((ambient + diffuse + specular) * aColor, 1.0);
         }
 
-        // return vec4((ambient + diffuse) * aColor, 1.0);
-                return vec4((ambient + diffuse) , 1.0);
+        return vec4((ambient + diffuse) , 1.0);
     }
 
 
@@ -68,7 +66,7 @@
         vec3 light_pos = vec3(projection * vec4(light.position, 1.0));
         // light_pos = light.position;
 
-        vertex_color = get_result_color_lighting(world_position, world_normal, light_pos)  * vec4(1.0, 0.0, 0.0, 1.0); // color obtained with lighting calculations
+        vertex_color = get_result_color_lighting(world_position, world_normal, light_pos); // color obtained with lighting calculations
 
         gl_Position = projection * view * model * vec4(aPos, 1.0);
     }
