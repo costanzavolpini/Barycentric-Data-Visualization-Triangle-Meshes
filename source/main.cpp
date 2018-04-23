@@ -17,6 +17,7 @@
 //to test
 #include "glm/ext.hpp"
 
+#define IS_IN_DEBUG false // to show normals
 
 using namespace std;
 
@@ -169,7 +170,8 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         (GLSL version 420 corresponds to OpenGL version 4.2 for example).
     */
     Shader ourShader(vertex_shader, fragment_shader, geometry_shader);
-    // Shader normalShader("normal.vs", "normal.fs", "normal.gs");
+
+    Shader normalShader("normal.vs", "normal.fs", "normal.gs");
 
 
 
@@ -216,8 +218,9 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         // cout << "MIN " << object.get_minimum_gaussian_curvature_value() << endl;
         // cout << "MAX " << object.get_maximum_gaussian_curvature_value() << endl;
     }
-        view = glm::translate(view, glm::vec3(-(get_max_x() + get_min_x())/2.0f,-(get_max_y() + get_min_y())/2.0f,-(get_max_z() + get_min_z())/2.0f));
-        std::cout << glm::to_string(view) << std::endl;
+        // view = glm::translate(view, glm::vec3(-(get_max_coords().x() + get_min_coords().x())/2.0f,-(get_max_coords().y() + get_min_coords().y())/2.0f,-(get_max_coords().z() + get_min_coords().z())/2.0f));
+        // view = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0., 0., 0.), glm::vec3(0., 1., 0.));;
+        // std::cout << glm::to_string(view) << std::endl;
 
     /**
         application to keep drawing images and handling user input until the program has been explicitly told to stop
@@ -248,14 +251,15 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         // ourShader.setMat4("model", transform);
         object.draw();
 
+        if (IS_IN_DEBUG){
+            // then draw model with normal visualizing geometry shader (FOR DEBUG)
+            normalShader.use();
+            normalShader.setMat4("projection", projection);
+            normalShader.setMat4("view", rotated_view);
+            normalShader.setMat4("model", rotated_model);
 
-        // then draw model with normal visualizing geometry shader (FOR DEBUG)
-        // normalShader.use();
-        // normalShader.setMat4("projection", projection);
-        // normalShader.setMat4("view", rotated_view);
-        // normalShader.setMat4("model", rotated_model);
-
-        // object.draw();
+            object.draw();
+        }
 
         glfwSwapBuffers(window); // will swap the color buffer
         glfwPollEvents(); // function checks if any events are triggered (like keyboard input or mouse movement events)
