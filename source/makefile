@@ -1,7 +1,7 @@
 CPP = g++
 CC = gcc
 CFLAGS = -c
-CPPFLAGS = -c
+CPPFLAGS = -c -std=c++11
 FLAGS = -lglfw
 
 OBJECTC = glad.o main.o

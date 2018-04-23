@@ -1,4 +1,7 @@
-\subsection{Chapter 3}
+\subsection{Chapter \ref{section:vertex-area-chapter}}
+CHECK AND UPDATE CODES
+
+
 \begin{lstlisting}[caption={Max diagram - Vertex based area (Section: \ref{section:max-diagram})\label{appendix:max-diagram}}]
 if (Coords.x > Coords.y && Coords.x > Coords.z) {
     vec3 blue = vec3(0.0f, 0.0f, 1.0f);
@@ -101,7 +104,9 @@ void main() {
 
 \vspace{10pt}
 
-\begin{lstlisting}[caption={Vertex Shader for flat shading extension using gaussian curvature (Section: \ref{section:extend-flat-gaussian-curvature})\label{appendix:vs-gaussiancurvature}}]
+\begin{lstlisting}[caption={Vertex Shader for flat shading extension using gaussian curvature (Section:
+    \ref{section:vertex-area-gaussian-curvature})
+    \label{appendix:vs-gaussiancurvature}}]
 #version 330 core
 layout (location = 0) in vec3 aPos;
 layout (location = 2) in vec3 gaussian_curvature;

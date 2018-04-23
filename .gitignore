@@ -7,16 +7,22 @@
 
 *.bcf
 
-Project Plan/Analysis 1/report\.fdb_latexmk
+*.blg
 
-Project Plan/Analysis 1/report\.fls
+*.fdb_latexmk
 
-Project Plan/Analysis 1/report\.log
+*.fls
 
-*.synctex(busy)
+*.log
 
 *.gz
 
-Project Plan/Analysis 1/report\.toc
+*.toc
 
-*.blg
+Project Plan/Thesis/report-blx\.bib
+
+*.xml
+
+*.bbl
+
+Project Plan/Analysis 1/report-blx\.bib

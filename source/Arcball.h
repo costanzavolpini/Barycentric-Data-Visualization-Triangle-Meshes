@@ -2,6 +2,7 @@
 #ifndef ARCBALL_H
 #define ARCBALL_H
 #include "Base.h"
+#include "glm/ext.hpp"
 
 /**
     Get a normalized vector from the center of the virtual ball O to a
@@ -15,10 +16,12 @@ class Arcball {
     int WIDTH, HEIGHT;
     float speed;
     bool x_axis, y_axis;
-    glm::vec3 camera_axis = glm::vec3(0.0f, 1.0f, 0.0f);
+    glm::vec3 rotation_axis = glm::vec3(0.0f, 1.0f, 0.0f);
     float angle = 0.0f;
     int event_mouse = 0;
     glm::vec3 cur_pos, prev_pos;
+
+    glm::mat4 transform = glm::mat4(1.0f);
 
 
     public:
@@ -37,7 +40,7 @@ class Arcball {
 
             if(x_axis)
                 P.x =  (2 * x - WIDTH ) / WIDTH;
-    
+
             if(y_axis)
                 P.y = -(2 * y - HEIGHT) / HEIGHT;
 
@@ -71,24 +74,29 @@ class Arcball {
 
             // not the first time that we have pressed the btn
             cur_pos = get_screen_coord(xpos, ypos); //get current pos
-            
+
             // angle in radians and clip [0, 90]
             angle = acos(std::min(1.0f, glm::dot(prev_pos, cur_pos)));
-            
+
             // cross product to get rotation axis (in camera coords)
-            camera_axis = glm::cross(prev_pos, cur_pos);
+            rotation_axis = glm::cross(prev_pos, cur_pos);
+
         }
 
         // create rotation matrix with camera coords
         // multiply this matrix with view matrix to rotate the camera
         glm::mat4 rotation_matrix_view(){
-            return glm::rotate(glm::degrees(angle) * speed, camera_axis);
+            // std::cout << glm::to_string(rotation_axis) << std::endl;
+            // std::cout << angle << "speed " << speed << std::endl;
+            // vec3(-0.000147, 0.006335, -0.000574)
+            // 0.00636642 speed 1.5
+            return glm::rotate(glm::degrees(angle) * speed, rotation_axis);
         }
 
         // create rotation matrix with world coords
         // multiply this matrix with model matrix to rotate the object
         glm::mat4 rotation_matrix_model(glm::mat4& view_matrix){
-            glm::vec3 axis = glm::inverse(glm::mat3(view_matrix)) * camera_axis;
+            glm::vec3 axis = glm::inverse(glm::mat3(view_matrix)) * rotation_axis;
             return glm::rotate(glm::degrees(angle) * speed, axis);
         }
 };
