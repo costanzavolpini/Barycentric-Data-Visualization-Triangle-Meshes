@@ -2,3 +2,27 @@
 \.DS_Store
 
 *.o
+
+*.aux
+
+*.bcf
+
+*.blg
+
+*.fdb_latexmk
+
+*.fls
+
+*.log
+
+*.gz
+
+*.toc
+
+Project Plan/Thesis/report-blx\.bib
+
+*.xml
+
+*.bbl
+
+Project Plan/Analysis 1/report-blx\.bib

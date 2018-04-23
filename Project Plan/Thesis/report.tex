@@ -1,0 +1,136 @@
+
+\documentclass[12pt]{report}
+\usepackage[utf8]{inputenc}
+
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{pgfgantt}
+\usepackage{amsthm}
+\usepackage{fancyhdr}
+\usepackage{rotating}
+\usepackage[graphicx]{realboxes}
+\renewcommand{\vec}{\bm}
+\usepackage{dsfont}
+\usepackage{xcolor}
+\usepackage{sectsty}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage[backend=biber]{biblatex}
+\addbibresource{report.bib}
+\pgfplotsset{compat=newest}
+\usepgfplotslibrary{patchplots}
+\usetikzlibrary{calc,intersections,trees,positioning,arrows,chains,shapes.geometric,%
+    decorations.pathreplacing,decorations.pathmorphing,shapes,%
+    matrix,shapes.symbols, 3d}
+
+
+\tikzset{
+>=stealth',
+  punktchain/.style={
+    rectangle,
+    rounded corners,
+    % fill=black!10,
+    draw=black, very thick,
+    text width=10em,
+    minimum height=3em,
+    text centered,
+    on chain},
+  line/.style={draw, thick, <-},
+  element/.style={
+    tape,
+    top color=white,
+    bottom color=blue!50!black!60!,
+    minimum width=8em,
+    draw=blue!40!black!90, very thick,
+    text width=10em,
+    minimum height=3.5em,
+    text centered,
+    on chain},
+  every join/.style={->, thick,shorten >=1pt},
+  decoration={brace},
+  tuborg/.style={decorate},
+  tubnode/.style={midway, right=2pt},
+  pics/carc/.style args={#1:#2:#3}{
+    code={
+      \draw[pic actions] (#1:#3) arc(#1:#2:#3);
+    }
+  }
+}
+
+% set the default code style
+\lstset{
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=left, % display line numbers on the left
+    basicstyle=\ttfamily,
+    language=C++,
+    breaklines=true,
+    commentstyle=\color{gray}\ttfamily,, % comment color
+    keywordstyle=\color{blue}\ttfamily,, % keyword color
+    stringstyle=\color{red}\ttfamily, % string color
+}
+
+\usepackage[paper=a4paper,top=0.58in,left=1.65in, right=1.65in, bottom=1.65in]{geometry}
+
+\definecolor{lightorange}{RGB}{251,211,168}
+\definecolor{darkred}{RGB}{153,0,0}
+\definecolor{darkgreen}{RGB}{0,51,25}
+
+\title{ \includegraphics[width=\linewidth]{header.png}~
+\\[0.5cm]
+  \huge{Bachelor Project} \\
+\textbf{\Large{Barycentric Data Visualization for Triangle Meshes}}}
+\date{Spring Semester 2018}
+\author{Costanza \textbf{Volpini} \\ \textcolor{gray}{costanza.volpini@usi.ch} \\ \\ Professor: Kai \textbf{Hormann} \\ Assistant: Jan \textbf{Svoboda}}
+
+\begin{document}
+\pagestyle{fancy}
+\rhead{\bfseries  Costanza Volpini}
+\lhead{\bfseries  Bachelor Project}
+\maketitle
+\newgeometry{paper=a4paper,margin=1.65in}
+
+%%%%%%% ref: https://it.sharelatex.com/blog/2013/08/02/thesis-series-pt1.html
+\chapter*{Abstract}
+Abstract goes here
+
+\chapter*{Dedication}
+to somebody
+
+\chapter*{Declaration}
+I declare that..
+
+\chapter*{Acknowledgements}
+I want to thank...
+
+\tableofcontents
+%%%%%%%
+\chapter{Introduction}
+\input{chapters/introduction}
+
+\chapter{GPU program}
+\input{chapters/gpuprogram}
+
+\chapter{Vertex area based}
+\input{chapters/vertexarea}
+
+% \subsection{Min diagram - Edge based area}
+% A different approach from interpolating, can be found coloring edge areas based on the minimum barycentric coordinate.
+% The color is given by the region closest to the vertex.
+
+% \chapter{Conclusion}
+% \input{chapters/conclusion}
+% See~\cite{DUMMY:1}.
+\printbibliography
+
+
+\appendix
+\chapter{Pseudocodes}
+\input{chapters/pseudocodes}
+
+\end{document}
+

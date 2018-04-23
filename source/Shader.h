@@ -10,9 +10,9 @@ Comment:  This file contains all Shader definitions and functions.
 
 /**
     ------------- SHADER PROGRAM -------------
-    The graphics pipeline can be divided into two large parts: the first transforms your 3D coordinates into 2D coordinates 
+    The graphics pipeline can be divided into two large parts: the first transforms your 3D coordinates into 2D coordinates
     and the second part transforms the 2D coordinates into actual colored pixels.
-    The geometry shader takes as input a collection of vertices that form a primitive and has the ability 
+    The geometry shader takes as input a collection of vertices that form a primitive and has the ability
     to generate other shapes by emitting new vertices to form new (or other) primitive(s).
 */
 
@@ -85,7 +85,7 @@ public:
 
         // Fragment Shader : is all about calculating the color output of your pixels
         fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(fragmentShader, 1, &fShaderCode, NULL); 
+        glShaderSource(fragmentShader, 1, &fShaderCode, NULL);
         glCompileShader(fragmentShader);
         checkCompileErrors(fragmentShader, "FRAGMENT"); // check for shader compile errors (fragment)
 
@@ -101,15 +101,15 @@ public:
 
         /**
             Shader Program that we can use for rendering
-            To use the recently compiled shaders we have to link them to a shader program object 
+            To use the recently compiled shaders we have to link them to a shader program object
             and then activate this shader program when rendering objects.
         */
         shaderProgram = glCreateProgram();
         glAttachShader(shaderProgram, vertexShader);
         if(pathGeometryShader != nullptr){
             glAttachShader(shaderProgram, geometry);
-        }           
-        glAttachShader(shaderProgram, fragmentShader);                             
+        }
+        glAttachShader(shaderProgram, fragmentShader);
 
         glLinkProgram(shaderProgram);
         checkCompileErrors(shaderProgram, "PROGRAM");
@@ -122,59 +122,59 @@ public:
     }
     // activate the shader
     // ------------------------------------------------------------------------
-    void use() { 
-        glUseProgram(shaderProgram); 
+    void use() {
+        glUseProgram(shaderProgram);
     }
 
     // deactivate
-    void deactivate() { 
+    void deactivate() {
         glUseProgram(0);
     }
 
     // utility uniform functions
     // ------------------------------------------------------------------------
-    void setBool(const std::string &name, bool value) const {         
-        glUniform1i(glGetUniformLocation(shaderProgram, name.c_str()), (int)value); 
+    void setBool(const std::string &name, bool value) const {
+        glUniform1i(glGetUniformLocation(shaderProgram, name.c_str()), (int)value);
     }
 
     // ------------------------------------------------------------------------
-    void setInt(const std::string &name, int value) const { 
-        glUniform1i(glGetUniformLocation(shaderProgram, name.c_str()), value); 
-    }
-    
-    // ------------------------------------------------------------------------
-    void setFloat(const std::string &name, float value) const { 
-        glUniform1f(glGetUniformLocation(shaderProgram, name.c_str()), value); 
+    void setInt(const std::string &name, int value) const {
+        glUniform1i(glGetUniformLocation(shaderProgram, name.c_str()), value);
     }
 
     // ------------------------------------------------------------------------
-
-    void setVec2(const std::string &name, const glm::vec2 &value) const { 
-        glUniform2fv(glGetUniformLocation(shaderProgram, name.c_str()), 1, &value[0]); 
-    }
-
-    void setVec2(const std::string &name, float x, float y) const { 
-        glUniform2f(glGetUniformLocation(shaderProgram, name.c_str()), x, y); 
+    void setFloat(const std::string &name, float value) const {
+        glUniform1f(glGetUniformLocation(shaderProgram, name.c_str()), value);
     }
 
     // ------------------------------------------------------------------------
 
-    void setVec3(const std::string &name, const glm::vec3 &value) const { 
-        glUniform3fv(glGetUniformLocation(shaderProgram, name.c_str()), 1, &value[0]); 
+    void setVec2(const std::string &name, const glm::vec2 &value) const {
+        glUniform2fv(glGetUniformLocation(shaderProgram, name.c_str()), 1, &value[0]);
     }
 
-    void setVec3(const std::string &name, float x, float y, float z) const { 
-        glUniform3f(glGetUniformLocation(shaderProgram, name.c_str()), x, y, z); 
+    void setVec2(const std::string &name, float x, float y) const {
+        glUniform2f(glGetUniformLocation(shaderProgram, name.c_str()), x, y);
     }
 
     // ------------------------------------------------------------------------
 
-    void setVec4(const std::string &name, const glm::vec4 &value) const { 
-        glUniform4fv(glGetUniformLocation(shaderProgram, name.c_str()), 1, &value[0]); 
+    void setVec3(const std::string &name, const glm::vec3 &value) const {
+        glUniform3fv(glGetUniformLocation(shaderProgram, name.c_str()), 1, &value[0]);
     }
 
-    void setVec4(const std::string &name, float x, float y, float z, float w) const { 
-        glUniform4f(glGetUniformLocation(shaderProgram, name.c_str()), x, y, z, w); 
+    void setVec3(const std::string &name, float x, float y, float z) const {
+        glUniform3f(glGetUniformLocation(shaderProgram, name.c_str()), x, y, z);
+    }
+
+    // ------------------------------------------------------------------------
+
+    void setVec4(const std::string &name, const glm::vec4 &value) const {
+        glUniform4fv(glGetUniformLocation(shaderProgram, name.c_str()), 1, &value[0]);
+    }
+
+    void setVec4(const std::string &name, float x, float y, float z, float w) const {
+        glUniform4f(glGetUniformLocation(shaderProgram, name.c_str()), x, y, z, w);
     }
 
     // ------------------------------------------------------------------------
@@ -190,7 +190,7 @@ public:
     }
 
     // ------------------------------------------------------------------------
-    
+
     void setMat4(const std::string &name, const glm::mat4 &mat) const {
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, name.c_str()), 1, GL_FALSE, &mat[0][0]);
     }
@@ -198,9 +198,9 @@ public:
 private:
     /**
         check for linking errors (program)
-        When linking the shaders into a program it links the outputs of each shader to the inputs of the next shader. 
+        When linking the shaders into a program it links the outputs of each shader to the inputs of the next shader.
         This is also where you'll get linking errors if your outputs and inputs do not match.
-    */    
+    */
     void checkCompileErrors(unsigned int shader, std::string type) {
         int success;
         char infoLog[1024];

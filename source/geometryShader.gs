@@ -1,11 +1,11 @@
 #version 330 core
 
 layout (triangles) in;
-layout (triangle_strip, max_vertices = 3) out; 
+layout (triangle_strip, max_vertices = 3) out;
 
-in vec4 vertex_color[3];
+in vec4 vertex_color[3]; // an array of 3 vectors of size 4 (since it is a triangle)
 out vec3 coords;
-out vec4 wedge_color[3];
+out vec4 wedge_color[3]; // an array of 3 vectors of size 4 (since it is a triangle)
 
 void main()
 {

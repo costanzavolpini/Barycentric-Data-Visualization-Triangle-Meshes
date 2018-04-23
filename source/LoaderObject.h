@@ -8,6 +8,8 @@
 #include <stdlib.h>
 #include <map>
 #include <iterator>
+#include "glm/ext.hpp"
+
 
 using namespace std;
 
@@ -23,18 +25,88 @@ struct Triangle { int v[3]; };
 vector<Triangle> t;
 double PI = atan(1)*4;
 int num_triangles;
+
 int isGaussianCurvature = 0; //default not
+int isLinearInterpolation = 0; //default not
+int isExtendFlatShading = 1; //default yes
+int isGouraudShading = 0; // default not
+
+double max_val_x = 0;
+double max_val_y = 0;
+double max_val_z = 0;
+
+double min_val_x = 0;
+double min_val_y = 0;
+double min_val_z = 0;
 
         void setGaussianCurvature(int flag){
             isGaussianCurvature = flag;
         }
 
+        void setLinearInterpolation(int flag){
+            isLinearInterpolation = flag;
+        }
 
-        bool load (const char * path, vector<float> &out_vertices, vector<float> &out_normals, vector<float> &gc) {
+        void setExtendFlatShading(int flag){
+            isExtendFlatShading = flag;
+        }
+
+        void setGouraudShading(int flag){
+            isGouraudShading = flag;
+        }
+
+        void set_min(Point3d current){
+            if(current.x() < min_val_x)
+                min_val_x = current.x();
+
+            if(current.y() < min_val_y)
+                min_val_y = current.y();
+
+            if(current.z() < min_val_z)
+                min_val_z = current.z();
+        }
+
+        void set_max(Point3d current){
+            if(current.x() > max_val_x)
+                max_val_x = current.x();
+
+            if(current.y() > max_val_y)
+                max_val_y = current.y();
+
+            if(current.z() > max_val_z)
+                max_val_z = current.z();
+        }
+
+        double get_max_x(){
+            return max_val_x;
+        }
+
+        double get_max_y(){
+            return max_val_y;
+        }
+
+        double get_max_z(){
+            return max_val_z;
+        }
+
+        double get_min_x(){
+            return min_val_x;
+        }
+
+        double get_min_y(){
+            return min_val_y;
+        }
+
+        double get_min_z(){
+            return min_val_z;
+        }
+
+
+        bool load (const char * path, vector<float> &out_vertices, vector<float> &out_normals, vector<float> &gc, vector<float> &color_li) {
             // --------------------- COMPUTATIONS -----------------------------
             /**
                 Read .OFF file
-            */ 
+            */
             ifstream in(path); // substitute with path
             if (!in) {
                 cout<<"\nError reading file."<<endl;
@@ -64,6 +136,11 @@ int isGaussianCurvature = 0; //default not
             in.close();
 
             // --------- Vector initializations -------------
+            out_vertices.clear();
+            out_normals.clear();
+            gc.clear();
+            color_li.clear();
+
             // vertices array
             vector<Point3d> normals(num_vertices);
             std::fill(normals.begin(), normals.end(), Point3d(0.0f, 0.0f, 0.0f));
@@ -75,11 +152,14 @@ int isGaussianCurvature = 0; //default not
             vector<int> v_counter(num_vertices);
             std::fill(v_counter.begin(), v_counter.end(), 0); // initialize every vertex normal to (0,0,0)
 
+
+
             // -------------- GAUSSIAN CURVATURE and VERTICES TRIANGLES -----------------
             // find gaussian curvature
             vector<float> triangle_gc(num_triangles * 9);
+            color_li.resize(num_triangles * 9);
             vector<float> gc_counter(num_vertices);
-            std::fill(gc_counter.begin(), gc_counter.end(), 0); 
+            std::fill(gc_counter.begin(), gc_counter.end(), 0);
 
             // iterate inside triangles and calculates angle_defeact
             for(int k = 0; k < num_triangles; k++){
@@ -87,7 +167,18 @@ int isGaussianCurvature = 0; //default not
                 Point3d v1 = v[t[k].v[1]];
                 Point3d v2 = v[t[k].v[2]];
 
-                if(!isGaussianCurvature){ //normals
+                // Update max and min
+                set_min(v0);
+                set_max(v0);
+
+                set_min(v1);
+                set_max(v1);
+
+                set_min(v2);
+                set_max(v2);
+
+
+                if(isExtendFlatShading || isGouraudShading){ //normals
                     // for every triangle face compute face normal and normalize it
                     Point3d n = (v1-v0)^(v2-v0);
                     n.normalize();
@@ -114,7 +205,7 @@ int isGaussianCurvature = 0; //default not
                     // VERTEX 2
                     // v2 -> v1 -> v0
                     Point3d v1v2 = v2 - v1;
-                    double sum_angles_2 = v1v2.getAngle(-v0v1);        
+                    double sum_angles_2 = v1v2.getAngle(-v0v1);
 
                     // VERTEX 3
                     // v0 -> v2 -> v1
@@ -124,6 +215,19 @@ int isGaussianCurvature = 0; //default not
                     gc_counter[t[k].v[0]] += sum_angles_1;
                     gc_counter[t[k].v[1]] += sum_angles_2;
                     gc_counter[t[k].v[2]] += sum_angles_3;
+                }
+
+                //LINEAR INTERPOLATION
+                if(isLinearInterpolation) {
+                    color_li[9 * k] = 1.0f; //red x
+                    color_li[9 * k + 1] = 0.0f; // red y
+                    color_li[9 * k + 2] = 0.0f; // red z
+                    color_li[9 * k + 3] = 0.0f;  // green x
+                    color_li[9 * k + 4] = 1.0f; // green y
+                    color_li[9 * k + 5] = 0.0f; // green z
+                    color_li[9 * k + 6] = 0.0f; // blue x
+                    color_li[9 * k + 7] = 0.0f; // blue y
+                    color_li[9 * k + 8] = 1.0f; // blue z
                 }
             }
 
@@ -142,13 +246,13 @@ int isGaussianCurvature = 0; //default not
 
            // -------------- END GAUSSIAN CURVATURE -----------------
 
-            if(!isGaussianCurvature){ //normals
+            if(isExtendFlatShading || isGouraudShading){ //normals
                 // normalize every vertex normal
                 // average of norms of adj triangle of a vertex (sum of triangle norms / number of triangles)
                 for(int k = 0; k < num_vertices; k++){
                     // normals[k].normalize();
-                    if(v_counter[k] != 0){ 
-                        normals[k] = normals[k] / v_counter[k]; 
+                    if(v_counter[k] != 0){
+                        normals[k] = normals[k] / v_counter[k];
                 }
                     normals[k].normalize();
                 }
@@ -159,7 +263,7 @@ int isGaussianCurvature = 0; //default not
                 triangle_vertices[9 * k] = v[t[k].v[0]].x();
                 triangle_vertices[9 * k + 1] = v[t[k].v[0]].y();
                 triangle_vertices[9 * k + 2] = v[t[k].v[0]].z();
-                
+
                 triangle_vertices[9 * k + 3] = v[t[k].v[1]].x();
                 triangle_vertices[9 * k + 4] = v[t[k].v[1]].y();
                 triangle_vertices[9 * k + 5] = v[t[k].v[1]].z();
@@ -168,12 +272,12 @@ int isGaussianCurvature = 0; //default not
                 triangle_vertices[9 * k + 7] = v[t[k].v[2]].y();
                 triangle_vertices[9 * k + 8] = v[t[k].v[2]].z();
 
-                if(!isGaussianCurvature){
+                if(isExtendFlatShading || isGouraudShading){
                     // insert normal values in triangles
                     triangle_normals[9 * k] = normals[t[k].v[0]].x();
                     triangle_normals[9 * k + 1] = normals[t[k].v[0]].y();
                     triangle_normals[9 * k + 2] = normals[t[k].v[0]].z();
-                    
+
                     triangle_normals[9 * k + 3] = normals[t[k].v[1]].x();
                     triangle_normals[9 * k + 4] = normals[t[k].v[1]].y();
                     triangle_normals[9 * k + 5] = normals[t[k].v[1]].z();
@@ -186,16 +290,13 @@ int isGaussianCurvature = 0; //default not
 
             // output vectors
             //For each vertex of each triangle
-            out_vertices.clear();
-            out_normals.clear();
-
             for (unsigned int i = 0; i < triangle_vertices.size(); i++) {
                 // get value
                 out_vertices.push_back(triangle_vertices[i]);
-                if(!isGaussianCurvature) {
-                    out_normals.push_back(triangle_normals[i]);      
-                } else {
-                    gc.push_back(triangle_gc[i]);     
+                if(isExtendFlatShading || isGouraudShading) {
+                    out_normals.push_back(triangle_normals[i]);
+                } else if(isGaussianCurvature) {
+                    gc.push_back(triangle_gc[i]);
                 }
             }
 

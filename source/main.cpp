@@ -1,7 +1,7 @@
 /**
     ref: https://learnopengl.com
     glfw3: brew install glfw3
-    g++ -c main.cpp && gcc -c glad.c && g++ -lglfw glad.o main.o -o main 
+    g++ -c main.cpp && gcc -c glad.c && g++ -lglfw glad.o main.o -o main
     or just use make clean && make && ./main
     Costanza Volpini
 */
@@ -44,14 +44,20 @@ using namespace std;
     void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
     static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
     void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-    
+
 
 int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is gaussian curvature, li is linearly interpolated, efs is extension of flat shading)
     string name_file = "models/iCorsi/icosahedron_1.off"; //default name
     string type = "efs"; //default type
-    const char * vertex_shader = "vertexShader.vs";
+    const char * vertex_shader = "vertexShaderEF.vs";
+    const char * geometry_shader = "geometryShader.gs";
+    const char * fragment_shader = "maxDiagramFragmentShader.fs";
     int isGaussianCurvature = 0;
-    /* 
+    int isLinearInterpolation = 0;
+    int isExtendFlatShading = 1;
+    int isGouraudShading = 1;
+
+    /*
        Take input
      */
     if (argc > 1) {
@@ -62,23 +68,44 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
                 name_file = strtok(NULL, "=");
             } else if (strcmp(token, "type") == 0) {
                 type = strtok(NULL, "=");
-                if(type == "gc"){
-                    setGaussianCurvature(1);
+                if(type == "gc"){ // GAUSSIAN CURVATURE
+                    setGaussianCurvature(1); //pass to LoaderObject
+                    setExtendFlatShading(0); //pass to LoaderObject
+                    setGouraudShading(0); //pass to LoaderObject
                     vertex_shader = "vertexShaderGC.vs";
                     isGaussianCurvature = 1;
-                }
+                    isExtendFlatShading = 0;
+                    isGouraudShading = 0;
+                } else if(type == "li"){ // LINEAR INTERPOLATION
+                    setLinearInterpolation(1); //pass to LoaderObject
+                    setExtendFlatShading(0); //pass to LoaderObject
+                    setGouraudShading(0); //pass to LoaderObject
+                    vertex_shader = "vertexShaderLI.vs";
+                    fragment_shader = "fragmentShader.fs";
+                    geometry_shader = NULL;
+                    isLinearInterpolation = 1;
+                    isExtendFlatShading = 0;
+                    isGouraudShading = 0;
+                } else if(type == "li"){
+                    setLinearInterpolation(0); //pass to LoaderObject
+                    setExtendFlatShading(0); //pass to LoaderObject
+                    setGouraudShading(1); //pass to LoaderObject
+                    vertex_shader = "vertexShaderGS.vs";
+                    fragment_shader = "fragmentShader.fs";
+                    geometry_shader = NULL;
+                    isGouraudShading = 1;
+                    isLinearInterpolation = 0;
+                    isExtendFlatShading = 0;
+                } // else EXTEND FLAT SHADING
             }
         }
     }
 
-    cout << name_file << endl;
-    cout << type << endl;
-   
 
     /**
         ------------- GLFW -------------
         initialize glf library
-     */ 
+     */
     glfwInit();
 
     // configure GLFW - OpenGl version 3
@@ -118,60 +145,68 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         cout << "Failed to initialize GLAD" << endl;
         return -1;
-    }    
+    }
 
     // ------------- END GLAD -------------
 
     /**
         Modern OpenGL requires that we at least set up a vertex and fragment shader if we want to do some rendering.
         Shader language GLSL (OpenGL Shading Language)
-        Each shader begins with a declaration of its version. 
-        Since OpenGL 3.3 and higher the version numbers of GLSL match the version of OpenGL 
+        Each shader begins with a declaration of its version.
+        Since OpenGL 3.3 and higher the version numbers of GLSL match the version of OpenGL
         (GLSL version 420 corresponds to OpenGL version 4.2 for example).
     */
-    Shader ourShader(vertex_shader, "maxDiagramFragmentShader.fs", "geometryShader.gs");
+    Shader ourShader(vertex_shader, fragment_shader, geometry_shader);
     // Shader normalShader("normal.vs", "normal.fs", "normal.gs");
+
 
 
     /**
         NB. OpenGL works in 3D space we render a 2D triangle with each vertex having a z coordinate of 0.0.
         This way the depth of the triangle remains the same making it look like it's 2D.
-        
-        Send vertex data to vertex shader (load .off file). 
-     */ 
-    
-    Object object = Object(name_file);    
+
+        Send vertex data to vertex shader (load .off file).
+     */
+    Object object = Object(name_file);
     object.setGaussianCurvature(isGaussianCurvature);
+    object.setExtendFlatShading(isExtendFlatShading);
+    object.setLinearInterpolation(isLinearInterpolation);
     object.init();
 
     /**
         IMPORTANT FOR TRANSFORMATION:
-        Since GLM version 0.9.9, GLM default initializates matrix types to a 0-initalized matrix, 
-        instead of the identity matrix. From that version it is required to initialize matrix types as: glm::mat4 mat = glm::mat4(1.0f). 
-    */ 
+        Since GLM version 0.9.9, GLM default initializates matrix types to a 0-initalized matrix,
+        instead of the identity matrix. From that version it is required to initialize matrix types as: glm::mat4 mat = glm::mat4(1.0f).
+    */
     glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0., 0., 0.), glm::vec3(0., 1., 0.));
-    glm::mat4 projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, 3.0f, 10.0f); //near plane must be close of the the camera location (aound 3.0f)
     glm::mat4 model = glm::mat4(1.0f);
 
     ourShader.use(); //draw
 
-    if(!isGaussianCurvature){
+
+    if(isExtendFlatShading || isGouraudShading){
         // get matrix's uniform location and set matrix
-        ourShader.setVec3("light.position", 5.0f, 5.0f, 5.0f); 
+        ourShader.setVec3("light.position", 0.5f, 0.5f, 0.5f);
         ourShader.setVec3("viewPos", glm::vec3(0.0f, 0.0f, 3.0f));
 
         // light properties
-        ourShader.setVec3("light.ambient", 0.8f, 0.8f, 0.8f);
-        ourShader.setVec3("light.diffuse", 0.2f, 0.2f, 0.2f);
+        ourShader.setVec3("light.ambient", 0.1f, 0.1f, 0.1f);
+        ourShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
         ourShader.setVec3("light.specular", 0.2f, 0.2f, 0.2f);
         ourShader.setFloat("shininess", 12.0f);
-    } else {
+
+    } else if(isGaussianCurvature) {
         // gaussian curvature
         ourShader.setFloat("min_gc", object.get_minimum_gaussian_curvature_value());
         ourShader.setFloat("max_gc", object.get_maximum_gaussian_curvature_value());
+        ourShader.setFloat("mean_negative_gc", object.get_negative_mean_gaussian_curvature_value());
+        ourShader.setFloat("mean_positive_gc", object.get_positive_mean_gaussian_curvature_value());
+        // cout << "MIN " << object.get_minimum_gaussian_curvature_value() << endl;
+        // cout << "MAX " << object.get_maximum_gaussian_curvature_value() << endl;
     }
+        view = glm::translate(view, glm::vec3(-(get_max_x() + get_min_x())/2.0f,-(get_max_y() + get_min_y())/2.0f,-(get_max_z() + get_min_z())/2.0f));
+        std::cout << glm::to_string(view) << std::endl;
 
-    
     /**
         application to keep drawing images and handling user input until the program has been explicitly told to stop
         render loop
@@ -184,16 +219,23 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); //black screen
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the depth buffer before each render iteration (otherwise the depth information of the previous frame stays in the buffer).
 
+
         // arcball
         glm::mat4 rotated_view = view * arcball.rotation_matrix_view();
         glm::mat4 rotated_model = model * arcball.rotation_matrix_model(view);
-        projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, 3.0f, 10.0f);
+        // glm::mat4 projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, (float) get_min_z(), (float) get_max_z()); //near plane must be close of the the camera location (aound 3.0f)
+        glm::mat4 projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, 3.0f, 10.0f);
+        // std::cout << get_min_z() << " " << get_max_z() << std::endl;
 
         ourShader.setMat4("projection", projection);
         ourShader.setMat4("view", rotated_view);
         ourShader.setMat4("model", rotated_model);
-        
+
+        // glm::mat4 transform = glm::mat4(1.0f);
+        // transform = model * glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+        // ourShader.setMat4("model", transform);
         object.draw();
+
 
         // then draw model with normal visualizing geometry shader (FOR DEBUG)
         // normalShader.use();
@@ -204,7 +246,7 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         // object.draw();
 
         glfwSwapBuffers(window); // will swap the color buffer
-        glfwPollEvents(); // function checks if any events are triggered (like keyboard input or mouse movement events) 
+        glfwPollEvents(); // function checks if any events are triggered (like keyboard input or mouse movement events)
     }
 
     ourShader.deactivate();
@@ -213,7 +255,7 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
     object.clear();
 
     // clean/delete all resources that were allocated
-    glfwTerminate(); 
+    glfwTerminate();
     return 0;
 }
 
@@ -221,7 +263,7 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
 // whenever the window size changed this callback function executes
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     /**
-        make sure the viewport matches the new window dimensions; note that width and 
+        make sure the viewport matches the new window dimensions; note that width and
         height will be significantly larger than specified on retina displays.
     */
     glViewport(0, 0, width, height);
