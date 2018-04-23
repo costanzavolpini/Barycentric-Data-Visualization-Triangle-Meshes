@@ -96,6 +96,18 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
                     isGouraudShading = 1;
                     isLinearInterpolation = 0;
                     isExtendFlatShading = 0;
+                } else if(type == "gcli"){ //gaussian curvature linear interpolation
+                    setLinearInterpolation(0); //pass to LoaderObject
+                    setExtendFlatShading(0); //pass to LoaderObject
+                    setGouraudShading(0); //pass to LoaderObject
+                    setGaussianCurvature(1);
+                    vertex_shader = "vertexShaderGC.vs";
+                    fragment_shader = "fragmentShader.fs";
+                    geometry_shader = NULL;
+                    isGouraudShading = 0;
+                    isLinearInterpolation = 0;
+                    isExtendFlatShading = 0;
+                    isGaussianCurvature = 1;
                 } // else EXTEND FLAT SHADING
             }
         }

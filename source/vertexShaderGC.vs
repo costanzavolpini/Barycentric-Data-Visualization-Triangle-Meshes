@@ -3,7 +3,7 @@
     layout (location = 0) in vec3 aPos;
     layout (location = 2) in vec3 gaussian_curvature;
 
-    out vec4 vertex_color;
+    out vec4 color;
 
     uniform mat4 model;
     uniform mat4 view;
@@ -36,7 +36,7 @@
     void main() {
         vec3 pos = vec3(model * vec4(aPos, 1.0));
 
-        vertex_color = get_result_color_gc(); //color obtained using gaussian curvature
+        color = get_result_color_gc(); //vertex color obtained using gaussian curvature
 
         gl_Position = projection * view * model * vec4(aPos, 1.0);
     }

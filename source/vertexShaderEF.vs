@@ -11,7 +11,7 @@
         vec3 specular;
     };
 
-    out vec4 vertex_color;
+    out vec4 color;
 
     uniform mat4 model;
     uniform mat4 view;
@@ -66,7 +66,7 @@
         vec3 light_pos = vec3(projection * vec4(light.position, 1.0));
         // light_pos = light.position;
 
-        vertex_color = get_result_color_lighting(world_position, world_normal, light_pos); // color obtained with lighting calculations
+        color = get_result_color_lighting(world_position, world_normal, light_pos); // color obtained with lighting calculations
 
         gl_Position = projection * view * model * vec4(aPos, 1.0);
     }
