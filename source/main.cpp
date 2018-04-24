@@ -109,7 +109,7 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
                     isLinearInterpolation = 0;
                     isExtendFlatShading = 0;
                     isGaussianCurvature = 1;
-                } // else EXTEND FLAT SHADING
+                } // else EXTEND FLAT SHADING (ef)
             }
         }
     }
@@ -193,8 +193,8 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         Since GLM version 0.9.9, GLM default initializates matrix types to a 0-initalized matrix,
         instead of the identity matrix. From that version it is required to initialize matrix types as: glm::mat4 mat = glm::mat4(1.0f).
     */
-    // camera position - look at origin - head is up
-    glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0., 0., 0.), glm::vec3(0., 1., 0.));
+    // camera position (eye) - look at origin - head is up
+    glm::mat4 view = glm::lookAt(glm::vec3(4.0f, 3.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
     glm::mat4 model = glm::mat4(1.0f);
 
@@ -221,8 +221,6 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         // cout << "MIN " << object.get_minimum_gaussian_curvature_value() << endl;
         // cout << "MAX " << object.get_maximum_gaussian_curvature_value() << endl;
     }
-        // view = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0., 0., 0.), glm::vec3(0., 1., 0.));;
-        // std::cout << glm::to_string(view) << std::endl;
 
     /**
         application to keep drawing images and handling user input until the program has been explicitly told to stop
@@ -232,13 +230,15 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         // keyboard
         process_input(window);
 
+        glEnable(GL_DEPTH_TEST);
+
         // render colours
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); //black screen
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the depth buffer before each render iteration (otherwise the depth information of the previous frame stays in the buffer).
 
 
         // glm::mat4 projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 10.0f);
-        glm::mat4 projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, 5.0f, 10.f);
+        glm::mat4 projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 100.f);
 
         // arcball
         glm::mat4 rotated_view = view * arcball.rotation_matrix_view();
@@ -249,7 +249,8 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         ourShader.setMat4("model", rotated_model);
 
         glm::mat4 transform = glm::mat4(1.0f);
-        transform = model * glm::rotate(transform, (float)glfwGetTime(), glm::vec3(1.0f, 0.0f, 1.0f));
+        // transform = model * glm::rotate(transform, 90.0f, glm::vec3(1.0f, 0.0f, 1.0f));
+        transform = model * glm::translate(transform, glm::vec3(0.0f, 0.0f, -5.0f));
         // transform = model * glm::rotate(transform, (float)glfwGetTime(), glm::vec3(1.0f, 0.0f, 1.0f));
         // ourShader.setMat4("model", transform);
         object.draw();
