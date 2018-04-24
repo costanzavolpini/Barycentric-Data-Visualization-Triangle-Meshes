@@ -236,9 +236,7 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); //black screen
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the depth buffer before each render iteration (otherwise the depth information of the previous frame stays in the buffer).
 
-
-        // glm::mat4 projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 10.0f);
-        glm::mat4 projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 100.f);
+        glm::mat4 projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 10.f);
 
         // arcball
         glm::mat4 rotated_view = view * arcball.rotation_matrix_view();
@@ -250,7 +248,7 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
 
         glm::mat4 transform = glm::mat4(1.0f);
         // transform = model * glm::rotate(transform, 90.0f, glm::vec3(1.0f, 0.0f, 1.0f));
-        transform = model * glm::translate(transform, glm::vec3(0.0f, 0.0f, -5.0f));
+        // transform = model * glm::translate(transform, glm::vec3(0.0f, 0.0f, -5.0f));
         // transform = model * glm::rotate(transform, (float)glfwGetTime(), glm::vec3(1.0f, 0.0f, 1.0f));
         // ourShader.setMat4("model", transform);
         object.draw();
