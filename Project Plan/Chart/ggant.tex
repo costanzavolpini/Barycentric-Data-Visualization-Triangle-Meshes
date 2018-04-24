@@ -63,7 +63,7 @@
         y unit chart=1.145cm,
         time slot format=little-endian,
         % progress=today,
-        today=16.4.18
+        today=23.4.18
         ]{19.2.2018}{31.5.2018}
   \gantttitlecalendar*{19.2.2018}{31.5.2018}{month=shortname, week} \\
   \ganttbar[
@@ -86,11 +86,17 @@
     progress=100,
     bar/.append style={fill=black!43}
   ]{Optimize the GPU program}{02.4.2018}{15.4.2018} \ganttnewline
-  \ganttbar{Evaluation and comparison about\ganttalignnewline the extension of Flat Shading}{16.4.2018}{22.4.2018} \ganttnewline
+  \ganttbar[
+    progress=100,
+    bar/.append style={fill=black!43}
+  ]{Evaluation and comparison about\ganttalignnewline the extension of Flat Shading}{16.4.2018}{22.4.2018} \ganttnewline
   \ganttbar{Extend Gouraud Shading for\ganttalignnewline these new mesh tessellations.}{23.4.2018}{6.5.2018} \ganttnewline
   \ganttbar{Evaluation and comparison about\ganttalignnewline the extension of Gouraud Shading }{7.5.2018}{13.5.2018} \ganttnewline
   \ganttbar{Write the final report}{14.5.2018}{27.5.2018}
-  \ganttbar{}{23.4.2018}{26.4.2018}
+  \ganttbar[
+    progress=25,
+    bar/.append style={fill=black!43}
+  ]{}{23.4.2018}{26.4.2018}
   \ganttnewline
   \ganttbar{Make the poster}{21.5.2018}{27.5.2018}
   \ganttvrule{M1}{04.03.2018}
