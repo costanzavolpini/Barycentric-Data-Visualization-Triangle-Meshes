@@ -17,6 +17,7 @@
 //to test
 #include "glm/ext.hpp"
 
+#define IS_IN_DEBUG false // to show normals
 
 using namespace std;
 
@@ -49,7 +50,7 @@ using namespace std;
 int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is gaussian curvature, li is linearly interpolated, efs is extension of flat shading)
     string name_file = "models/iCorsi/icosahedron_1.off"; //default name
     string type = "efs"; //default type
-    const char * vertex_shader = "vertexShaderEF.vs";
+    const char * vertex_shader = "vertexShader.vs";
     const char * geometry_shader = "geometryShader.gs";
     const char * fragment_shader = "maxDiagramFragmentShader.fs";
     int isGaussianCurvature = 0;
@@ -86,11 +87,11 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
                     isLinearInterpolation = 1;
                     isExtendFlatShading = 0;
                     isGouraudShading = 0;
-                } else if(type == "li"){
+                } else if(type == "gs"){
                     setLinearInterpolation(0); //pass to LoaderObject
                     setExtendFlatShading(0); //pass to LoaderObject
                     setGouraudShading(1); //pass to LoaderObject
-                    vertex_shader = "vertexShaderGS.vs";
+                    vertex_shader = "vertexShader.vs";
                     fragment_shader = "fragmentShader.fs";
                     geometry_shader = NULL;
                     isGouraudShading = 1;
@@ -169,7 +170,8 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         (GLSL version 420 corresponds to OpenGL version 4.2 for example).
     */
     Shader ourShader(vertex_shader, fragment_shader, geometry_shader);
-    // Shader normalShader("normal.vs", "normal.fs", "normal.gs");
+
+    Shader normalShader("normal.vs", "normal.fs", "normal.gs");
 
 
 
@@ -182,6 +184,7 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
     Object object = Object(name_file);
     object.setGaussianCurvature(isGaussianCurvature);
     object.setExtendFlatShading(isExtendFlatShading);
+    object.setGouraudFlatShading(isGouraudShading);
     object.setLinearInterpolation(isLinearInterpolation);
     object.init();
 
@@ -190,7 +193,9 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         Since GLM version 0.9.9, GLM default initializates matrix types to a 0-initalized matrix,
         instead of the identity matrix. From that version it is required to initialize matrix types as: glm::mat4 mat = glm::mat4(1.0f).
     */
-    glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0., 0., 0.), glm::vec3(0., 1., 0.));
+    // camera position - look at origin - head is up
+    glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0., 0., 0.), glm::vec3(0., 1., 0.));
+
     glm::mat4 model = glm::mat4(1.0f);
 
     ourShader.use(); //draw
@@ -216,8 +221,8 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         // cout << "MIN " << object.get_minimum_gaussian_curvature_value() << endl;
         // cout << "MAX " << object.get_maximum_gaussian_curvature_value() << endl;
     }
-        view = glm::translate(view, glm::vec3(-(get_max_x() + get_min_x())/2.0f,-(get_max_y() + get_min_y())/2.0f,-(get_max_z() + get_min_z())/2.0f));
-        std::cout << glm::to_string(view) << std::endl;
+        // view = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0., 0., 0.), glm::vec3(0., 1., 0.));;
+        // std::cout << glm::to_string(view) << std::endl;
 
     /**
         application to keep drawing images and handling user input until the program has been explicitly told to stop
@@ -232,30 +237,32 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the depth buffer before each render iteration (otherwise the depth information of the previous frame stays in the buffer).
 
 
+        // glm::mat4 projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 10.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, 5.0f, 10.f);
+
         // arcball
         glm::mat4 rotated_view = view * arcball.rotation_matrix_view();
-        glm::mat4 rotated_model = model * arcball.rotation_matrix_model(view);
-        // glm::mat4 projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, (float) get_min_z(), (float) get_max_z()); //near plane must be close of the the camera location (aound 3.0f)
-        glm::mat4 projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, 3.0f, 10.0f);
-        // std::cout << get_min_z() << " " << get_max_z() << std::endl;
+        glm::mat4 rotated_model = model * arcball.rotation_matrix_model(rotated_view);
 
         ourShader.setMat4("projection", projection);
         ourShader.setMat4("view", rotated_view);
         ourShader.setMat4("model", rotated_model);
 
-        // glm::mat4 transform = glm::mat4(1.0f);
-        // transform = model * glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+        glm::mat4 transform = glm::mat4(1.0f);
+        transform = model * glm::rotate(transform, (float)glfwGetTime(), glm::vec3(1.0f, 0.0f, 1.0f));
+        // transform = model * glm::rotate(transform, (float)glfwGetTime(), glm::vec3(1.0f, 0.0f, 1.0f));
         // ourShader.setMat4("model", transform);
         object.draw();
 
+        if (IS_IN_DEBUG){
+            // then draw model with normal visualizing geometry shader (FOR DEBUG)
+            normalShader.use();
+            normalShader.setMat4("projection", projection);
+            normalShader.setMat4("view", rotated_view);
+            normalShader.setMat4("model", rotated_model);
 
-        // then draw model with normal visualizing geometry shader (FOR DEBUG)
-        // normalShader.use();
-        // normalShader.setMat4("projection", projection);
-        // normalShader.setMat4("view", rotated_view);
-        // normalShader.setMat4("model", rotated_model);
-
-        // object.draw();
+            object.draw();
+        }
 
         glfwSwapBuffers(window); // will swap the color buffer
         glfwPollEvents(); // function checks if any events are triggered (like keyboard input or mouse movement events)
@@ -283,8 +290,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 
 // Function that activate arcball when button left is pressed.
 // mouse button, button action and modifier bits.
-void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
-{
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
      arcball.mouse_btn_callback(window, button, action, mods);
 }
 

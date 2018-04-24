@@ -8,8 +8,8 @@
 #include <stdlib.h>
 #include <map>
 #include <iterator>
+#include <math.h>       /* fmin */
 #include "glm/ext.hpp"
-
 
 using namespace std;
 
@@ -31,13 +31,10 @@ int isLinearInterpolation = 0; //default not
 int isExtendFlatShading = 1; //default yes
 int isGouraudShading = 0; // default not
 
-double max_val_x = 0;
-double max_val_y = 0;
-double max_val_z = 0;
+double min_coord;
+double max_coord;
 
-double min_val_x = 0;
-double min_val_y = 0;
-double min_val_z = 0;
+int interval = 2; // max - min = 1 - (-1)
 
         void setGaussianCurvature(int flag){
             isGaussianCurvature = flag;
@@ -55,50 +52,33 @@ double min_val_z = 0;
             isGouraudShading = flag;
         }
 
-        void set_min(Point3d current){
-            if(current.x() < min_val_x)
-                min_val_x = current.x();
-
-            if(current.y() < min_val_y)
-                min_val_y = current.y();
-
-            if(current.z() < min_val_z)
-                min_val_z = current.z();
+        void set_min(Point3d current){ // only negative values
+            if(!min_coord){
+                min_coord = fmin(fmin(current.x(), current.y()), current.z());
+                return;
+            }
+            min_coord = fmin(fmin(current.x(), current.y()), fmin(current.z(), min_coord));
         }
 
         void set_max(Point3d current){
-            if(current.x() > max_val_x)
-                max_val_x = current.x();
-
-            if(current.y() > max_val_y)
-                max_val_y = current.y();
-
-            if(current.z() > max_val_z)
-                max_val_z = current.z();
+            if(!max_coord){
+                max_coord = fmax(fmax(current.x(), current.y()), current.z());
+                return;
+            }
+            max_coord = fmax(fmax(current.x(), current.y()), fmax(current.z(), max_coord));
         }
 
-        double get_max_x(){
-            return max_val_x;
+        double get_max_coord(){
+            return max_coord;
         }
 
-        double get_max_y(){
-            return max_val_y;
+        double get_min_coord(){
+            return min_coord;
         }
 
-        double get_max_z(){
-            return max_val_z;
-        }
 
-        double get_min_x(){
-            return min_val_x;
-        }
-
-        double get_min_y(){
-            return min_val_y;
-        }
-
-        double get_min_z(){
-            return min_val_z;
+        Point3d get_rescaled_value(Point3d value){
+            return interval/(max_coord - min_coord) * (value - max_coord) + 1; //1 is the max of interval
         }
 
 
@@ -153,7 +133,6 @@ double min_val_z = 0;
             std::fill(v_counter.begin(), v_counter.end(), 0); // initialize every vertex normal to (0,0,0)
 
 
-
             // -------------- GAUSSIAN CURVATURE and VERTICES TRIANGLES -----------------
             // find gaussian curvature
             vector<float> triangle_gc(num_triangles * 9);
@@ -161,21 +140,29 @@ double min_val_z = 0;
             vector<float> gc_counter(num_vertices);
             std::fill(gc_counter.begin(), gc_counter.end(), 0);
 
+            // found max and min
+            for(int k = 0; k < num_triangles; k++){
+                // Update max and min
+                set_min(v[t[k].v[0]]);
+                set_max(v[t[k].v[0]]);
+
+                set_min(v[t[k].v[1]]);
+                set_max(v[t[k].v[1]]);
+
+                set_min(v[t[k].v[2]]);
+                set_max(v[t[k].v[2]]);
+            }
+
             // iterate inside triangles and calculates angle_defeact
             for(int k = 0; k < num_triangles; k++){
-                Point3d v0 = v[t[k].v[0]];
-                Point3d v1 = v[t[k].v[1]];
-                Point3d v2 = v[t[k].v[2]];
 
-                // Update max and min
-                set_min(v0);
-                set_max(v0);
+                Point3d v0 = get_rescaled_value(v[t[k].v[0]]);
+                Point3d v1 = get_rescaled_value(v[t[k].v[1]]);
+                Point3d v2 = get_rescaled_value(v[t[k].v[2]]);
 
-                set_min(v1);
-                set_max(v1);
-
-                set_min(v2);
-                set_max(v2);
+                // Point3d v0 = v[t[k].v[0]];
+                // Point3d v1 = v[t[k].v[1]];
+                // Point3d v2 = v[t[k].v[2]];
 
 
                 if(isExtendFlatShading || isGouraudShading){ //normals
@@ -234,10 +221,6 @@ double min_val_z = 0;
             if(isGaussianCurvature){
                 // add everything to triangle gaussian curvature
                 for(int k = 0; k < num_triangles; k++){
-                    Point3d v0 = v[t[k].v[0]];
-                    Point3d v1 = v[t[k].v[1]];
-                    Point3d v2 = v[t[k].v[2]];
-
                     triangle_gc[9*k] = triangle_gc[9*k + 1] = triangle_gc[9*k + 2] = 2 * PI - gc_counter[t[k].v[0]];
                     triangle_gc[9*k + 3] = triangle_gc[9*k + 4] = triangle_gc[9*k + 5] = 2 * PI - gc_counter[t[k].v[1]];
                     triangle_gc[9*k + 6] = triangle_gc[9*k + 7] = triangle_gc[9*k + 8] = 2 * PI - gc_counter[t[k].v[2]];
@@ -260,17 +243,17 @@ double min_val_z = 0;
 
             for (int k = 0; k < num_triangles; k++) {
                 // insert vertice values in triangles
-                triangle_vertices[9 * k] = v[t[k].v[0]].x();
-                triangle_vertices[9 * k + 1] = v[t[k].v[0]].y();
-                triangle_vertices[9 * k + 2] = v[t[k].v[0]].z();
+                triangle_vertices[9 * k] = get_rescaled_value(v[t[k].v[0]]).x();
+                triangle_vertices[9 * k + 1] = get_rescaled_value(v[t[k].v[0]]).y();
+                triangle_vertices[9 * k + 2] = get_rescaled_value(v[t[k].v[0]]).z();
 
-                triangle_vertices[9 * k + 3] = v[t[k].v[1]].x();
-                triangle_vertices[9 * k + 4] = v[t[k].v[1]].y();
-                triangle_vertices[9 * k + 5] = v[t[k].v[1]].z();
+                triangle_vertices[9 * k + 3] = get_rescaled_value(v[t[k].v[1]]).x();
+                triangle_vertices[9 * k + 4] = get_rescaled_value(v[t[k].v[1]]).y();
+                triangle_vertices[9 * k + 5] = get_rescaled_value(v[t[k].v[1]]).z();
 
-                triangle_vertices[9 * k + 6] = v[t[k].v[2]].x();
-                triangle_vertices[9 * k + 7] = v[t[k].v[2]].y();
-                triangle_vertices[9 * k + 8] = v[t[k].v[2]].z();
+                triangle_vertices[9 * k + 6] = get_rescaled_value(v[t[k].v[2]]).x();
+                triangle_vertices[9 * k + 7] = get_rescaled_value(v[t[k].v[2]]).y();
+                triangle_vertices[9 * k + 8] = get_rescaled_value(v[t[k].v[2]]).z();
 
                 if(isExtendFlatShading || isGouraudShading){
                     // insert normal values in triangles

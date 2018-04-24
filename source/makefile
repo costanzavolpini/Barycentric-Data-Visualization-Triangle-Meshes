@@ -10,9 +10,9 @@ CSOURCES = \
 	 glad.c
 
 CPPSOURCES = \
-	main.cpp 
+	main.cpp
 
-main: 
+main:
 	$(CPP) $(CPPFLAGS) $(CPPSOURCES) && $(CC) $(CFLAGS) $(CSOURCES) && $(CPP) $(FLAGS) $(OBJECTC) -o main
 
 .PHONY: all main clean

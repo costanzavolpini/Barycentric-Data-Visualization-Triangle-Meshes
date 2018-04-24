@@ -183,6 +183,17 @@ public:
         return Point3d( _x / w, _y / w, _z / w );
     }
 
+    /**
+     * Division operator for a Point3d p.
+     * All coordinates will be divided by the coords of p.
+     * @param p - the divisor
+     * @return the <b> new point </b>
+     */
+    const Point3d operator / ( const Point3d& p ) const {
+        return Point3d( _x / p.x(), _y / p.y(), _z / p.z() );
+    }
+
+
   /**
   * Division operator for a single value.
   * All coordinates will be divided by the given value.
@@ -210,6 +221,58 @@ public:
     const Point3d operator * ( const double w ) const {
         return Point3d( _x * w, _y * w, _z * w );
     }
+
+
+    /**
+     * Return a new object composed by the max of coords of two objects.
+     * @param p
+     * @return Point3d
+     */
+    const Point3d max_coords( const Point3d& p ) const {
+        Point3d res;
+        if(_x > p.x())
+            res.x() = _x;
+        else
+            res.x() = p.x();
+
+        if(_y > p.y())
+            res.y() = _y;
+        else
+            res.y() = p.y();
+
+        if(_z > p.z())
+            res.z() = _z;
+        else
+            res.z() = p.z();
+
+        return res;
+    }
+
+    /**
+     * Return a new object composed by the min of coords of two objects.
+     * @param p
+     * @return Point3d
+     */
+    const Point3d min_coords( const Point3d& p ) const {
+        Point3d res;
+        if(_x < p.x())
+            res.x() = _x;
+        else
+            res.x() = p.x();
+
+        if(_y < p.y())
+            res.y() = _y;
+        else
+            res.y() = p.y();
+
+        if(_z < p.z())
+            res.z() = _z;
+        else
+            res.z() = p.z();
+
+        return res;
+    }
+
 
   /**
   * Multiply operator for a single value.

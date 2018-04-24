@@ -27,7 +27,7 @@ Comment:  This file contains all basic definitions.
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
- 
+
 
 #include "Point3.h"
 
