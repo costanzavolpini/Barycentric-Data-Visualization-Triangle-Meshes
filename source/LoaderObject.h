@@ -78,12 +78,6 @@ int interval = 2; // max - min = 1 - (-1)
 
 
         Point3d get_rescaled_value(Point3d value){
-            // if(val.min_coords(Point3d(0.0f, 0.0f, 0.0f)) == val) //val <= 0
-            //     return val/get_min_coord();
-            // else
-            //     return val/get_max_coord();
-
-
             return interval/(max_coord - min_coord) * (value - max_coord) + 1; //1 is the max of interval
         }
 
