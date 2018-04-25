@@ -158,7 +158,10 @@ int interval = 2; // max - min = 1 - (-1)
                 val = upper_outlier;
            else if(val < lower_outlier)
                 val = lower_outlier;
-            return val;
+
+            // interval from 0 to 1 then it is 1 because (0+1)
+            // I have mapped all values from 0 to 1
+            return 1/(upper_outlier - lower_outlier) * (val - upper_outlier) + 1; //1 is the max of interval
        }
 
 
