@@ -239,10 +239,11 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         ourShader.setMat4("model", rotated_model);
 
         glm::mat4 transform = glm::mat4(1.0f);
-        // transform = model * glm::rotate(transform, 90.0f, glm::vec3(1.0f, 0.0f, 1.0f));
-        // transform = model * glm::translate(transform, glm::vec3(0.0f, 0.0f, -5.0f));
+        transform = model * glm::rotate(transform, 90.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+        transform = model * glm::rotate(transform, 120.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+        transform = model * glm::rotate(transform, 90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
         // transform = model * glm::rotate(transform, (float)glfwGetTime(), glm::vec3(1.0f, 0.0f, 1.0f));
-        // ourShader.setMat4("model", transform);
+        ourShader.setMat4("model", transform);
         object.draw();
 
         if (IS_IN_DEBUG){
