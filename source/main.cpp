@@ -1,8 +1,11 @@
 /**
     ref: https://learnopengl.com
     glfw3: brew install glfw3
-    g++ -c main.cpp && gcc -c glad.c && g++ -lglfw glad.o main.o -o main
-    or just use make clean && make && ./main
+    gtk: brew install gtk+3
+    brew install pkg-config
+    export PKG_CONFIG_PATH=/usr/local/Cellar/cairo/1.12.16/lib/pkgconfig/
+    export PKG_CONFIG_PATH=/usr/X11/lib/pkgconfig
+    just use make clean && make && ./main
     Costanza Volpini
 */
 
@@ -13,6 +16,7 @@
 #include "LoaderObject.h"
 #include <math.h>
 #include <string>
+#include <gtk/gtk.h>
 
 //to test
 #include "glm/ext.hpp"
