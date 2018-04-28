@@ -40,17 +40,8 @@
 #include "imgui.h"
 #include "imgui_impl_glfw_gl3.h"
 
-// GL3W/GLFW
-// #ifdef __APPLE__
-// #  include <OpenGL/gl.h>
-// #  include <OpenGL/glu.h>
-// #  include <GLUT/glut.h>
-// #else
-// #  include <GL/gl.h>
-// #  include <GL/glu.h>
-// #  include <GL/freeglut.h>
-// #endif
-// #include <GL/gl3w.h>    // This example is using gl3w to access OpenGL functions (because it is small). You may use glew/glad/glLoadGen/etc. whatever already works for you.
+// GLAD/GLFW
+#include "glad.h"    // This example is using gl3w to access OpenGL functions (because it is small). You may use glew/glad/glLoadGen/etc. whatever already works for you.
 #include <GLFW/glfw3.h>
 #ifdef _WIN32
 #undef APIENTRY

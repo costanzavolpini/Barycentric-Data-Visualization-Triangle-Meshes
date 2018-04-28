@@ -23,31 +23,30 @@
 
 using namespace std;
 
-    // settings
-    const unsigned int WIDTH = 800;
-    const unsigned int HEIGHT = 600;
+// settings
+const unsigned int WIDTH = 800;
+const unsigned int HEIGHT = 600;
 
-    // Arcball instance
-    static Arcball arcball(WIDTH, HEIGHT, 1.5f, true, true);
+// Arcball instance
+static Arcball arcball(WIDTH, HEIGHT, 1.5f, true, true);
 
-    void error_callback(int error, const char * desc);
+void error_callback(int error, const char * desc);
 
-    // Camera options
-    float Zoom = 45.0f;
+// Camera options
+float Zoom = 45.0f;
 
-    // resize window
-    void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+// resize window
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
-    // keyboard
-    void process_input(GLFWwindow *window);
+// keyboard
+void process_input(GLFWwindow *window);
 
-    double last_mx = 0, last_my = 0, cur_mx = 0, cur_my = 0;
-    int arcball_on = false;
+double last_mx = 0, last_my = 0, cur_mx = 0, cur_my = 0;
+int arcball_on = false;
 
-    void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
-    static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
-    void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
+static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is gaussian curvature, li is linearly interpolated, efs is extension of flat shading)
     string name_file = "models/iCorsi/icosahedron_1.off"; //default name
@@ -316,4 +315,5 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
         if (Zoom >= 45.0f)
             Zoom = 45.0f;
 }
+
 

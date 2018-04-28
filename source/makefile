@@ -8,8 +8,8 @@ EXE = main
 
 CSOURCES = glad.c
 
-# CPPSOURCES = main.cpp imgui_impl_glfw_gl3.cpp
-CPPSOURCES = main.cpp
+CPPSOURCES = main.cpp imgui_impl_glfw_gl3.cpp
+# CPPSOURCES = main.cpp
 CPPSOURCES += imgui.cpp imgui_draw.cpp
 
 OBJECTCPP = $(addsuffix .o, $(basename $(notdir $(CPPSOURCES))))
