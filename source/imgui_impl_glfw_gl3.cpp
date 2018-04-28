@@ -41,7 +41,16 @@
 #include "imgui_impl_glfw_gl3.h"
 
 // GL3W/GLFW
-#include <GL/gl3w.h>    // This example is using gl3w to access OpenGL functions (because it is small). You may use glew/glad/glLoadGen/etc. whatever already works for you.
+// #ifdef __APPLE__
+// #  include <OpenGL/gl.h>
+// #  include <OpenGL/glu.h>
+// #  include <GLUT/glut.h>
+// #else
+// #  include <GL/gl.h>
+// #  include <GL/glu.h>
+// #  include <GL/freeglut.h>
+// #endif
+// #include <GL/gl3w.h>    // This example is using gl3w to access OpenGL functions (because it is small). You may use glew/glad/glLoadGen/etc. whatever already works for you.
 #include <GLFW/glfw3.h>
 #ifdef _WIN32
 #undef APIENTRY
@@ -66,7 +75,7 @@ static unsigned int g_VboHandle = 0, g_ElementsHandle = 0;
 
 // OpenGL3 Render function.
 // (this used to be set in io.RenderDrawListsFn and called by ImGui::Render(), but you can now call this directly from your main loop)
-// Note that this implementation is little overcomplicated because we are saving/setting up/restoring every OpenGL state explicitly, in order to be able to run within any OpenGL engine that doesn't do so. 
+// Note that this implementation is little overcomplicated because we are saving/setting up/restoring every OpenGL state explicitly, in order to be able to run within any OpenGL engine that doesn't do so.
 void ImGui_ImplGlfwGL3_RenderDrawData(ImDrawData* draw_data)
 {
     // Avoid rendering when minimized, scale coordinates for retina displays (screen coordinates != framebuffer coordinates)
@@ -123,7 +132,7 @@ void ImGui_ImplGlfwGL3_RenderDrawData(ImDrawData* draw_data)
     glUniformMatrix4fv(g_AttribLocationProjMtx, 1, GL_FALSE, &ortho_projection[0][0]);
     glBindSampler(0, 0); // Rely on combined texture/sampler state.
 
-    // Recreate the VAO every time 
+    // Recreate the VAO every time
     // (This is to easily allow multiple GL contexts. VAO are not shared among GL contexts, and we don't track creation/deletion of windows so we don't have an obvious key to use to cache them.)
     GLuint vao_handle = 0;
     glGenVertexArrays(1, &vao_handle);
@@ -519,9 +528,9 @@ void ImGui_ImplGlfwGL3_NewFrame()
         MAP_ANALOG(ImGuiNavInput_LStickDown, 1,  -0.3f,  -0.9f);
         #undef MAP_BUTTON
         #undef MAP_ANALOG
-        if (axes_count > 0 && buttons_count > 0) 
-            io.BackendFlags |= ImGuiBackendFlags_HasGamepad; 
-        else 
+        if (axes_count > 0 && buttons_count > 0)
+            io.BackendFlags |= ImGuiBackendFlags_HasGamepad;
+        else
             io.BackendFlags &= ~ImGuiBackendFlags_HasGamepad;
     }
 

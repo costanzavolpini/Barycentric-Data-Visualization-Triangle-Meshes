@@ -8,8 +8,9 @@ EXE = main
 
 CSOURCES = glad.c
 
-CPPSOURCES = main.cpp imgui_impl_glfw_gl3.cpp
-CPPSOURCES += ../ext/imgui/imgui.cpp ../ext/imgui/imgui_draw.cpp
+# CPPSOURCES = main.cpp imgui_impl_glfw_gl3.cpp
+CPPSOURCES = main.cpp
+CPPSOURCES += imgui.cpp imgui_draw.cpp
 
 OBJECTCPP = $(addsuffix .o, $(basename $(notdir $(CPPSOURCES))))
 
@@ -17,7 +18,7 @@ OBJECTC = $(addsuffix .o, $(basename $(notdir $(CSOURCES))))
 
 
 all: $(EXE)
-	@echo Build complete for $(ECHO_MESSAGE)
+	@echo Build complete!
 
 $(EXE): $(OBJS)
 	$(CPP) $(CPPFLAGS) $(CPPSOURCES) && $(CC) $(CFLAGS) $(CSOURCES) && $(CPP) $(FLAGS) $(OBJECTCPP) $(OBJECTC) -o main

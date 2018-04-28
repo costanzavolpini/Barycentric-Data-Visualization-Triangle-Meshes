@@ -1,6 +1,7 @@
 /**
     ref: https://learnopengl.com
     glfw3: brew install glfw3
+    glew: brew install glew
     just use make clean && make && ./main
     Costanza Volpini
 */
