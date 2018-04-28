@@ -222,11 +222,32 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         // cout << "MAX " << object.get_maximum_gaussian_curvature_value() << endl;
     }
 
+
+    // --------------- IMGUI ---------------------
+    // Setup Dear ImGui binding
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
+    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
+    ImGui_ImplGlfwGL3_Init(window, true);
+
+    // Setup style
+    ImGui::StyleColorsDark();
+    //ImGui::StyleColorsClassic();
+
+    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
+
     /**
         application to keep drawing images and handling user input until the program has been explicitly told to stop
         render loop
     */
     while(!glfwWindowShouldClose(window)) { // function checks at the start of each loop iteration if GLFW has been instructed to close
+
+        // new frame imgui
+        ImGui_ImplGlfwGL3_NewFrame();
+
         // keyboard
         process_input(window);
 
@@ -247,10 +268,8 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         ourShader.setMat4("model", rotated_model);
 
         glm::mat4 transform = glm::mat4(1.0f);
-        // transform = model * glm::rotate(transform, 90.0f, glm::vec3(1.0f, 0.0f, 1.0f));
-        // transform = model * glm::translate(transform, glm::vec3(0.0f, 0.0f, -5.0f));
-        // transform = model * glm::rotate(transform, (float)glfwGetTime(), glm::vec3(1.0f, 0.0f, 1.0f));
-        // ourShader.setMat4("model", transform);
+        transform = model * glm::rotate(transform, (float)glfwGetTime(), glm::vec3(1.0f, 0.0f, 1.0f));
+        ourShader.setMat4("model", transform);
         object.draw();
 
         if (IS_IN_DEBUG){
@@ -263,6 +282,55 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
             object.draw();
         }
 
+        // Window for movement control
+        // Tip: if we don't call ImGui::Begin()/ImGui::End() the widgets automatically appears in a window called "Debug".
+        {
+            ImGui::Begin("Movement control");
+            static int angle = 0;
+            static int zoom = 0;
+            ImGui::Text("Set the angle of rotation");
+            ImGui::SliderInt("angle", &angle, 0, 360);             // Edit 1 angle from 0 to 360
+
+            // double inc = 1.0f;
+            // double dec = -1.0f;
+            // if (ImGui::Button("zoom-in")){                            // Buttons return true when clicked (NB: most widgets return true when edited/activated)
+            //     zoom++;
+            //     zoom_in_out(inc);
+            // }
+            // ImGui::SameLine();
+            // if (ImGui::Button("zoom-out")){                           // Buttons return true when clicked (NB: most widgets return true when edited/activated)
+            //     zoom--;
+            //     zoom_in_out(dec);
+            // }
+
+            ImGui::SliderFloat("zoom", &Zoom, 100, 1);             // Zoom
+
+            // ImGui::Text("ZOOM = %d", zoom);
+            ImGui::End();
+        }
+
+        // // Window rotation
+        // // Tip: if we don't call ImGui::Begin()/ImGui::End() the widgets automatically appears in a window called "Debug".
+        // {
+        //     ImGui::Begin("Shader experiments");
+        //     static float f = 0.0f;
+        //     static int counter = 0;
+        //     ImGui::Text("Hello, world!");                           // Display some text (you can use a format string too)
+        //     ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+        //     ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+
+        //     if (ImGui::Button("Button"))                            // Buttons return true when clicked (NB: most widgets return true when edited/activated)
+        //         counter++;
+        //     ImGui::SameLine();
+        //     ImGui::Text("counter = %d", counter);
+
+        //     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        //     ImGui::End();
+        // }
+
+        ImGui::Render();
+        ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
+
         glfwSwapBuffers(window); // will swap the color buffer
         glfwPollEvents(); // function checks if any events are triggered (like keyboard input or mouse movement events)
     }
@@ -271,6 +339,9 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
 
     // delete the shader objects once we've linked them into the program object; we no longer need them anymore
     object.clear();
+
+    ImGui_ImplGlfwGL3_Shutdown();
+    ImGui::DestroyContext();
 
     // clean/delete all resources that were allocated
     glfwTerminate();
@@ -308,6 +379,7 @@ void process_input(GLFWwindow *window) {
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+    cout << "eh" << endl;
         if (Zoom >= 1.0f && Zoom <= 45.0f)
             Zoom -= yoffset;
         if (Zoom <= 1.0f)
@@ -315,5 +387,3 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
         if (Zoom >= 45.0f)
             Zoom = 45.0f;
 }
-
-
