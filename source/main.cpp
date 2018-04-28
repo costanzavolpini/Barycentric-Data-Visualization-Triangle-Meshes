@@ -1,10 +1,6 @@
 /**
     ref: https://learnopengl.com
     glfw3: brew install glfw3
-    gtk: brew install gtk+3
-    brew install pkg-config
-    export PKG_CONFIG_PATH=/usr/local/Cellar/cairo/1.12.16/lib/pkgconfig/
-    export PKG_CONFIG_PATH=/usr/X11/lib/pkgconfig
     just use make clean && make && ./main
     Costanza Volpini
 */
@@ -16,7 +12,8 @@
 #include "LoaderObject.h"
 #include <math.h>
 #include <string>
-#include <gtk/gtk.h>
+#include "imgui.h"
+#include "imgui_impl_glfw_gl3.h"
 
 //to test
 #include "glm/ext.hpp"
@@ -153,7 +150,6 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback); // user resizes the window the viewport should be adjusted as well
     glfwSetMouseButtonCallback(window, mouse_button_callback); // call the callback when the user press a button. It corresponds to glutMouseFunc
     glfwSetCursorPosCallback(window, cursor_position_callback); // call the callback when the user move the cursor. It corresponds to glutMotionFunc
-
 
     /**
         ------------- GLAD -------------

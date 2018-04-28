@@ -1,21 +1,27 @@
 CPP = g++
 CC = gcc
 CFLAGS = -c
-CPPFLAGS = -c -std=c++11 `pkg-config --cflags gtk+-3.0`
+CPPFLAGS = -c -std=c++11 -Wall -Wformat
 FLAGS = -lglfw
-GTKFLAGS = `pkg-config --libs gtk+-3.0`
 
-OBJECTC = glad.o main.o
+EXE = main
 
-CSOURCES = \
-	 glad.c
+CSOURCES = glad.c
 
-CPPSOURCES = \
-	main.cpp
+CPPSOURCES = main.cpp imgui_impl_glfw_gl3.cpp
+CPPSOURCES += ../ext/imgui/imgui.cpp ../ext/imgui/imgui_draw.cpp
 
-main:
-	$(CPP) $(CPPFLAGS) $(CPPSOURCES) && $(CC) $(CFLAGS) $(CSOURCES) && $(CPP) $(FLAGS) $(OBJECTC) -o main $(GTKFLAGS)
+OBJECTCPP = $(addsuffix .o, $(basename $(notdir $(CPPSOURCES))))
 
-.PHONY: all main clean
+OBJECTC = $(addsuffix .o, $(basename $(notdir $(CSOURCES))))
+
+
+all: $(EXE)
+	@echo Build complete for $(ECHO_MESSAGE)
+
+$(EXE): $(OBJS)
+	$(CPP) $(CPPFLAGS) $(CPPSOURCES) && $(CC) $(CFLAGS) $(CSOURCES) && $(CPP) $(FLAGS) $(OBJECTCPP) $(OBJECTC) -o main
+
 clean:
-	$(RM) *.o main
+	rm -f $(EXE) $(OBJECTCPP) $(OBJECTC)
+
