@@ -48,7 +48,13 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
-void ToggleButton(const char* str_id, bool* v);
+// ------- TRANSFORMATION -------
+glm::mat4 transform_shader = glm::mat4(1.0f);
+
+// ------- IMGUI -----------
+void show_window(bool* p_open);
+bool window_showed = true;
+void rotation_settings();
 
 int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is gaussian curvature, li is linearly interpolated, efs is extension of flat shading)
     string name_file = "models/iCorsi/icosahedron_1.off"; //default name
@@ -199,6 +205,7 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
     glm::mat4 view = glm::lookAt(glm::vec3(4.0f, 3.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
     glm::mat4 model = glm::mat4(1.0f);
+    transform_shader = model * glm::rotate(transform_shader, 180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 
     ourShader.use(); //draw
 
@@ -269,9 +276,7 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         ourShader.setMat4("view", rotated_view);
         ourShader.setMat4("model", rotated_model);
 
-        glm::mat4 transform = glm::mat4(1.0f);
-        transform = model * glm::rotate(transform, (float)glfwGetTime(), glm::vec3(1.0f, 0.0f, 1.0f));
-        ourShader.setMat4("model", transform);
+        ourShader.setMat4("model", transform_shader);
         object.draw();
 
         if (IS_IN_DEBUG){
@@ -284,56 +289,7 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
             object.draw();
         }
 
-        // Window for movement control
-        // Tip: if we don't call ImGui::Begin()/ImGui::End() the widgets automatically appears in a window called "Debug".
-        {
-            ImGui::Begin("Movement control");
-            static int angle = 0;
-            ImGui::Text("Set the angle of rotation");
-            ImGui::SliderInt("angle", &angle, 0, 360);             // Edit 1 angle from 0 to 360
-
-            bool rotate = true;
-
-            // double inc = 1.0f;
-            // double dec = -1.0f;
-            // if (ImGui::Button("zoom-in")){                            // Buttons return true when clicked (NB: most widgets return true when edited/activated)
-            //     zoom++;
-            //     zoom_in_out(inc);
-            // }
-            // ImGui::SameLine();
-            // if (ImGui::Button("rotate")){                           // Buttons return true when clicked (NB: most widgets return true when edited/activated)
-            //     if(rotate)
-            //       rotate = false;
-            //     else
-            //       rotate = true;
-            // }
-
-            ToggleButton("rotate", &rotate);
-
-            ImGui::SliderFloat("zoom", &Zoom, 100, 1);             // Zoom
-
-            // ImGui::Text("ZOOM = %d", zoom);
-            ImGui::End();
-        }
-
-        // // Window rotation
-        // // Tip: if we don't call ImGui::Begin()/ImGui::End() the widgets automatically appears in a window called "Debug".
-        // {
-        //     ImGui::Begin("Shader experiments");
-        //     static float f = 0.0f;
-        //     static int counter = 0;
-        //     ImGui::Text("Hello, world!");                           // Display some text (you can use a format string too)
-        //     ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-        //     ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-        //     if (ImGui::Button("Button"))                            // Buttons return true when clicked (NB: most widgets return true when edited/activated)
-        //         counter++;
-        //     ImGui::SameLine();
-        //     ImGui::Text("counter = %d", counter);
-
-        //     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-        //     ImGui::End();
-        // }
+        show_window(&window_showed);
 
         ImGui::Render();
         ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
@@ -395,23 +351,101 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
             Zoom = 45.0f;
 }
 
-// imgui toggle button
-void ToggleButton(const char* str_id, bool* v) {
-    ImVec2 p = ImGui::GetCursorScreenPos();
-    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+// IMGUI window with specific to set rotation, zoom, examples...
+void show_window(bool* p_open){
+        // Window for movement control
+        // Tip: if we don't call ImGui::Begin()/ImGui::End() the widgets automatically appears in a window called "Debug".
+            static bool no_titlebar = false;
+            static bool no_scrollbar = false;
+            static bool no_menu = false;
+            static bool no_move = false;
+            static bool no_resize = false;
+            static bool no_collapse = false;
+            static bool no_close = false;
+            static bool no_nav = false;
 
-    float height = ImGui::GetFrameHeight();
-    float width = height * 1.55f;
-    float radius = height * 0.50f;
+            // Demonstrate the various window flags. Typically you would just use the default.
+            ImGuiWindowFlags window_flags = 0;
+            if (no_titlebar)  window_flags |= ImGuiWindowFlags_NoTitleBar;
+            if (no_scrollbar) window_flags |= ImGuiWindowFlags_NoScrollbar;
+            if (!no_menu)     window_flags |= ImGuiWindowFlags_MenuBar;
+            if (no_move)      window_flags |= ImGuiWindowFlags_NoMove;
+            if (no_resize)    window_flags |= ImGuiWindowFlags_NoResize;
+            if (no_collapse)  window_flags |= ImGuiWindowFlags_NoCollapse;
+            if (no_nav)       window_flags |= ImGuiWindowFlags_NoNav;
+            if (no_close)     p_open = NULL; // Don't pass our bool* to Begin
 
-    if (ImGui::InvisibleButton(str_id, ImVec2(width, height)))
-        *v = !*v;
-    ImU32 col_bg;
-    if (ImGui::IsItemHovered())
-        col_bg = *v ? IM_COL32(145+20, 211, 68+20, 255) : IM_COL32(218-20, 218-20, 218-20, 255);
-    else
-        col_bg = *v ? IM_COL32(145, 211, 68, 255) : IM_COL32(218, 218, 218, 255);
+            double half_window_h = HEIGHT/2;
+            double half_window_w = WIDTH/2;
 
-    draw_list->AddRectFilled(p, ImVec2(p.x + width, p.y + height), col_bg, height * 0.5f);
-    draw_list->AddCircleFilled(ImVec2(*v ? (p.x + width - radius) : (p.x + radius), p.y + radius), radius - 1.5f, IM_COL32(255, 255, 255, 255));
+            // void DrawSplitter(int split_vertically, float thickness, float* size0, float* size1, float min_size0, float min_size1)
+
+
+            ImGui::Begin("Movement control");
+            ImGui::Columns(3, "mixed");
+            ImGui::Separator();
+
+            ImGui::Text("Settings");
+            if (ImGui::CollapsingHeader("Rotation")) {
+                rotation_settings();
+            }
+            if (ImGui::CollapsingHeader("Zoom")) {
+                ImGui::TextWrapped("This window is being created by the ShowDemoWindow() function. Please refer to the code in imgui_demo.cpp for reference.\n\n");
+                ImGui::Text("USER GUIDE:");
+                // ImGui::ShowUserGuide();
+            }
+            if (ImGui::CollapsingHeader("Models")) {
+                ImGui::TextWrapped("This window is being created by the ShowDemoWindow() function. Please refer to the code in imgui_demo.cpp for reference.\n\n");
+                ImGui::Text("USER GUIDE:");
+                // ImGui::ShowUserGuide();
+            }
+            if (ImGui::CollapsingHeader("Shading")) {
+                ImGui::TextWrapped("This window is being created by the ShowDemoWindow() function. Please refer to the code in imgui_demo.cpp for reference.\n\n");
+                ImGui::Text("USER GUIDE:");
+                // ImGui::ShowUserGuide();
+            }
+            ImGui::NextColumn();
+
+            ImGui::Text("ImGui");
+            ImGui::Button("Apple");
+            static float foo = 1.0f;
+            ImGui::InputFloat("red", &foo, 0.05f, 0, 3);
+            ImGui::Text("An extra line here.");
+            ImGui::NextColumn();
+
+            ImGui::Text("Analyse");
+            ImGui::Button("Corniflower");
+            static float bar = 1.0f;
+            ImGui::InputFloat("blue", &bar, 0.05f, 0, 3);
+            ImGui::NextColumn();
+
+            // ImGui::SetNextWindowPos(ImVec2(0, ImGui::GetIO().DisplaySize.y - HEIGHT), 0);
+            // ImGui::SetNextWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x, 0), 0);
+
+
+            ImGui::SliderFloat("zoom", &Zoom, 100, 1);             // Zoom
+
+            // ImGui::Text("ZOOM = %d", zoom);
+
+            ImGui::End();
+}
+
+void rotation_settings(){
+            static int angle = 180;
+            ImGui::Text("Set the angle of rotation:");
+            ImGui::SliderInt("angle", &angle, -360, 360);             // Edit 1 angle from -360 to 360
+
+            ImGui::Text("Set axis of rotation:");
+            static bool axis_x = false;
+            ImGui::Checkbox("x", &axis_x);
+            ImGui::SameLine();
+
+            static bool axis_y = true;
+            ImGui::Checkbox("y", &axis_y);
+
+            ImGui::SameLine();
+            static bool axis_z = false;
+            ImGui::Checkbox("z", &axis_z);
+            static bool rotate = true;
+            ImGui::Checkbox("rotate/stop", &rotate);
 }
