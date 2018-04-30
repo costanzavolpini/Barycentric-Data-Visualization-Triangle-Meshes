@@ -55,6 +55,7 @@ static glm::mat4 transform_shader = glm::mat4(1.0f);
 void show_window(bool* p_open);
 bool window_showed = true;
 void rotation_settings();
+void zoom_settings();
 
 // set-up parameter imgui
 static float angle = 180.0f; // angle of rotation - must be the same of transform_shader
@@ -178,6 +179,7 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
     }
 
     // ------------- END GLAD -------------
+
 
     /**
         Modern OpenGL requires that we at least set up a vertex and fragment shader if we want to do some rendering.
@@ -399,9 +401,7 @@ void show_window(bool* p_open){
                 rotation_settings();
             }
             if (ImGui::CollapsingHeader("Zoom")) {
-                ImGui::TextWrapped("This window is being created by the ShowDemoWindow() function. Please refer to the code in imgui_demo.cpp for reference.\n\n");
-                ImGui::Text("USER GUIDE:");
-                // ImGui::ShowUserGuide();
+                zoom_settings();
             }
             if (ImGui::CollapsingHeader("Models")) {
                 ImGui::TextWrapped("This window is being created by the ShowDemoWindow() function. Please refer to the code in imgui_demo.cpp for reference.\n\n");
@@ -431,8 +431,6 @@ void show_window(bool* p_open){
             // ImGui::SetNextWindowPos(ImVec2(0, ImGui::GetIO().DisplaySize.y - HEIGHT), 0);
             // ImGui::SetNextWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x, 0), 0);
 
-
-            ImGui::SliderFloat("zoom", &Zoom, 100, 1);             // Zoom
 
             // ImGui::Text("ZOOM = %d", zoom);
 
@@ -465,4 +463,10 @@ void rotation_settings(){
             }
 
             transform_shader = glm::rotate(transform_shader, angle, glm::vec3(axis_x, axis_y, axis_z));
+}
+
+
+void zoom_settings(){
+    ImGui::Text("Set how much zoom the object:");
+    ImGui::SliderFloat("zoom", &Zoom, 100, 1);             // Zoom
 }
