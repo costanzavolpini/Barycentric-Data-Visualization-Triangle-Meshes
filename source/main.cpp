@@ -49,12 +49,21 @@ static void cursor_position_callback(GLFWwindow* window, double xpos, double ypo
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 // ------- TRANSFORMATION -------
-glm::mat4 transform_shader = glm::mat4(1.0f);
+static glm::mat4 transform_shader = glm::mat4(1.0f);
 
 // ------- IMGUI -----------
 void show_window(bool* p_open);
 bool window_showed = true;
 void rotation_settings();
+
+// set-up parameter imgui
+static float angle = 180.0f; // angle of rotation - must be the same of transform_shader
+static float axis_x = 0.0f; // axis of rotation - must be the same of transform_shader
+static float axis_y = 1.0f;  // axis of rotation - must be the same of transform_shader
+static float axis_z = 0.0f;  // axis of rotation - must be the same of transform_shader
+static bool rotate_animation = false; // animate rotation or not
+static bool last_time_was_animated = false; // if was moving and now we have stopped it
+
 
 int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is gaussian curvature, li is linearly interpolated, efs is extension of flat shading)
     string name_file = "models/iCorsi/icosahedron_1.off"; //default name
@@ -431,21 +440,29 @@ void show_window(bool* p_open){
 }
 
 void rotation_settings(){
-            static int angle = 180;
             ImGui::Text("Set the angle of rotation:");
-            ImGui::SliderInt("angle", &angle, -360, 360);             // Edit 1 angle from -360 to 360
+            ImGui::SliderFloat("angle", &angle, -360.0f, 360.0f);             // Edit 1 angle from -360 to 360
 
             ImGui::Text("Set axis of rotation:");
-            static bool axis_x = false;
-            ImGui::Checkbox("x", &axis_x);
-            ImGui::SameLine();
 
-            static bool axis_y = true;
-            ImGui::Checkbox("y", &axis_y);
+            ImGui::InputFloat("input float", &axis_x, 0.01f, 1.0f);
+            ImGui::InputFloat("input float", &axis_y, 0.01f, 1.0f);
+            ImGui::InputFloat("input float", &axis_z, 0.01f, 1.0f);
 
-            ImGui::SameLine();
-            static bool axis_z = false;
-            ImGui::Checkbox("z", &axis_z);
-            static bool rotate = true;
-            ImGui::Checkbox("rotate/stop", &rotate);
+            ImGui::Checkbox("rotate/stop", &rotate_animation);
+
+            if(rotate_animation == true){
+                angle = (float)glfwGetTime();
+                last_time_was_animated = true;
+            }
+
+            if (last_time_was_animated && rotate_animation == false){
+                axis_x = 0.0f;
+                axis_y = 1.0f;
+                axis_z = 0.0f;
+                angle = 180;
+                last_time_was_animated = false;
+            }
+
+            transform_shader = glm::rotate(transform_shader, angle, glm::vec3(axis_x, axis_y, axis_z));
 }
