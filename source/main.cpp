@@ -179,8 +179,7 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
     }
 
     // ------------- END GLAD -------------
-
-
+\
     /**
         Modern OpenGL requires that we at least set up a vertex and fragment shader if we want to do some rendering.
         Shader language GLSL (OpenGL Shading Language)
@@ -416,10 +415,7 @@ void show_window(bool* p_open){
             ImGui::NextColumn();
 
             ImGui::Text("ImGui");
-            ImGui::Button("Apple");
-            static float foo = 1.0f;
-            ImGui::InputFloat("red", &foo, 0.05f, 0, 3);
-            ImGui::Text("An extra line here.");
+            // opengl
             ImGui::NextColumn();
 
             ImGui::Text("Analyse");
