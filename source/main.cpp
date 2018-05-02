@@ -63,7 +63,6 @@ void rotation_settings();
 void zoom_settings();
 void set_shader();
 
-
 // set-up parameter imgui
 static float angle = 180.0f; // angle of rotation - must be the same of transform_shader
 static float axis_x = 0.0f; // axis of rotation - must be the same of transform_shader
@@ -71,78 +70,35 @@ static float axis_y = 1.0f;  // axis of rotation - must be the same of transform
 static float axis_z = 0.0f;  // axis of rotation - must be the same of transform_shader
 static bool rotate_animation = false; // animate rotation or not
 static bool last_time_was_animated = false; // if was moving and now we have stopped it
+
 static ImVec4 color_imgui = ImColor(0, 0, 0, 255);
 
 int count_angle = 0;
 bool decrease_angle = false;
 
+// imgui shaders
+static int shader_set = 0;
 
-int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is gaussian curvature, li is linearly interpolated, efs is extension of flat shading)
-    string name_file = "models/iCorsi/icosahedron_1.off"; //default name
-    string type = "efs"; //default type
-    const char * vertex_shader = "vertexShader.vs";
-    const char * geometry_shader = "geometryShader.gs";
-    const char * fragment_shader = "maxDiagramFragmentShader.fs";
-    int isGaussianCurvature = 0;
-    int isLinearInterpolation = 0;
-    int isExtendFlatShading = 1;
-    int isGouraudShading = 1;
+void set_parameters_shader(int selected_shader);
 
-    /*
-       Take input
-     */
-    if (argc > 1) {
-        char * token;
-        for (int elem = 1; elem < argc; elem++) {
-            token = strtok(argv[elem], "=");
-            if (strcmp(token, "name") == 0) {
-                name_file = strtok(NULL, "=");
-            } else if (strcmp(token, "type") == 0) {
-                type = strtok(NULL, "=");
-                if(type == "gc"){ // GAUSSIAN CURVATURE
-                    setGaussianCurvature(1); //pass to LoaderObject
-                    setExtendFlatShading(0); //pass to LoaderObject
-                    setGouraudShading(0); //pass to LoaderObject
-                    vertex_shader = "vertexShaderGC.vs";
-                    isGaussianCurvature = 1;
-                    isExtendFlatShading = 0;
-                    isGouraudShading = 0;
-                } else if(type == "li"){ // LINEAR INTERPOLATION
-                    setLinearInterpolation(1); //pass to LoaderObject
-                    setExtendFlatShading(0); //pass to LoaderObject
-                    setGouraudShading(0); //pass to LoaderObject
-                    vertex_shader = "vertexShaderLI.vs";
-                    fragment_shader = "fragmentShader.fs";
-                    geometry_shader = NULL;
-                    isLinearInterpolation = 1;
-                    isExtendFlatShading = 0;
-                    isGouraudShading = 0;
-                } else if(type == "gs"){
-                    setLinearInterpolation(0); //pass to LoaderObject
-                    setExtendFlatShading(0); //pass to LoaderObject
-                    setGouraudShading(1); //pass to LoaderObject
-                    vertex_shader = "vertexShader.vs";
-                    fragment_shader = "fragmentShader.fs";
-                    geometry_shader = NULL;
-                    isGouraudShading = 1;
-                    isLinearInterpolation = 0;
-                    isExtendFlatShading = 0;
-                } else if(type == "gcli"){ //gaussian curvature linear interpolation
-                    setLinearInterpolation(0); //pass to LoaderObject
-                    setExtendFlatShading(0); //pass to LoaderObject
-                    setGouraudShading(0); //pass to LoaderObject
-                    setGaussianCurvature(1);
-                    vertex_shader = "vertexShaderGC.vs";
-                    fragment_shader = "fragmentShader.fs";
-                    geometry_shader = NULL;
-                    isGouraudShading = 0;
-                    isLinearInterpolation = 0;
-                    isExtendFlatShading = 0;
-                    isGaussianCurvature = 1;
-                } // else EXTEND FLAT SHADING (ef)
-            }
-        }
-    }
+// ------- END IMGUI -------------
+
+// ------ SETTINGS SHADERS ---------------
+const char * vertex_shader;
+const char * geometry_shader;
+const char * fragment_shader;
+int imgui_isGaussianCurvature;
+int imgui_isLinearInterpolation;
+int imgui_isExtendFlatShading;
+int imgui_isGouraudShading;
+
+// ----------- END SETTINGS SHADERS ----------
+
+
+
+int main(int argc, char * argv[]) {
+            string name_file = "models/iCorsi/icosahedron_1.off"; //default name
+            set_parameters_shader(0);
 
 
     /**
@@ -237,10 +193,10 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         Send vertex data to vertex shader (load .off file).
      */
     object.set_file(name_file); //load mesh
-    object.setGaussianCurvature(isGaussianCurvature);
-    object.setExtendFlatShading(isExtendFlatShading);
-    object.setGouraudFlatShading(isGouraudShading);
-    object.setLinearInterpolation(isLinearInterpolation);
+    object.setGaussianCurvature(imgui_isGaussianCurvature);
+    object.setExtendFlatShading(imgui_isExtendFlatShading);
+    object.setGouraudFlatShading(imgui_isGouraudShading);
+    object.setLinearInterpolation(imgui_isLinearInterpolation);
     object.init(); // fn to initialize VBO and VAO
 
     /**
@@ -257,7 +213,7 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
     ourShader.use(); // glUseProgram
 
 
-    if(isExtendFlatShading || isGouraudShading){
+    if(imgui_isExtendFlatShading || imgui_isGouraudShading){
         // get matrix's uniform location and set matrix
         ourShader.setVec3("light.position", 0.5f, 0.5f, 0.5f);
         ourShader.setVec3("viewPos", glm::vec3(0.0f, 0.0f, 3.0f));
@@ -268,7 +224,7 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         ourShader.setVec3("light.specular", 0.2f, 0.2f, 0.2f);
         ourShader.setFloat("shininess", 12.0f);
 
-    } else if(isGaussianCurvature) {
+    } else if(imgui_isGaussianCurvature) {
 
         // gaussian curvature
         ourShader.setFloat("min_gc", object.get_minimum_gaussian_curvature_value());
@@ -636,12 +592,102 @@ void zoom_settings(){
 
 
 void set_shader(){
-    static int e = 0;
-    ImGui::RadioButton("Linear Interpolation", &e, 0);
-    ImGui::RadioButton("Extend Flat Shading", &e, 1);
-    ImGui::RadioButton("Gouraud Shading", &e, 2);
-    ImGui::RadioButton("Gaussian Curvature", &e, 3);
-    ImGui::RadioButton("Linear Interpolated GC", &e, 4);
+    ImGui::RadioButton("Linear Interpolation", &shader_set, 0);
+    ImGui::RadioButton("Extend Flat Shading", &shader_set, 1);
+    ImGui::RadioButton("Gouraud Shading", &shader_set, 2);
+    ImGui::RadioButton("Gaussian Curvature", &shader_set, 3);
+    ImGui::RadioButton("Linear Interpolation GC", &shader_set, 4);
+}
+
+
+// function to set shader
+void set_parameters_shader(int selected_shader){
+    switch (selected_shader) {
+
+        case 1: // extend flat shading
+        setLinearInterpolation(0); //pass to LoaderObject
+        setExtendFlatShading(1); //pass to LoaderObject
+        setGouraudShading(0); //pass to LoaderObject
+        setGaussianCurvature(0); //pass to LoaderObject
+
+        vertex_shader = "vertexShader.vs";
+        fragment_shader = "maxDiagramFragmentShader.fs";
+        geometry_shader = "geometryShader.gs";
+
+        imgui_isExtendFlatShading = 1;
+        imgui_isGaussianCurvature = 0;
+        imgui_isGouraudShading = 0;
+        imgui_isLinearInterpolation = 0;
+        break;
+
+        // ---------
+
+        case 2: // gouraud shading
+        setLinearInterpolation(0); //pass to LoaderObject
+        setExtendFlatShading(0); //pass to LoaderObject
+        setGouraudShading(1); //pass to LoaderObject
+        setGaussianCurvature(0); //pass to LoaderObject
+
+        vertex_shader = "vertexShader.vs";
+        fragment_shader = "fragmentShader.fs";
+        geometry_shader = NULL;
+
+        imgui_isGouraudShading = 1;
+        imgui_isLinearInterpolation = 0;
+        imgui_isExtendFlatShading = 0;
+        imgui_isGaussianCurvature = 0;
+        break;
+
+        // ---------
+
+        case 3: // gaussian curvature
+        setGaussianCurvature(1); //pass to LoaderObject
+        setExtendFlatShading(0); //pass to LoaderObject
+        setGouraudShading(0); //pass to LoaderObject
+        setLinearInterpolation(0); //pass to LoaderObject
+
+        vertex_shader = "vertexShaderGC.vs";
+        fragment_shader = "maxDiagramFragmentShader.fs";
+        geometry_shader = "geometryShader.gs";
+
+        imgui_isGaussianCurvature = 1;
+        imgui_isExtendFlatShading = 0;
+        imgui_isGouraudShading = 0;
+        imgui_isLinearInterpolation = 0;
+        break;
+
+        case 4: // linear interpolation Gaussian Curvature
+        setLinearInterpolation(0); //pass to LoaderObject
+        setExtendFlatShading(0); //pass to LoaderObject
+        setGouraudShading(0); //pass to LoaderObject
+        setGaussianCurvature(1); //pass to LoaderObject
+
+        vertex_shader = "vertexShaderGC.vs";
+        fragment_shader = "fragmentShader.fs";
+        geometry_shader = NULL;
+
+        imgui_isGaussianCurvature = 1;
+        imgui_isGouraudShading = 0;
+        imgui_isLinearInterpolation = 0;
+        imgui_isExtendFlatShading = 0;
+        break;
+
+        default:  // linear interpolation
+        setLinearInterpolation(1); //pass to LoaderObject
+        setExtendFlatShading(0); //pass to LoaderObject
+        setGouraudShading(0); //pass to LoaderObject
+        setGaussianCurvature(0); //pass to LoaderObject
+
+        vertex_shader = "vertexShaderLI.vs";
+        fragment_shader = "fragmentShader.fs";
+        geometry_shader = NULL;
+
+        imgui_isLinearInterpolation = 1;
+        imgui_isExtendFlatShading = 0;
+        imgui_isGouraudShading = 0;
+        imgui_isGaussianCurvature = 0;
+        break;
+    }
 }
 
 
