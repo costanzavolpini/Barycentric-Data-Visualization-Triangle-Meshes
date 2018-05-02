@@ -50,8 +50,6 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
-
-
 // ------- TRANSFORMATION -------
 static glm::mat4 transform_shader = glm::mat4(1.0f);
 
@@ -173,9 +171,7 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
     int windowHeight = HEIGHT;
     glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
 
-
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-
 
     // callback functions
     glfwSetScrollCallback(window, scroll_callback); //zoom
@@ -537,11 +533,11 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
 // IMGUI window with specific to set rotation, zoom, examples...
 void show_window(bool* p_open, GLFWwindow* window){
         // Window for movement control
-        // Tip: if we don't call ImGui::Begin()/ImGui::End() the widgets automatically appears in a window called "Debug".
-            static bool no_titlebar = false;
+            // Tip: if we don't call ImGui::Begin()/ImGui::End() the widgets automatically appears in a window called "Debug".
+            static bool no_titlebar = true;
             static bool no_scrollbar = false;
-            static bool no_menu = false;
-            static bool no_move = false;
+            static bool no_menu = true;
+            static bool no_move = true;
             static bool no_resize = false;
             static bool no_collapse = false;
             static bool no_close = false;
@@ -561,10 +557,7 @@ void show_window(bool* p_open, GLFWwindow* window){
             double half_window_h = HEIGHT/2;
             double half_window_w = WIDTH/2;
 
-            // void DrawSplitter(int split_vertically, float thickness, float* size0, float* size1, float min_size0, float min_size1)
-
-
-            ImGui::Begin("Movement control");
+            ImGui::Begin("Movement control", p_open, window_flags);
             ImGui::Columns(3, "mixed");
             ImGui::Separator();
 
