@@ -403,7 +403,7 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
             pre_time = current_time;
             angle = glm::radians(delta_time * 100.0f);
 
-            transform_shader = glm::rotate(transform_shader, angle, glm::vec3(axis_x, axis_y, axis_z));
+            transform_shader = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(axis_x, axis_y, axis_z));
             last_time_was_animated = true;
         }
 
@@ -649,13 +649,13 @@ void rotation_settings(){
             float prev_axis_z = axis_z;
 
             ImGui::Text("Set the angle of rotation:");
-            ImGui::SliderFloat("angle", &angle, -360.0f, 360.0f);             // Edit 1 angle from -360 to 360
+            ImGui::SliderFloat("angle", &angle, 0.0f, 360.0f);             // Edit 1 angle from 0 to 360
 
             ImGui::Text("Set axis of rotation:");
 
-            ImGui::InputFloat("input float", &axis_x, 0.01f, 1.0f);
-            ImGui::InputFloat("input float", &axis_y, 0.01f, 1.0f);
-            ImGui::InputFloat("input float", &axis_z, 0.01f, 1.0f);
+            ImGui::InputFloat("x", &axis_x, 0.01f, 1.0f);
+            ImGui::InputFloat("y", &axis_y, 0.01f, 1.0f);
+            ImGui::InputFloat("z", &axis_z, 0.01f, 1.0f);
 
             ImGui::Checkbox("rotate/stop", &rotate_animation);
 
@@ -668,13 +668,13 @@ void rotation_settings(){
             }
 
             if((prev_angle != angle) || (prev_axis_x != axis_x) || (prev_axis_y != axis_y) || (prev_axis_z != axis_z))
-                transform_shader = glm::rotate(transform_shader, angle, glm::vec3(axis_x, axis_y, axis_z));
+                transform_shader = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(axis_x, axis_y, axis_z));
 }
 
 
 void zoom_settings(){
     ImGui::Text("Set how much zoom the object:");
-    ImGui::SliderFloat("zoom", &Zoom, 100, 1);             // Zoom
+    ImGui::SliderFloat("zoom", &Zoom, 100, 1); // Zoom
 }
 
 
