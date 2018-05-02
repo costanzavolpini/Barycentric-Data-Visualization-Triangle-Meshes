@@ -61,6 +61,7 @@ void show_window(bool* p_open, GLFWwindow* window);
 bool window_showed = true;
 void rotation_settings();
 void zoom_settings();
+void set_shader();
 
 
 // set-up parameter imgui
@@ -560,10 +561,9 @@ void show_window(bool* p_open, GLFWwindow* window){
                 ImGui::Text("USER GUIDE:");
                 // ImGui::ShowUserGuide();
             }
-            if (ImGui::CollapsingHeader("Shading")) {
-                ImGui::TextWrapped("This window is being created by the ShowDemoWindow() function. Please refer to the code in imgui_demo.cpp for reference.\n\n");
-                ImGui::Text("USER GUIDE:");
-                // ImGui::ShowUserGuide();
+            if (ImGui::CollapsingHeader("Shaders")) {
+                ImGui::TextWrapped("Set a shader experiment to see how the model looks like:\n\n");
+                set_shader();
             }
             ImGui::NextColumn();
 
@@ -632,6 +632,16 @@ void rotation_settings(){
 void zoom_settings(){
     ImGui::Text("Zoom-in/out:");
     ImGui::SliderFloat("zoom", &Zoom, 100, 1); // Zoom
+}
+
+
+void set_shader(){
+    static int e = 0;
+    ImGui::RadioButton("Linear Interpolation", &e, 0);
+    ImGui::RadioButton("Extend Flat Shading", &e, 1);
+    ImGui::RadioButton("Gouraud Shading", &e, 2);
+    ImGui::RadioButton("Gaussian Curvature", &e, 3);
+    ImGui::RadioButton("Linear Interpolated GC", &e, 4);
 }
 
 
