@@ -148,6 +148,10 @@ class Object {
         glBindVertexArray(0);
       }
 
+      void disable(){
+        glDisableVertexAttribArray(1);
+      }
+
 
      // delete the shader objects once we've linked them into the program object; we no longer need them anymore
       void clear(){

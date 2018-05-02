@@ -279,6 +279,70 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
     // ---------- END SHADER -----------------
 
 
+    // ---------------------------------------------
+	// Render to Texture - specific code begins here
+	// ---------------------------------------------
+
+    // The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
+	GLuint frame_buffer = 0;
+	glGenFramebuffers(1, &frame_buffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
+
+	// The texture we're going to render to
+	GLuint rendered_texture;
+	glGenTextures(1, &rendered_texture);
+
+	// "Bind" the newly created texture : all future texture functions will modify this texture
+	glBindTexture(GL_TEXTURE_2D, rendered_texture);
+
+	// Give an empty image to OpenGL ( the last "0" means "empty" )
+	glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, windowWidth, windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+
+	// Poor filtering
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	// The depth buffer
+	GLuint depth_render_buffer;
+	glGenRenderbuffers(1, &depth_render_buffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, depth_render_buffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, windowWidth, windowHeight);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_render_buffer);
+
+    // Set "rendered_texture" as our colour attachement #0
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, rendered_texture, 0);
+
+    // Set the list of draw buffers.
+	GLenum draw_buffers[1] = {GL_COLOR_ATTACHMENT0};
+	glDrawBuffers(1, draw_buffers); // "1" is the size of draw_buffers
+
+	// Always check that our framebuffer is ok
+	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		return false;
+
+
+    // The fullscreen quad's FBO
+	static const GLfloat g_quad_vertex_buffer_data[] = {
+		-1.0f, -1.0f, 0.0f,
+		 1.0f, -1.0f, 0.0f,
+		-1.0f,  1.0f, 0.0f,
+		-1.0f,  1.0f, 0.0f,
+		 1.0f, -1.0f, 0.0f,
+		 1.0f,  1.0f, 0.0f,
+	};
+
+	GLuint quad_vertexbuffer;
+	glGenBuffers(1, &quad_vertexbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
+
+	// Create and compile our GLSL program from the shaders
+    Shader quadShader("bufferTexture.vs", "bufferTexture.fs");
+    quadShader.use();
+	GLuint texID = glGetUniformLocation(quadShader.shaderProgram, "renderedTexture");
+	GLuint timeID = glGetUniformLocation(quadShader.shaderProgram, "time");
 
 
     // --------------- IMGUI ---------------------
@@ -315,11 +379,18 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
 
         glEnable(GL_DEPTH_TEST);
 
+        // Render to our framebuffer
+		glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
+        glViewport(0, 0, windowWidth, windowHeight); // Render on the whole framebuffer, complete from the lower left corner to the upper right
+
+
         // render colours
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); //black screen
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the depth buffer before each render iteration (otherwise the depth information of the previous frame stays in the buffer).
 
         glm::mat4 projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 10.f);
+
+        ourShader.use();
 
         // arcball
         glm::mat4 rotated_view = view * arcball.rotation_matrix_view();
@@ -331,6 +402,10 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
 
         ourShader.setMat4("model", transform_shader);
 
+        object.draw(); // draw
+        // object.disable(); // and then disable
+
+
         if (IS_IN_DEBUG){
             // then draw model with normal visualizing geometry shader (FOR DEBUG)
             normalShader.use();
@@ -338,8 +413,36 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
             normalShader.setMat4("view", rotated_view);
             normalShader.setMat4("model", rotated_model);
 
-            object.draw();
+            object.draw(); // draw
+            // object.disable();
         }
+
+        // ---------- RENDER AS TEXTURE (FBO) --------------------
+
+        // Render to the screen
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        // Render on the whole framebuffer, complete from the lower left corner to the upper right
+		glViewport(0, 0, windowWidth, windowHeight);
+
+		// Clear the screen
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		// Use our shader
+        quadShader.use();
+
+        // Bind our texture in Texture Unit 0
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, rendered_texture);
+
+		// Set our "renderedTexture" sampler to use Texture Unit 0
+		glUniform1i(texID, 0);
+
+		glUniform1f(timeID, (float)(glfwGetTime() * 10.0f));
+
+        // ---------- END RENDER AS TEXTURE (FBO) --------------------
+
+        // ----------- IMGUI -----------------
 
         // Rendering
         show_window(&window_showed, window);
@@ -349,11 +452,16 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
 
         // swap the buffers and check for events
         glfwSwapBuffers(window); // will swap the color buffer
-        glfwPollEvents(); // function checks if any events are triggered (like keyboard input or mouse movement events)
+        // glfwPollEvents(); // function checks if any events are triggered (like keyboard input or mouse movement events)
         glDisable(GL_DEPTH_TEST);
     }
 
     ourShader.deactivate();
+    quadShader.deactivate();
+
+    if (IS_IN_DEBUG){
+        normalShader.deactivate();
+    }
 
     // delete the shader objects once we've linked them into the program object; we no longer need them anymore
     object.clear();
