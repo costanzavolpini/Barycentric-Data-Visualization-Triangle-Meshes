@@ -98,7 +98,7 @@ int imgui_isGouraudShading;
 
 int main(int argc, char * argv[]) {
             string name_file = "models/iCorsi/icosahedron_1.off"; //default name
-            set_parameters_shader(0);
+    set_parameters_shader(0);
 
 
     /**
@@ -605,11 +605,6 @@ void set_parameters_shader(int selected_shader){
     switch (selected_shader) {
 
         case 1: // extend flat shading
-        setLinearInterpolation(0); //pass to LoaderObject
-        setExtendFlatShading(1); //pass to LoaderObject
-        setGouraudShading(0); //pass to LoaderObject
-        setGaussianCurvature(0); //pass to LoaderObject
-
         vertex_shader = "vertexShader.vs";
         fragment_shader = "maxDiagramFragmentShader.fs";
         geometry_shader = "geometryShader.gs";
@@ -623,11 +618,6 @@ void set_parameters_shader(int selected_shader){
         // ---------
 
         case 2: // gouraud shading
-        setLinearInterpolation(0); //pass to LoaderObject
-        setExtendFlatShading(0); //pass to LoaderObject
-        setGouraudShading(1); //pass to LoaderObject
-        setGaussianCurvature(0); //pass to LoaderObject
-
         vertex_shader = "vertexShader.vs";
         fragment_shader = "fragmentShader.fs";
         geometry_shader = NULL;
@@ -641,11 +631,6 @@ void set_parameters_shader(int selected_shader){
         // ---------
 
         case 3: // gaussian curvature
-        setGaussianCurvature(1); //pass to LoaderObject
-        setExtendFlatShading(0); //pass to LoaderObject
-        setGouraudShading(0); //pass to LoaderObject
-        setLinearInterpolation(0); //pass to LoaderObject
-
         vertex_shader = "vertexShaderGC.vs";
         fragment_shader = "maxDiagramFragmentShader.fs";
         geometry_shader = "geometryShader.gs";
@@ -657,11 +642,6 @@ void set_parameters_shader(int selected_shader){
         break;
 
         case 4: // linear interpolation Gaussian Curvature
-        setLinearInterpolation(0); //pass to LoaderObject
-        setExtendFlatShading(0); //pass to LoaderObject
-        setGouraudShading(0); //pass to LoaderObject
-        setGaussianCurvature(1); //pass to LoaderObject
-
         vertex_shader = "vertexShaderGC.vs";
         fragment_shader = "fragmentShader.fs";
         geometry_shader = NULL;
@@ -673,11 +653,6 @@ void set_parameters_shader(int selected_shader){
         break;
 
         default:  // linear interpolation
-        setLinearInterpolation(1); //pass to LoaderObject
-        setExtendFlatShading(0); //pass to LoaderObject
-        setGouraudShading(0); //pass to LoaderObject
-        setGaussianCurvature(0); //pass to LoaderObject
-
         vertex_shader = "vertexShaderLI.vs";
         fragment_shader = "fragmentShader.fs";
         geometry_shader = NULL;
