@@ -195,7 +195,28 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
 
     // ------------- END GLAD -------------
 
-\
+
+    // --------- SET UP ------------
+
+    // Set the mouse at the center of the screen
+    glfwPollEvents();
+    glfwSetCursorPos(window, WIDTH/2, HEIGHT/2);
+
+    // Black background
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+
+    // Enable depth test
+	glEnable(GL_DEPTH_TEST);
+	// Accept fragment if it closer to the camera than the former one
+	glDepthFunc(GL_LESS);
+
+    // Cull triangles which normal is not towards the camera
+	glEnable(GL_CULL_FACE);
+
+    // ----------------------
+
+    // --------------- SHADER -------------------------------
     /**
         Modern OpenGL requires that we at least set up a vertex and fragment shader if we want to do some rendering.
         Shader language GLSL (OpenGL Shading Language)
@@ -208,19 +229,18 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
     Shader normalShader("normal.vs", "normal.fs", "normal.gs");
 
 
-
     /**
         NB. OpenGL works in 3D space we render a 2D triangle with each vertex having a z coordinate of 0.0.
         This way the depth of the triangle remains the same making it look like it's 2D.
 
         Send vertex data to vertex shader (load .off file).
      */
-    object.set_file(name_file);
+    object.set_file(name_file); //load mesh
     object.setGaussianCurvature(isGaussianCurvature);
     object.setExtendFlatShading(isExtendFlatShading);
     object.setGouraudFlatShading(isGouraudShading);
     object.setLinearInterpolation(isLinearInterpolation);
-    object.init();
+    object.init(); // fn to initialize VBO and VAO
 
     /**
         IMPORTANT FOR TRANSFORMATION:
@@ -233,7 +253,7 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
     glm::mat4 model = glm::mat4(1.0f);
     transform_shader = model * glm::rotate(transform_shader, 180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 
-    ourShader.use(); //draw
+    ourShader.use(); // glUseProgram
 
 
     if(isExtendFlatShading || isGouraudShading){
@@ -248,14 +268,15 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         ourShader.setFloat("shininess", 12.0f);
 
     } else if(isGaussianCurvature) {
+
         // gaussian curvature
         ourShader.setFloat("min_gc", object.get_minimum_gaussian_curvature_value());
         ourShader.setFloat("max_gc", object.get_maximum_gaussian_curvature_value());
         ourShader.setFloat("mean_negative_gc", object.get_negative_mean_gaussian_curvature_value());
         ourShader.setFloat("mean_positive_gc", object.get_positive_mean_gaussian_curvature_value());
-        // cout << "MIN " << object.get_minimum_gaussian_curvature_value() << endl;
-        // cout << "MAX " << object.get_maximum_gaussian_curvature_value() << endl;
     }
+
+    // ---------- END SHADER -----------------
 
 
 
@@ -274,6 +295,8 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
     //ImGui::StyleColorsClassic();
 
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
+    // ---------------- END IMGUI ----------------------
 
 
     /**
