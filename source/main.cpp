@@ -56,10 +56,6 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 // ------- TRANSFORMATION -------
 static glm::mat4 transform_shader = glm::mat4(1.0f);
 
-unsigned int rbo;
-unsigned int framebuffer;
-unsigned int textureColorbuffer;
-
 // ------- IMGUI -----------
 void show_window(bool* p_open, GLFWwindow* window);
 bool window_showed = true;
@@ -73,6 +69,9 @@ static float axis_y = 1.0f;  // axis of rotation - must be the same of transform
 static float axis_z = 0.0f;  // axis of rotation - must be the same of transform_shader
 static bool rotate_animation = false; // animate rotation or not
 static bool last_time_was_animated = false; // if was moving and now we have stopped it
+
+
+// FRAMEBUFFER
 
 
 int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is gaussian curvature, li is linearly interpolated, efs is extension of flat shading)
@@ -169,6 +168,13 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         return -1;
     }
     glfwMakeContextCurrent(window);
+
+    // But on MacOS X with a retina screen it'll be 1024*2 and 768*2, so we get the actual framebuffer size:
+    int windowWidth = WIDTH;
+    int windowHeight = HEIGHT;
+    glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
+
+
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
 
@@ -189,29 +195,6 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
 
     // ------------- END GLAD -------------
 
-    // framebuffer configuration
-    // -------------------------
-    // glGenFramebuffers(1, &framebuffer);
-    // glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-
-    // // create a color attachment texture
-    // glGenTextures(1, &textureColorbuffer);
-    // glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
-    // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WIDTH, HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
-
-    // // create a renderbuffer object for depth and stencil attachment (we won't be sampling these)
-    // glGenRenderbuffers(1, &rbo);
-    // glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-    // glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, WIDTH, HEIGHT); // use a single renderbuffer object for both a depth AND stencil buffer.
-    // glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // now actually attach it
-
-    // now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
-    // glBindFramebuffer(GL_FRAMEBUFFER, 0);
 \
     /**
         Modern OpenGL requires that we at least set up a vertex and fragment shader if we want to do some rendering.
@@ -307,10 +290,6 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         // keyboard
         process_input(window);
 
-        // glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-        // Finally use the results for the final rendering
-        // glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        // glDrawBuffer(GL_BACK);
         glEnable(GL_DEPTH_TEST);
 
         // render colours
@@ -329,8 +308,6 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
 
         ourShader.setMat4("model", transform_shader);
 
-
-
         if (IS_IN_DEBUG){
             // then draw model with normal visualizing geometry shader (FOR DEBUG)
             normalShader.use();
@@ -340,8 +317,6 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
 
             object.draw();
         }
-
-        // glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         // Rendering
         show_window(&window_showed, window);
