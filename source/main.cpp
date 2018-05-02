@@ -72,8 +72,8 @@ static bool rotate_animation = false; // animate rotation or not
 static bool last_time_was_animated = false; // if was moving and now we have stopped it
 static ImVec4 color_imgui = ImColor(0, 0, 0, 255);
 
-// FRAMEBUFFER
-
+double last_time;
+double timer = 0;
 
 int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is gaussian curvature, li is linearly interpolated, efs is extension of flat shading)
     string name_file = "models/iCorsi/icosahedron_1.off"; //default name
@@ -397,6 +397,15 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         ourShader.setMat4("view", rotated_view);
         // ourShader.setMat4("model", rotated_model);
 
+        // imgui rotation
+        if(rotate_animation == true){
+            if(last_time_was_animated == false) // if it is the first time then set the speed
+                angle = glm::radians(glfwGetTime());
+            transform_shader = glm::rotate(transform_shader, angle, glm::vec3(axis_x, axis_y, axis_z));
+            last_time_was_animated = true;
+        }
+
+
         ourShader.setMat4("model", transform_shader);
 
         object.draw(); // draw
@@ -630,6 +639,7 @@ void show_window(bool* p_open, GLFWwindow* window){
             ImGui::PopStyleColor();
 }
 
+// Function to handle rotation made by GUI
 void rotation_settings(){
             float prev_angle = angle;
             float prev_axis_x = axis_x;
@@ -646,12 +656,6 @@ void rotation_settings(){
             ImGui::InputFloat("input float", &axis_z, 0.01f, 1.0f);
 
             ImGui::Checkbox("rotate/stop", &rotate_animation);
-
-            if(rotate_animation == true){
-                angle = (float)glfwGetTime();
-                last_time_was_animated = true;
-                transform_shader = glm::rotate(transform_shader, angle, glm::vec3(axis_x, axis_y, axis_z));
-            }
 
             if (last_time_was_animated && rotate_animation == false){
                 axis_x = 0.0f;
