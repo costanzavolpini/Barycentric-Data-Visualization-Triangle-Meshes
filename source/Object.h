@@ -32,7 +32,7 @@ class Object {
     unsigned int VBO, VAO, VBO_NORMAL, VBO_GAUSSIANCURVATURE, VBO_LINEARINTERPOLATION;
 
     // Constructor
-      Object(const std::string &_path) {
+      void set_file(const std::string &_path) {
         if(!load(_path.c_str(), triangle_vertices, triangle_normals, triangle_gc, triangle_color)){
             cout << "error loading file" << endl;
             return;
@@ -242,6 +242,11 @@ class Object {
     void setGouraudFlatShading(int flag){
         isGouraudShading = flag;
     }
+
+    unsigned int getVAO(){
+        return VAO;
+    }
+
 };
 
 #endif

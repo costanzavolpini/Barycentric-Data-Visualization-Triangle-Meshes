@@ -15,7 +15,7 @@
 #include <string>
 #include "imgui.h"
 #include "imgui_impl_glfw_gl3.h"
-
+#include <cstdlib>
 //to test
 #include "glm/ext.hpp"
 
@@ -31,6 +31,9 @@ const unsigned int HEIGHT = 600;
 static Arcball arcball(WIDTH, HEIGHT, 1.5f, true, true);
 
 void error_callback(int error, const char * desc);
+
+// create object
+Object object = Object();
 
 // Camera options
 float Zoom = 45.0f;
@@ -48,11 +51,17 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
+
+
 // ------- TRANSFORMATION -------
 static glm::mat4 transform_shader = glm::mat4(1.0f);
 
+unsigned int rbo;
+unsigned int framebuffer;
+unsigned int textureColorbuffer;
+
 // ------- IMGUI -----------
-void show_window(bool* p_open);
+void show_window(bool* p_open, GLFWwindow* window);
 bool window_showed = true;
 void rotation_settings();
 void zoom_settings();
@@ -179,6 +188,30 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
     }
 
     // ------------- END GLAD -------------
+
+    // framebuffer configuration
+    // -------------------------
+    // glGenFramebuffers(1, &framebuffer);
+    // glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+    // // create a color attachment texture
+    // glGenTextures(1, &textureColorbuffer);
+    // glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+    // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WIDTH, HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
+
+    // // create a renderbuffer object for depth and stencil attachment (we won't be sampling these)
+    // glGenRenderbuffers(1, &rbo);
+    // glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+    // glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, WIDTH, HEIGHT); // use a single renderbuffer object for both a depth AND stencil buffer.
+    // glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // now actually attach it
+
+    // now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
+    // glBindFramebuffer(GL_FRAMEBUFFER, 0);
 \
     /**
         Modern OpenGL requires that we at least set up a vertex and fragment shader if we want to do some rendering.
@@ -199,7 +232,7 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
 
         Send vertex data to vertex shader (load .off file).
      */
-    Object object = Object(name_file);
+    object.set_file(name_file);
     object.setGaussianCurvature(isGaussianCurvature);
     object.setExtendFlatShading(isExtendFlatShading);
     object.setGouraudFlatShading(isGouraudShading);
@@ -242,6 +275,8 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
     }
 
 
+
+
     // --------------- IMGUI ---------------------
     // Setup Dear ImGui binding
     IMGUI_CHECKVERSION();
@@ -264,12 +299,18 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
     */
     while(!glfwWindowShouldClose(window)) { // function checks at the start of each loop iteration if GLFW has been instructed to close
 
+        glfwPollEvents();
+
         // new frame imgui
         ImGui_ImplGlfwGL3_NewFrame();
 
         // keyboard
         process_input(window);
 
+        // glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+        // Finally use the results for the final rendering
+        // glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        // glDrawBuffer(GL_BACK);
         glEnable(GL_DEPTH_TEST);
 
         // render colours
@@ -287,7 +328,8 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
         ourShader.setMat4("model", rotated_model);
 
         ourShader.setMat4("model", transform_shader);
-        object.draw();
+
+
 
         if (IS_IN_DEBUG){
             // then draw model with normal visualizing geometry shader (FOR DEBUG)
@@ -299,13 +341,18 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
             object.draw();
         }
 
-        show_window(&window_showed);
+        // glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        // Rendering
+        show_window(&window_showed, window);
 
         ImGui::Render();
         ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
 
+        // swap the buffers and check for events
         glfwSwapBuffers(window); // will swap the color buffer
         glfwPollEvents(); // function checks if any events are triggered (like keyboard input or mouse movement events)
+        glDisable(GL_DEPTH_TEST);
     }
 
     ourShader.deactivate();
@@ -362,7 +409,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
 }
 
 // IMGUI window with specific to set rotation, zoom, examples...
-void show_window(bool* p_open){
+void show_window(bool* p_open, GLFWwindow* window){
         // Window for movement control
         // Tip: if we don't call ImGui::Begin()/ImGui::End() the widgets automatically appears in a window called "Debug".
             static bool no_titlebar = false;
@@ -395,6 +442,9 @@ void show_window(bool* p_open){
             ImGui::Columns(3, "mixed");
             ImGui::Separator();
 
+            //get the mouse position
+            ImVec2 pos = ImGui::GetCursorScreenPos();
+
             ImGui::Text("Settings");
             if (ImGui::CollapsingHeader("Rotation")) {
                 rotation_settings();
@@ -414,8 +464,34 @@ void show_window(bool* p_open){
             }
             ImGui::NextColumn();
 
-            ImGui::Text("ImGui");
-            // opengl
+            ImGui::Text("ImGui"); // opengl
+
+            // ImGui::Image((void *)TextureID, ImVec2(WIDTH,HEIGHT));
+            object.draw();
+
+            //pass the texture of the FBO
+            //window.getRenderTexture() is the texture of the FBO
+            //the next parameter is the upper left corner for the uvs to be applied at
+            //the third parameter is the lower right corner
+            //the last two parameters are the UVs
+            //they have to be flipped (normally they would be (0,0);(1,1)
+
+            GLubyte* pixels = (GLubyte*) malloc(WIDTH * HEIGHT * sizeof(GLubyte) * 4);
+            glReadPixels(0, 0, WIDTH, HEIGHT, GL_BGRA, GL_UNSIGNED_BYTE, pixels);
+
+
+            // cout << object.getVAO() << endl;
+
+
+            ImGui::GetWindowDrawList()->AddImage((void*)object.getVAO(),
+            ImVec2(ImGui::GetCursorScreenPos()),
+            ImVec2(ImGui::GetCursorScreenPos().x + WIDTH/2,
+            ImGui::GetCursorScreenPos().y + HEIGHT/2), ImVec2(0, 1), ImVec2(1, 0));
+
+            // cout << pixels << endl;
+
+            // free(pixels);
+
             ImGui::NextColumn();
 
             ImGui::Text("Analyse");
@@ -466,3 +542,5 @@ void zoom_settings(){
     ImGui::Text("Set how much zoom the object:");
     ImGui::SliderFloat("zoom", &Zoom, 100, 1);             // Zoom
 }
+
+
