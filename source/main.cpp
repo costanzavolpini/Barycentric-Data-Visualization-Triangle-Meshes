@@ -210,29 +210,6 @@ int main(int argc, char * argv[]) {
     glm::mat4 model = glm::mat4(1.0f);
     transform_shader = glm::rotate(transform_shader, 180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 
-    ourShader.use(); // glUseProgram
-
-
-    if(imgui_isExtendFlatShading || imgui_isGouraudShading){
-        // get matrix's uniform location and set matrix
-        ourShader.setVec3("light.position", 0.5f, 0.5f, 0.5f);
-        ourShader.setVec3("viewPos", glm::vec3(0.0f, 0.0f, 3.0f));
-
-        // light properties
-        ourShader.setVec3("light.ambient", 0.1f, 0.1f, 0.1f);
-        ourShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
-        ourShader.setVec3("light.specular", 0.2f, 0.2f, 0.2f);
-        ourShader.setFloat("shininess", 12.0f);
-
-    } else if(imgui_isGaussianCurvature) {
-
-        // gaussian curvature
-        ourShader.setFloat("min_gc", object.get_minimum_gaussian_curvature_value());
-        ourShader.setFloat("max_gc", object.get_maximum_gaussian_curvature_value());
-        ourShader.setFloat("mean_negative_gc", object.get_negative_mean_gaussian_curvature_value());
-        ourShader.setFloat("mean_positive_gc", object.get_positive_mean_gaussian_curvature_value());
-    }
-
     // ---------- END SHADER -----------------
 
 
@@ -324,6 +301,28 @@ int main(int argc, char * argv[]) {
         glm::mat4 projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 10.f);
 
         ourShader.use();
+
+        // --- setting shaders ---
+        if(imgui_isExtendFlatShading || imgui_isGouraudShading){
+            // get matrix's uniform location and set matrix
+            ourShader.setVec3("light.position", 0.5f, 0.5f, 0.5f);
+            ourShader.setVec3("viewPos", glm::vec3(0.0f, 0.0f, 3.0f));
+
+            // light properties
+            ourShader.setVec3("light.ambient", 0.1f, 0.1f, 0.1f);
+            ourShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
+            ourShader.setVec3("light.specular", 0.2f, 0.2f, 0.2f);
+            ourShader.setFloat("shininess", 12.0f);
+
+        } else if(imgui_isGaussianCurvature) {
+
+            // gaussian curvature
+            ourShader.setFloat("min_gc", object.get_minimum_gaussian_curvature_value());
+            ourShader.setFloat("max_gc", object.get_maximum_gaussian_curvature_value());
+            ourShader.setFloat("mean_negative_gc", object.get_negative_mean_gaussian_curvature_value());
+            ourShader.setFloat("mean_positive_gc", object.get_positive_mean_gaussian_curvature_value());
+        }
+        // --- end settings shaders ---
 
         // arcball
         glm::mat4 rotated_view = view * arcball.rotation_matrix_view();
