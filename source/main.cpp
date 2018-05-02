@@ -250,7 +250,7 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
     glm::mat4 view = glm::lookAt(glm::vec3(4.0f, 3.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
     glm::mat4 model = glm::mat4(1.0f);
-    transform_shader = model * glm::rotate(transform_shader, 180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+    transform_shader = glm::rotate(transform_shader, 180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 
     ourShader.use(); // glUseProgram
 
@@ -395,13 +395,11 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
 
         ourShader.setMat4("projection", projection);
         ourShader.setMat4("view", rotated_view);
-        ourShader.setMat4("model", rotated_model);
+        // ourShader.setMat4("model", rotated_model);
 
         ourShader.setMat4("model", transform_shader);
 
         object.draw(); // draw
-        // object.disable(); // and then disable
-
 
         if (IS_IN_DEBUG){
             // then draw model with normal visualizing geometry shader (FOR DEBUG)
@@ -411,7 +409,6 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
             normalShader.setMat4("model", rotated_model);
 
             object.draw(); // draw
-            // object.disable();
         }
 
         // ---------- RENDER AS TEXTURE (FBO) --------------------
@@ -634,6 +631,11 @@ void show_window(bool* p_open, GLFWwindow* window){
 }
 
 void rotation_settings(){
+            float prev_angle = angle;
+            float prev_axis_x = axis_x;
+            float prev_axis_y = axis_y;
+            float prev_axis_z = axis_z;
+
             ImGui::Text("Set the angle of rotation:");
             ImGui::SliderFloat("angle", &angle, -360.0f, 360.0f);             // Edit 1 angle from -360 to 360
 
@@ -648,6 +650,7 @@ void rotation_settings(){
             if(rotate_animation == true){
                 angle = (float)glfwGetTime();
                 last_time_was_animated = true;
+                transform_shader = glm::rotate(transform_shader, angle, glm::vec3(axis_x, axis_y, axis_z));
             }
 
             if (last_time_was_animated && rotate_animation == false){
@@ -658,7 +661,8 @@ void rotation_settings(){
                 last_time_was_animated = false;
             }
 
-            transform_shader = glm::rotate(transform_shader, angle, glm::vec3(axis_x, axis_y, axis_z));
+            if((prev_angle != angle) || (prev_axis_x != axis_x) || (prev_axis_y != axis_y) || (prev_axis_z != axis_z))
+                transform_shader = glm::rotate(transform_shader, angle, glm::vec3(axis_x, axis_y, axis_z));
 }
 
 
