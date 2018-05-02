@@ -16,8 +16,7 @@
 #include "imgui.h"
 #include "imgui_impl_glfw_gl3.h"
 #include <cstdlib>
-//to test
-#include "glm/ext.hpp"
+#include "glm/ext.hpp" //to test
 
 #define IS_IN_DEBUG false // to show normals
 
@@ -593,30 +592,17 @@ void show_window(bool* p_open, GLFWwindow* window){
 
             ImGui::Text("ImGui"); // opengl
 
-            // ImGui::Image((void *)TextureID, ImVec2(WIDTH,HEIGHT));
-
             //pass the texture of the FBO
-            //window.getRenderTexture() is the texture of the FBO
+            //object.getVAO() is the texture of the FBO
             //the next parameter is the upper left corner for the uvs to be applied at
             //the third parameter is the lower right corner
             //the last two parameters are the UVs
             //they have to be flipped (normally they would be (0,0);(1,1)
 
-            GLubyte* pixels = (GLubyte*) malloc(WIDTH * HEIGHT * sizeof(GLubyte) * 4);
-            glReadPixels(0, 0, WIDTH, HEIGHT, GL_BGRA, GL_UNSIGNED_BYTE, pixels);
-
-
-            // cout << object.getVAO() << endl;
-
-
             ImGui::GetWindowDrawList()->AddImage((void*)object.getVAO(),
             ImVec2(ImGui::GetCursorScreenPos()),
             ImVec2(ImGui::GetCursorScreenPos().x + WIDTH/2,
             ImGui::GetCursorScreenPos().y + HEIGHT/2), ImVec2(0, 1), ImVec2(1, 0));
-
-            // cout << pixels << endl;
-
-            // free(pixels);
 
             ImGui::NextColumn();
 
