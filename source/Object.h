@@ -55,31 +55,27 @@ class Object {
           */
           glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_vertices.size(), &triangle_vertices[0], GL_STATIC_DRAW); // copies the previously defined vertex data into the buffer's memor
 
-         if(isExtendFlatShading || isGouraudShading){
-            // VBO NORMALS
-            glGenBuffers(1, &VBO_NORMAL); //generate buffer, bufferID = 1
+          // VBO NORMALS
+          glGenBuffers(1, &VBO_NORMAL); //generate buffer, bufferID = 1
 
-            glBindBuffer(GL_ARRAY_BUFFER, VBO_NORMAL);
+          glBindBuffer(GL_ARRAY_BUFFER, VBO_NORMAL);
 
-            glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_normals.size(), &triangle_normals[0], GL_STATIC_DRAW);
-         }
+          glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_normals.size(), &triangle_normals[0], GL_STATIC_DRAW);
 
-          if(isGaussianCurvature){
-                // VBO_GAUSSIANCURVATURE
-                glGenBuffers(1, &VBO_GAUSSIANCURVATURE); //generate buffer, bufferID = 1
 
-                glBindBuffer(GL_ARRAY_BUFFER, VBO_GAUSSIANCURVATURE);
+           // VBO_GAUSSIANCURVATURE
+           glGenBuffers(1, &VBO_GAUSSIANCURVATURE); //generate buffer, bufferID = 1
 
-                glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_gc.size(), &triangle_gc[0], GL_STATIC_DRAW);
+           glBindBuffer(GL_ARRAY_BUFFER, VBO_GAUSSIANCURVATURE);
 
-          } else if(isLinearInterpolation){
-              // VBO_LINEARINTERPOLATION
-                glGenBuffers(1, &VBO_LINEARINTERPOLATION); //generate buffer, bufferID = 1
+           glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_gc.size(), &triangle_gc[0], GL_STATIC_DRAW);
 
-                glBindBuffer(GL_ARRAY_BUFFER, VBO_LINEARINTERPOLATION);
+            // VBO_LINEARINTERPOLATION
+            glGenBuffers(1, &VBO_LINEARINTERPOLATION); //generate buffer, bufferID = 1
 
-                glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_color.size(), &triangle_color[0], GL_STATIC_DRAW);
-          }
+            glBindBuffer(GL_ARRAY_BUFFER, VBO_LINEARINTERPOLATION);
+
+            glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_color.size(), &triangle_color[0], GL_STATIC_DRAW);
 
 
           // ------------- VAO -------------
@@ -103,28 +99,26 @@ class Object {
           glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float))); // 72-bit floating point values, each position is composed of 3 of those values (3 points (one for each vertex))
           glEnableVertexAttribArray(0); //this 0 is referred to the layout on shader
 
-         if(isExtendFlatShading || isGouraudShading){
-                glBindBuffer(GL_ARRAY_BUFFER, VBO_NORMAL);
-                //normal attribute
-                glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float)));
-                glEnableVertexAttribArray(1); //this 1 is referred to the layout on shader
-         }
 
-          if(isGaussianCurvature){
+          // normals
+          glBindBuffer(GL_ARRAY_BUFFER, VBO_NORMAL);
+          //normal attribute
+          glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float)));
+          glEnableVertexAttribArray(1); //this 1 is referred to the layout on shader
 
-                glBindBuffer(GL_ARRAY_BUFFER, VBO_GAUSSIANCURVATURE);
-                //normal attribute
-                glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float)));
-                glEnableVertexAttribArray(2); //this 2 is referred to the layout on shader
 
-          } else if(isLinearInterpolation){
+          // gaussian curvature
+          glBindBuffer(GL_ARRAY_BUFFER, VBO_GAUSSIANCURVATURE);
+          //normal attribute
+          glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float)));
+          glEnableVertexAttribArray(2); //this 2 is referred to the layout on shader
 
-                glBindBuffer(GL_ARRAY_BUFFER, VBO_LINEARINTERPOLATION);
 
-                // color
-                glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float)));
-                glEnableVertexAttribArray(2); //this 2 is referred to the layout on shader
-          }
+          // linear interpolation
+          glBindBuffer(GL_ARRAY_BUFFER, VBO_LINEARINTERPOLATION);
+          // color
+          glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float)));
+          glEnableVertexAttribArray(3); //this 3 is referred to the layout on shader
 
           /**
             Unbind the VAO so other VAO calls won't accidentally modify this VAO, but this rarely happens.
@@ -157,14 +151,9 @@ class Object {
       void clear(){
         glDeleteVertexArrays(1, &VAO);
         glDeleteBuffers(1, &VBO);
-        if(VBO_NORMAL)
-            glDeleteBuffers(1, &VBO_NORMAL);
-
-        if(VBO_GAUSSIANCURVATURE)
-            glDeleteBuffers(1, &VBO_GAUSSIANCURVATURE);
-
-        if(VBO_LINEARINTERPOLATION)
-            glDeleteBuffers(1, &VBO_LINEARINTERPOLATION);
+        glDeleteBuffers(1, &VBO_NORMAL);
+        glDeleteBuffers(1, &VBO_GAUSSIANCURVATURE);
+        glDeleteBuffers(1, &VBO_LINEARINTERPOLATION);
       }
 
     // Point3d interpolation(Point3d v0, Point3d v1, float t) {
