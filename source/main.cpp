@@ -566,10 +566,14 @@ void show_window(bool* p_open, GLFWwindow* window){
             ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f), ImGuiCond_Always, ImVec2(0.5f,0.5f));
             ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x - 10.0f, io.DisplaySize.y -10.0f), ImGuiCond_Always);
 
+            float size_x = (float) io.DisplaySize.x/8.0f;
+
+
             ImGui::Begin("Movement control", p_open, window_flags);
 
             ImGui::Columns(3, "mixed");
             ImGui::Separator();
+            ImGui::SetColumnOffset(0, 0);
 
             // ImGui::PushItemWidth(-1);
 
@@ -594,6 +598,9 @@ void show_window(bool* p_open, GLFWwindow* window){
 
             ImGui::Text("ImGui"); // opengl
 
+            ImGui::SetColumnOffset(1, size_x * 2);
+
+
             //pass the texture of the FBO
             //object.getVAO() is the texture of the FBO
             //the next parameter is the upper left corner for the uvs to be applied at
@@ -602,10 +609,13 @@ void show_window(bool* p_open, GLFWwindow* window){
             //they have to be flipped (normally they would be (0,0);(1,1)
             ImGui::GetWindowDrawList()->AddImage((void*)object.getVAO(),
             ImVec2(ImGui::GetCursorScreenPos()),
-            ImVec2(ImGui::GetCursorScreenPos().x + WIDTH/2,
-            ImGui::GetCursorScreenPos().y + HEIGHT/2), ImVec2(0, 1), ImVec2(1, 0));
+            ImVec2(ImGui::GetCursorScreenPos().x + io.DisplaySize.x/2,
+            ImGui::GetCursorScreenPos().y + io.DisplaySize.y/2), ImVec2(0, 1), ImVec2(1, 0));
 
             ImGui::NextColumn();
+
+            ImGui::SetColumnOffset(2, size_x * 6);
+
 
             ImGui::Text("Analyse");
             ImGui::Button("Corniflower");
