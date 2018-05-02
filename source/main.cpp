@@ -561,14 +561,17 @@ void show_window(bool* p_open, GLFWwindow* window){
             if (no_close)     p_open = NULL; // Don't pass our bool* to Begin
 
 
-            ImGui::SetNextWindowPosCenter(ImGuiCond_Once);
-            ImGui::SetNextWindowSize(ImVec2(WIDTH-10, HEIGHT-10), ImGuiCond_Always);
+            // ImGui::SetNextWindowPosCenter(ImGuiCond_Once);
+            ImGuiIO& io = ImGui::GetIO(); (void)io;
+            ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f), ImGuiCond_Always, ImVec2(0.5f,0.5f));
+            ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x - 10.0f, io.DisplaySize.y -10.0f), ImGuiCond_Always);
 
             ImGui::Begin("Movement control", p_open, window_flags);
 
-
             ImGui::Columns(3, "mixed");
             ImGui::Separator();
+
+            // ImGui::PushItemWidth(-1);
 
             ImGui::Text("Settings");
             if (ImGui::CollapsingHeader("Rotation")) {
