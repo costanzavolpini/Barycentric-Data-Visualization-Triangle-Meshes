@@ -62,6 +62,7 @@ bool window_showed = true;
 void rotation_settings();
 void zoom_settings();
 
+
 // set-up parameter imgui
 static float angle = 180.0f; // angle of rotation - must be the same of transform_shader
 static float axis_x = 0.0f; // axis of rotation - must be the same of transform_shader
@@ -69,7 +70,7 @@ static float axis_y = 1.0f;  // axis of rotation - must be the same of transform
 static float axis_z = 0.0f;  // axis of rotation - must be the same of transform_shader
 static bool rotate_animation = false; // animate rotation or not
 static bool last_time_was_animated = false; // if was moving and now we have stopped it
-
+static ImVec4 color_imgui = ImColor(0, 0, 0, 255);
 
 // FRAMEBUFFER
 
@@ -535,6 +536,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
 
 // IMGUI window with specific to set rotation, zoom, examples...
 void show_window(bool* p_open, GLFWwindow* window){
+
         // Window for movement control
             // Tip: if we don't call ImGui::Begin()/ImGui::End() the widgets automatically appears in a window called "Debug".
             static bool no_titlebar = true;
@@ -567,7 +569,8 @@ void show_window(bool* p_open, GLFWwindow* window){
             ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x - 10.0f, io.DisplaySize.y -10.0f), ImGuiCond_Always);
 
             float size_x = (float) io.DisplaySize.x/8.0f;
-
+            // ImGui::SetNextWindowBgAlpha(1.0f);
+            ImGui::PushStyleColor(ImGuiCol_WindowBg, color_imgui);
 
             ImGui::Begin("Movement control", p_open, window_flags);
 
@@ -600,7 +603,6 @@ void show_window(bool* p_open, GLFWwindow* window){
 
             ImGui::SetColumnOffset(1, size_x * 2);
 
-
             //pass the texture of the FBO
             //object.getVAO() is the texture of the FBO
             //the next parameter is the upper left corner for the uvs to be applied at
@@ -616,21 +618,19 @@ void show_window(bool* p_open, GLFWwindow* window){
 
             ImGui::SetColumnOffset(2, size_x * 6);
 
-
             ImGui::Text("Analyse");
             ImGui::Button("Corniflower");
             static float bar = 1.0f;
             ImGui::InputFloat("blue", &bar, 0.05f, 0, 3);
+            ImGui::SetCursorPosY(io.DisplaySize.y-18.0f);
             ImGui::NextColumn();
-
-
-            // ImGui::SetNextWindowPos(ImVec2(0, ImGui::GetIO().DisplaySize.y - HEIGHT), 0);
-            // ImGui::SetNextWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x, 0), 0);
 
 
             // ImGui::Text("ZOOM = %d", zoom);
 
+
             ImGui::End();
+            ImGui::PopStyleColor();
 }
 
 void rotation_settings(){
