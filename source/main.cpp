@@ -72,7 +72,9 @@ static bool rotate_animation = false; // animate rotation or not
 static bool last_time_was_animated = false; // if was moving and now we have stopped it
 static ImVec4 color_imgui = ImColor(0, 0, 0, 255);
 
-double pre_time= 0;
+int count_angle = 0;
+bool decrease_angle = false;
+
 
 int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is gaussian curvature, li is linearly interpolated, efs is extension of flat shading)
     string name_file = "models/iCorsi/icosahedron_1.off"; //default name
@@ -398,12 +400,29 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
 
         // imgui rotation
         if(rotate_animation == true){
-            double current_time = glfwGetTime();
-            double delta_time = current_time - pre_time;
-            pre_time = current_time;
-            angle = glm::radians(delta_time * 100.0f);
 
-            transform_shader = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(axis_x, axis_y, axis_z));
+            if(!last_time_was_animated)
+                count_angle = 0;
+
+            angle = count_angle;
+
+            // if(count_angle > 360){
+            //     decrease_angle = true;
+            // } else if(count_angle < 0){
+            //     decrease_angle = false;
+            // }
+
+
+            // if(decrease_angle)
+            //     count_angle--;
+            // else
+            //     count_angle++;
+
+            if(count_angle > 360)
+                count_angle = 0;
+            count_angle++;
+
+            transform_shader = glm::rotate(glm::mat4(1.0f), glm::radians((float) angle), glm::vec3(axis_x, axis_y, axis_z));
             last_time_was_animated = true;
         }
 
@@ -533,7 +552,6 @@ void process_input(GLFWwindow *window) {
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-    cout << "eh" << endl;
         if (Zoom >= 1.0f && Zoom <= 45.0f)
             Zoom -= yoffset;
         if (Zoom <= 1.0f)
@@ -633,10 +651,6 @@ void show_window(bool* p_open, GLFWwindow* window){
             ImGui::SetCursorPosY(io.DisplaySize.y-18.0f);
             ImGui::NextColumn();
 
-
-            // ImGui::Text("ZOOM = %d", zoom);
-
-
             ImGui::End();
             ImGui::PopStyleColor();
 }
@@ -673,7 +687,7 @@ void rotation_settings(){
 
 
 void zoom_settings(){
-    ImGui::Text("Set how much zoom the object:");
+    ImGui::Text("Zoom-in/out:");
     ImGui::SliderFloat("zoom", &Zoom, 100, 1); // Zoom
 }
 
