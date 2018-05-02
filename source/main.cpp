@@ -72,8 +72,7 @@ static bool rotate_animation = false; // animate rotation or not
 static bool last_time_was_animated = false; // if was moving and now we have stopped it
 static ImVec4 color_imgui = ImColor(0, 0, 0, 255);
 
-double last_time;
-double timer = 0;
+double pre_time= 0;
 
 int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is gaussian curvature, li is linearly interpolated, efs is extension of flat shading)
     string name_file = "models/iCorsi/icosahedron_1.off"; //default name
@@ -399,8 +398,11 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
 
         // imgui rotation
         if(rotate_animation == true){
-            if(last_time_was_animated == false) // if it is the first time then set the speed
-                angle = glm::radians(glfwGetTime());
+            double current_time = glfwGetTime();
+            double delta_time = current_time - pre_time;
+            pre_time = current_time;
+            angle = glm::radians(delta_time * 100.0f);
+
             transform_shader = glm::rotate(transform_shader, angle, glm::vec3(axis_x, axis_y, axis_z));
             last_time_was_animated = true;
         }
