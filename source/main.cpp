@@ -181,9 +181,10 @@ int main(int argc, char * argv[]) {
         Since OpenGL 3.3 and higher the version numbers of GLSL match the version of OpenGL
         (GLSL version 420 corresponds to OpenGL version 4.2 for example).
     */
-    Shader ourShader(vertex_shader, fragment_shader, geometry_shader);
+    Shader ourShader = Shader();
 
-    Shader normalShader("normal.vs", "normal.fs", "normal.gs");
+    Shader normalShader = Shader();
+    normalShader.initialize_shader("normal.vs", "normal.fs", "normal.gs");
 
 
     /**
@@ -193,10 +194,6 @@ int main(int argc, char * argv[]) {
         Send vertex data to vertex shader (load .off file).
      */
     object.set_file(name_file); //load mesh
-    object.setGaussianCurvature(imgui_isGaussianCurvature);
-    object.setExtendFlatShading(imgui_isExtendFlatShading);
-    object.setGouraudFlatShading(imgui_isGouraudShading);
-    object.setLinearInterpolation(imgui_isLinearInterpolation);
     object.init(); // fn to initialize VBO and VAO
 
     /**
@@ -300,6 +297,7 @@ int main(int argc, char * argv[]) {
 
         glm::mat4 projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 10.f);
 
+        ourShader.initialize_shader(vertex_shader, fragment_shader, geometry_shader);
         ourShader.use();
 
         // --- setting shaders ---
@@ -596,6 +594,8 @@ void set_shader(){
     ImGui::RadioButton("Gouraud Shading", &shader_set, 2);
     ImGui::RadioButton("Gaussian Curvature", &shader_set, 3);
     ImGui::RadioButton("Linear Interpolation GC", &shader_set, 4);
+
+    set_parameters_shader(shader_set);
 }
 
 

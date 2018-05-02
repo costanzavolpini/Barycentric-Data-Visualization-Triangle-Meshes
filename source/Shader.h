@@ -22,7 +22,7 @@ public:
 
     // constructor generates read the shader (GS is not required)
     // ------------------------------------------------------------------------
-    Shader(const char * pathVertexShader, const char * pathFragmentShader, const char * pathGeometryShader = nullptr) {
+    void initialize_shader(const char * pathVertexShader, const char * pathFragmentShader, const char * pathGeometryShader = nullptr) {
 
         // 1. retrieve the vertex/fragment(/geometry) source code from filePath
         std::string vertexCode;

@@ -20,11 +20,6 @@ class Object {
     vector<float> triangle_gc;
     vector<float> triangle_color;
 
-    int isGaussianCurvature = 0;
-    int isLinearInterpolation = 0;
-    int isExtendFlatShading = 1;
-    int isGouraudShading = 0;
-
     /**
         Memory on the GPU where we store the vertex data
         VBO: manage this memory via so called vertex buffer objects (VBO) that can store a large number of vertices in the GPU's memory
@@ -217,23 +212,6 @@ class Object {
 
         }
         return sum / count;
-    }
-
-
-    void setGaussianCurvature(int flag){
-        isGaussianCurvature = flag;
-    }
-
-    void setLinearInterpolation(int flag){
-        isLinearInterpolation = flag;
-    }
-
-    void setExtendFlatShading(int flag){
-        isExtendFlatShading = flag;
-    }
-
-    void setGouraudFlatShading(int flag){
-        isGouraudShading = flag;
     }
 
     unsigned int getVAO(){
