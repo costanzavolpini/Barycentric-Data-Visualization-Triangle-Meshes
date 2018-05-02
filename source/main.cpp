@@ -440,6 +440,23 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
 
 		glUniform1f(timeID, (float)(glfwGetTime() * 10.0f));
 
+        // 1rst attribute buffer : vertices
+		glEnableVertexAttribArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
+		glVertexAttribPointer(
+			0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+			3,                  // size
+			GL_FLOAT,           // type
+			GL_FALSE,           // normalized?
+			0,                  // stride
+			(void*)0            // array buffer offset
+		);
+
+		// Draw the triangles !
+		glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
+
+		glDisableVertexAttribArray(0);
+
         // ---------- END RENDER AS TEXTURE (FBO) --------------------
 
         // ----------- IMGUI -----------------
@@ -465,6 +482,10 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
 
     // delete the shader objects once we've linked them into the program object; we no longer need them anymore
     object.clear();
+    glDeleteFramebuffers(1, &frame_buffer);
+	glDeleteTextures(1, &rendered_texture);
+	glDeleteRenderbuffers(1, &depth_render_buffer);
+	glDeleteBuffers(1, &quad_vertexbuffer);
 
     ImGui_ImplGlfwGL3_Shutdown();
     ImGui::DestroyContext();
@@ -573,7 +594,6 @@ void show_window(bool* p_open, GLFWwindow* window){
             ImGui::Text("ImGui"); // opengl
 
             // ImGui::Image((void *)TextureID, ImVec2(WIDTH,HEIGHT));
-            object.draw();
 
             //pass the texture of the FBO
             //window.getRenderTexture() is the texture of the FBO
