@@ -26,6 +26,9 @@ using namespace std;
 const unsigned int WIDTH = 800;
 const unsigned int HEIGHT = 600;
 
+int current_width = 800;
+int current_height = 600;
+
 // Arcball instance
 static Arcball arcball(WIDTH, HEIGHT, 1.5f, true, true);
 
@@ -353,8 +356,6 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
     ImGui::StyleColorsDark();
     //ImGui::StyleColorsClassic();
 
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
     // ---------------- END IMGUI ----------------------
 
 
@@ -430,27 +431,27 @@ int main(int argc, char * argv[]) {  //arguments: nameFile type(example: gc is g
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, rendered_texture);
 
-		// Set our "renderedTexture" sampler to use Texture Unit 0
-		glUniform1i(texID, 0);
+		// // Set our "renderedTexture" sampler to use Texture Unit 0
+		// glUniform1i(texID, 0);
 
-		glUniform1f(timeID, (float)(glfwGetTime() * 10.0f));
+		// glUniform1f(timeID, (float)(glfwGetTime() * 10.0f));
 
-        // 1rst attribute buffer : vertices
-		glEnableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
-		glVertexAttribPointer(
-			0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-			3,                  // size
-			GL_FLOAT,           // type
-			GL_FALSE,           // normalized?
-			0,                  // stride
-			(void*)0            // array buffer offset
-		);
+        // // 1rst attribute buffer : vertices
+		// glEnableVertexAttribArray(0);
+		// glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
+		// glVertexAttribPointer(
+		// 	0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+		// 	3,                  // size
+		// 	GL_FLOAT,           // type
+		// 	GL_FALSE,           // normalized?
+		// 	0,                  // stride
+		// 	(void*)0            // array buffer offset
+		// );
 
-		// Draw the triangles !
-		glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
+		// // Draw the triangles !
+		// glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
 
-		glDisableVertexAttribArray(0);
+		// glDisableVertexAttribArray(0);
 
         // ---------- END RENDER AS TEXTURE (FBO) --------------------
 
@@ -497,6 +498,8 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
         make sure the viewport matches the new window dimensions; note that width and
         height will be significantly larger than specified on retina displays.
     */
+    current_width = width;
+    current_height = height;
     glViewport(0, 0, width, height);
 }
 
@@ -540,8 +543,10 @@ void show_window(bool* p_open, GLFWwindow* window){
             static bool no_move = true;
             static bool no_resize = false;
             static bool no_collapse = false;
-            static bool no_close = false;
+            static bool no_close = true;
             static bool no_nav = false;
+            static bool no_autoresize = false;
+
 
             // Demonstrate the various window flags. Typically you would just use the default.
             ImGuiWindowFlags window_flags = 0;
@@ -552,17 +557,18 @@ void show_window(bool* p_open, GLFWwindow* window){
             if (no_resize)    window_flags |= ImGuiWindowFlags_NoResize;
             if (no_collapse)  window_flags |= ImGuiWindowFlags_NoCollapse;
             if (no_nav)       window_flags |= ImGuiWindowFlags_NoNav;
+            if(!no_autoresize) window_flags |= ImGuiWindowFlags_AlwaysAutoResize;
             if (no_close)     p_open = NULL; // Don't pass our bool* to Begin
 
-            double half_window_h = HEIGHT/2;
-            double half_window_w = WIDTH/2;
+
+            ImGui::SetNextWindowPosCenter(ImGuiCond_Once);
+            ImGui::SetNextWindowSize(ImVec2(WIDTH-10, HEIGHT-10), ImGuiCond_Always);
 
             ImGui::Begin("Movement control", p_open, window_flags);
+
+
             ImGui::Columns(3, "mixed");
             ImGui::Separator();
-
-            //get the mouse position
-            ImVec2 pos = ImGui::GetCursorScreenPos();
 
             ImGui::Text("Settings");
             if (ImGui::CollapsingHeader("Rotation")) {
@@ -591,7 +597,6 @@ void show_window(bool* p_open, GLFWwindow* window){
             //the third parameter is the lower right corner
             //the last two parameters are the UVs
             //they have to be flipped (normally they would be (0,0);(1,1)
-
             ImGui::GetWindowDrawList()->AddImage((void*)object.getVAO(),
             ImVec2(ImGui::GetCursorScreenPos()),
             ImVec2(ImGui::GetCursorScreenPos().x + WIDTH/2,
@@ -604,6 +609,7 @@ void show_window(bool* p_open, GLFWwindow* window){
             static float bar = 1.0f;
             ImGui::InputFloat("blue", &bar, 0.05f, 0, 3);
             ImGui::NextColumn();
+
 
             // ImGui::SetNextWindowPos(ImVec2(0, ImGui::GetIO().DisplaySize.y - HEIGHT), 0);
             // ImGui::SetNextWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x, 0), 0);
