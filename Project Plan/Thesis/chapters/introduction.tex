@@ -6,7 +6,7 @@ The position of any point in a triangle can be expressed using a linear combinat
 $$ p = \lambda_1 p_1 + \lambda_2 p_2 + \lambda_3 p_3$$
 where $p_1$, $p_2$ and $p_3$ are the vertices of a triangle and $\lambda_1$, $\lambda_2$ and $\lambda_3$ (the barycentric coordinates) are three scalars such that
 respect the following barycentric coordinates properties.
-% https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/barycentric-coordinates
+% cite : https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/barycentric-coordinates
 % -------
 \begin{itemize}
   \item partition of unity: $\sum_{i=1}^3 \lambda_{i}(p) = 1$
@@ -15,17 +15,17 @@ respect the following barycentric coordinates properties.
   \item linearity: $\lambda_i \in \prod_1$
   \item non-negativity: $\lambda_i(p)\geq 0$ for $p \in [p_1, p_2, p_3]$
 \end{itemize}
-%https://www.icorsi.ch/pluginfile.php/406215/mod_resource/content/7/Graphics.2017.10.05.pdf
+%cite : https://www.icorsi.ch/pluginfile.php/406215/mod_resource/content/7/Graphics.2017.10.05.pdf
 % -------
 The point is inside the triangle if $0 \leq \lambda_1, \lambda_2, \lambda_3 \leq 1$. If a barycentric coordinates is less than zero or greater than one, the point is outside the triangle.
-% https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/barycentric-coordinates
+% cite : https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/barycentric-coordinates
 % -------
 Barycentric coordinates allow to interpolate values from a set of control points over the interior of a domain, using weighted combinations of values associated with the control points (Fig. \ref{fig:barycentric-coord}).
 % cite : http://lgg.epfl.ch/publications/2014/LBC/LBC.pdf
 % ------
 \begin{figure}
   \centering
-  \begin{tikzpicture}
+  \scalebox{.7}{\begin{tikzpicture}
     \coordinate (L1) at (0,0);
     \coordinate (L2) at (8,0);
     \coordinate (L3) at (4,5);
@@ -41,34 +41,46 @@ Barycentric coordinates allow to interpolate values from a set of control points
        -- (L2) node [below right] {$p_2$}
        -- (L3) node [above] {$p_3$}
        -- (X) node [below] {$p$};
-    \end{tikzpicture}
+    \end{tikzpicture}}
     \caption{Let $w_1$ be the red area, $w_2$ the green one and $w_3$ the blue one. Normalizing each of them by the area of the triangle, we will get three values ($\lambda_1, \lambda_2, \lambda_3$) that are the barycentric coordinates of $p$ with respect to the triangle [$p_1, p_2, p_3$].}
     \label{fig:barycentric-coord}
   \end{figure}
 
-  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\section{Triangle mesh}
-See book
+\section{Triangle meshes}
+A collection of triangles without any particular mathematical structure are called \textit{triangle meshes} in many geometry processing algorithms. To derive a global parameterization for an entire triangle mesh we can define a 2D position for each vertex. Let be $\mathcal{M}$ a triangle mesh that consists of a geometric and topological component represented by a graph structure with a set of vertices $\mathcal{V} = \{ v_1, ..., v_V \}$ and a set of triangular faces connecting them $\mathcal{F} = \{ f_1, ... , f_F \}$ with $f_i \in \mathcal{V} \times \mathcal{V} \times \mathcal{V}$. The connectivity of a triangle mesh can be expressed in termes of the edges of the respective graph $\mathcal{E} = \{ e_1, ..., e_E \}$ where $e_i \in \mathcal{V} \times \mathcal{V}$.
+% cite: Botsch 2010 Polygon Mesh Processing
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Lighting}
 formula + draw and explanation of angle (like at 90 degree some light..e.tc.)
+todo
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Linear Interpolation}
 The standard linear interpolated visualisation is made passing three attributes (colors) for each vertex of a triangle. OpenGL will interpolate linearly the colors. That is possible thanks to the barycentric coordinates that will tell how much of each color is being mixed at any position.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \section{Flat Shading}
+todo
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Gouraud Shading}
 \textit{Gouraud Shading} can be calculated in the \textit{vertex shader}. The main idea is to compute a normal at the vertex and an intensity for each vertex.
+todo (?)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Curvature}
 \subsection{Gaussian Curvature}
 \textit{Gaussian Curvature} works like a logical \texttt{AND}, it will check if there is a curvature along both directions.
-
 \begin{figure}[h]
-  \minipage[b]{.6\linewidth}
+  \minipage[b]{.5\linewidth}
   \centering
   \scalebox{0.7}{\begin{tikzpicture}
   \begin{axis}[view={60}{30}]
@@ -81,9 +93,9 @@ The standard linear interpolated visualisation is made passing three attributes 
        x);
   \end{axis}
   \end{tikzpicture}}
-  \caption{Positive gaussian curvature}\label{fig:positive-gaussian}
+  \caption{Positive GC}\label{fig:positive-gaussian}
   \endminipage
-  \minipage[b]{.6\linewidth}
+  \minipage[b]{.5\linewidth}
   \centering
   \begin{tikzpicture}[scale=0.7]
     \begin{axis}[view={60}{30}]
@@ -105,7 +117,7 @@ The standard linear interpolated visualisation is made passing three attributes 
     };
   \end{axis}
   \end{tikzpicture}
-  \caption{Negative gaussian curvature}\label{fig:negative-gaussian}
+  \caption{Negative GC}\label{fig:negative-gaussian}
   \endminipage
 \end{figure}
 Surfaces that have a zero gaussian curvature are called \textit{developable surfaces} because they can be flattened out into the plane without any stretching. Gaussian curvature should be zero inside each mesh triangle and the same along edges since it can be flattened symmetrically into the plane.
