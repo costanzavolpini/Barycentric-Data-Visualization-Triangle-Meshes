@@ -86,6 +86,8 @@ static int listbox_item_prev = 0;
 
 void set_parameters_shader(int selected_shader);
 
+void select_model(GLFWwindow* window);
+
 // ------- END IMGUI -------------
 
 // ------ SETTINGS SHADERS ---------------
@@ -101,6 +103,10 @@ string name_file = "models/armadillo.off"; //default name
 
 // ----------- END SETTINGS SHADERS ----------
 
+// --------- SETTINGS FBO -----------
+GLuint frame_buffer = 0;
+GLuint rendered_texture;
+GLuint depth_render_buffer;
 
 int main(int argc, char * argv[]) {
     set_parameters_shader(0);
@@ -137,6 +143,8 @@ int main(int argc, char * argv[]) {
     int windowHeight = HEIGHT;
     glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
 
+    glfwSetCursorPos(window, WIDTH/2, HEIGHT/2);
+
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
     // callback functions
@@ -156,27 +164,6 @@ int main(int argc, char * argv[]) {
 
     // ------------- END GLAD -------------
 
-
-    // --------- SET UP ------------
-
-    // Set the mouse at the center of the screen
-    glfwPollEvents();
-    glfwSetCursorPos(window, WIDTH/2, HEIGHT/2);
-
-    // Black background
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
-
-    // Enable depth test
-	glEnable(GL_DEPTH_TEST);
-	// Accept fragment if it closer to the camera than the former one
-	glDepthFunc(GL_LESS);
-
-    // Cull triangles which normal is not towards the camera
-	glEnable(GL_CULL_FACE);
-
-    // ----------------------
-
     // --------------- SHADER -------------------------------
     /**
         Modern OpenGL requires that we at least set up a vertex and fragment shader if we want to do some rendering.
@@ -189,16 +176,6 @@ int main(int argc, char * argv[]) {
 
     Shader normalShader = Shader();
     normalShader.initialize_shader("normal.vs", "normal.fs", "normal.gs");
-
-
-    /**
-        NB. OpenGL works in 3D space we render a 2D triangle with each vertex having a z coordinate of 0.0.
-        This way the depth of the triangle remains the same making it look like it's 2D.
-
-        Send vertex data to vertex shader (load .off file).
-     */
-    object.set_file(name_file); //load mesh
-    object.init(); // fn to initialize VBO and VAO
 
     /**
         IMPORTANT FOR TRANSFORMATION:
@@ -218,47 +195,9 @@ int main(int argc, char * argv[]) {
 	// Render to Texture - specific code begins here
 	// ---------------------------------------------
 
-    // The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
-	GLuint frame_buffer = 0;
-	glGenFramebuffers(1, &frame_buffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
+    setup_vao_vbo_fbo(window);
 
-	// The texture we're going to render to
-	GLuint rendered_texture;
-	glGenTextures(1, &rendered_texture);
-
-	// "Bind" the newly created texture : all future texture functions will modify this texture
-	glBindTexture(GL_TEXTURE_2D, rendered_texture);
-
-	// Give an empty image to OpenGL ( the last "0" means "empty" )
-	glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, windowWidth, windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
-
-	// Poor filtering
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-	// The depth buffer
-	GLuint depth_render_buffer;
-	glGenRenderbuffers(1, &depth_render_buffer);
-	glBindRenderbuffer(GL_RENDERBUFFER, depth_render_buffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, windowWidth, windowHeight);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_render_buffer);
-
-    // Set "rendered_texture" as our colour attachement #0
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, rendered_texture, 0);
-
-    // Set the list of draw buffers.
-	GLenum draw_buffers[1] = {GL_COLOR_ATTACHMENT0};
-	glDrawBuffers(1, draw_buffers); // "1" is the size of draw_buffers
-
-	// Always check that our framebuffer is ok
-	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		return false;
-
-
-    // --------------- IMGUI ---------------------
+    // // --------------- IMGUI ---------------------
     // Setup Dear ImGui binding
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -269,7 +208,6 @@ int main(int argc, char * argv[]) {
 
     // Setup style
     ImGui::StyleColorsDark();
-    //ImGui::StyleColorsClassic();
 
     // ---------------- END IMGUI ----------------------
 
@@ -293,7 +231,6 @@ int main(int argc, char * argv[]) {
         // Render to our framebuffer
 		glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
         glViewport(0, 0, windowWidth, windowHeight); // Render on the whole framebuffer, complete from the lower left corner to the upper right
-
 
         // render colours
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); //black screen
@@ -531,7 +468,7 @@ void show_window(bool* p_open, GLFWwindow* window){
             //the third parameter is the lower right corner
             //the last two parameters are the UVs
             //they have to be flipped (normally they would be (0,0);(1,1)
-            ImGui::GetWindowDrawList()->AddImage((void*)object.getVAO(),
+            ImGui::GetWindowDrawList()->AddImage((void*)texture_vao,
             ImVec2(ImGui::GetCursorScreenPos()),
             ImVec2(ImGui::GetCursorScreenPos().x + io.DisplaySize.x/2,
             ImGui::GetCursorScreenPos().y + io.DisplaySize.y/2), ImVec2(0, 1), ImVec2(1, 0));

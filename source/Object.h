@@ -27,15 +27,17 @@ class Object {
     unsigned int VBO, VAO, VBO_NORMAL, VBO_GAUSSIANCURVATURE, VBO_LINEARINTERPOLATION;
 
     // Constructor
-      void set_file(const std::string &_path) {
+      bool set_file(const std::string &_path) {
         if(!load(_path.c_str(), triangle_vertices, triangle_normals, triangle_gc, triangle_color)){
             cout << "error loading file" << endl;
-            return;
+            return false;
         }
+        if(!init()) return false;
+        return true;
       }
 
      // Function to initialize VBO and VAO
-      void init() {
+      bool init() {
 
           // ------------- VBO -------------
           // Use VBO to avoid to send data vertex at a time (we send everything together)
@@ -122,6 +124,7 @@ class Object {
           glBindVertexArray(0);
 
           cout << "Scene initialized..." << endl;
+          return true;
       }
 
       // function to draw the triangles of the mesh
