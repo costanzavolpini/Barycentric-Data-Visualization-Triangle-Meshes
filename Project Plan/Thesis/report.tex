@@ -18,8 +18,8 @@
 \usepackage{sectsty}
 \usepackage{tikz}
 \usepackage{pgfplots}
-\usepackage[backend=biber]{biblatex}
-\addbibresource{report.bib}
+% \usepackage[backend=biber]{biblatex}
+% \addbibresource{report.bib}
 \pgfplotsset{compat=newest}
 \usepgfplotslibrary{patchplots}
 \usetikzlibrary{calc,intersections,trees,positioning,arrows,chains,shapes.geometric,%
@@ -96,16 +96,17 @@
 
 %%%%%%% ref: https://it.sharelatex.com/blog/2013/08/02/thesis-series-pt1.html
 \chapter*{Abstract}
-Abstract goes here
+Abstract goes here (?)
+% The power of barycentric coordinates will grant the exploration of alternative data visualization techniques.
 
 \chapter*{Dedication}
-to somebody
+to somebody (?)
 
 \chapter*{Declaration}
-I declare that..
+I declare that.. (?)
 
 \chapter*{Acknowledgements}
-I want to thank...
+I want to thank... (?)
 
 \tableofcontents
 %%%%%%%
@@ -125,7 +126,31 @@ I want to thank...
 % \chapter{Conclusion}
 % \input{chapters/conclusion}
 % See~\cite{DUMMY:1}.
-\printbibliography
+% \printbibliography
+% \bibliography{report}
+
+% \cite{BOOK:1}
+
+\bibliography{report}
+\bibliographystyle{plain}
+
+
+
+% \begin{thebibliography}{9}
+%   % \bibitem{ddd}
+%   % Michel Goossens, Frank Mittelbach, and Alexander Samarin.
+%   % \textit{The \LaTeX\ Companion}.
+%   % Addison-Wesley, Reading, Massachusetts, 1993.
+
+%   % \bibitem{einstein}
+%   % Albert Einstein.
+%   % \textit{Zur Elektrodynamik bewegter K{\"o}rper}. (German)
+%   % [\textit{On the electrodynamics of moving bodies}].
+%   % Annalen der Physik, 322(10):891–921, 1905.
+%   \bibitem{barycenterCutKnot}
+%   \textit{Cut-the-knot}, Alexander Bogomolny.
+%   \\\texttt{www.cut-the-knot.org}
+% \end{thebibliography}
 
 
 \appendix
