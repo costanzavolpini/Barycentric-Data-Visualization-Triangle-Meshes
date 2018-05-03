@@ -62,6 +62,7 @@ bool window_showed = true;
 void rotation_settings();
 void zoom_settings();
 void set_shader();
+void select_model();
 
 // set-up parameter imgui
 static float angle = 180.0f; // angle of rotation - must be the same of transform_shader
@@ -79,6 +80,10 @@ bool decrease_angle = false;
 // imgui shaders
 static int shader_set = 0;
 
+// imgui listbox models
+static int listbox_item_current = 0;
+static int listbox_item_prev = 0;
+
 void set_parameters_shader(int selected_shader);
 
 // ------- END IMGUI -------------
@@ -91,15 +96,14 @@ int imgui_isGaussianCurvature;
 int imgui_isLinearInterpolation;
 int imgui_isExtendFlatShading;
 int imgui_isGouraudShading;
+string name_file = "models/armadillo.off"; //default name
+
 
 // ----------- END SETTINGS SHADERS ----------
 
 
-
 int main(int argc, char * argv[]) {
-            string name_file = "models/iCorsi/icosahedron_1.off"; //default name
     set_parameters_shader(0);
-
 
     /**
         ------------- GLFW -------------
@@ -510,12 +514,9 @@ void show_window(bool* p_open, GLFWwindow* window){
                 zoom_settings();
             }
             if (ImGui::CollapsingHeader("Models")) {
-                ImGui::TextWrapped("This window is being created by the ShowDemoWindow() function. Please refer to the code in imgui_demo.cpp for reference.\n\n");
-                ImGui::Text("USER GUIDE:");
-                // ImGui::ShowUserGuide();
+                select_model();
             }
             if (ImGui::CollapsingHeader("Shaders")) {
-                ImGui::TextWrapped("Set a shader experiment to see how the model looks like:\n\n");
                 set_shader();
             }
             ImGui::NextColumn();
@@ -589,6 +590,7 @@ void zoom_settings(){
 
 
 void set_shader(){
+    ImGui::TextWrapped("Set a shader experiment to see how the model looks like:\n\n");
     ImGui::RadioButton("Linear Interpolation", &shader_set, 0);
     ImGui::RadioButton("Extend Flat Shading", &shader_set, 1);
     ImGui::RadioButton("Gouraud Shading", &shader_set, 2);
@@ -662,6 +664,20 @@ void set_parameters_shader(int selected_shader){
         imgui_isGaussianCurvature = 0;
         break;
     }
+}
+
+// function to select a model to render
+void select_model(){
+    listbox_item_prev = listbox_item_current;
+    ImGui::TextWrapped("Select a model to render:\n\n");
+    const char* listbox_items[] = { "armadillo", "eight", "genus3", "horse", "icosahedron_0", "icosahedron_1", "icosahedron_2", "icosahedron_3", "icosahedron_4"};
+    ImGui::PushItemWidth(-1);
+    ImGui::ListBox("", &listbox_item_current, listbox_items, IM_ARRAYSIZE(listbox_items), 10);
+
+    name_file = "models/" + std::string(listbox_items[listbox_item_current]) + ".off"; // generate name file
+
+    // if(listbox_item_current != listbox_item_prev)
+        // setup vao and vbo and fbo
 }
 
 
