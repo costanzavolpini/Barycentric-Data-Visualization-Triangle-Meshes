@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <map>
 #include <iterator>
-#include <math.h>       /* fmin */
+#include <math.h>       /* fmin, sqrt */
 #include "glm/ext.hpp"
 
 using namespace std;
@@ -31,6 +31,9 @@ double max_coord;
 
 int interval = 2; // max - min = 1 - (-1)
 
+        /**
+         * Function to update the minimum value found in coords of an object.
+        */
         void set_min(Point3d current){ // only negative values
             if(!min_coord){
                 min_coord = fmin(fmin(current.x(), current.y()), current.z());
@@ -39,6 +42,9 @@ int interval = 2; // max - min = 1 - (-1)
             min_coord = fmin(fmin(current.x(), current.y()), fmin(current.z(), min_coord));
         }
 
+        /**
+         * Function to update the maximum value found in coords of an object.
+        */
         void set_max(Point3d current){
             if(!max_coord){
                 max_coord = fmax(fmax(current.x(), current.y()), current.z());
@@ -47,18 +53,83 @@ int interval = 2; // max - min = 1 - (-1)
             max_coord = fmax(fmax(current.x(), current.y()), fmax(current.z(), max_coord));
         }
 
+        /**
+         * Function to get the maximum value found in coords of an object.
+        */
         double get_max_coord(){
             return max_coord;
         }
 
+        /**
+         * Function to get the minimum value found in coords of an object.
+        */
         double get_min_coord(){
             return min_coord;
         }
 
-
+        /**
+         * Function to rescale a coord such that the coords is in a range between -1 and 1.
+        */
         Point3d get_rescaled_value(Point3d value){
             return interval/(max_coord - min_coord) * (value - max_coord) + 1; //1 is the max of interval
         }
+
+
+        int count_data = 0.0f;
+        double mean = 0.0f;
+        double M2 = 0.0f;
+        double variance;
+        double standard_deviation;
+        double multiplier = 1.5f; // 3 to get extreme case (usually is 1.5)
+        double lower_outlier;
+        double upper_outlier;
+
+        /**
+         * Function for update a new_value, compute the count, new mean, the new M2.
+         * mean accumulates the mean of the entire dataset
+         * M2 aggregates the squared distance from the mean
+         * count aggregates the number of samples seen so far
+        */
+       void update_statistics_data(double new_value){
+           count_data++;
+           double delta = new_value - mean;
+           mean = mean + (double) delta/count_data;
+           double delta2 = new_value - mean;
+           M2 = M2 + delta * delta2;
+       }
+
+
+        /**
+         * Function for calculate the final mean and variance from a dataset.
+        */
+       void finalize_statistics_data(){
+           if(count_data < 2){ // error case, that means that we have just one data
+               mean = 0.0f;
+               M2 = 0.0f;
+               return;
+           }
+
+           variance = (double) M2/(count_data - 1);
+           M2 = variance;
+           standard_deviation = sqrt(variance);
+           lower_outlier = mean - (standard_deviation * multiplier);
+           upper_outlier = mean + (standard_deviation * multiplier);
+       }
+
+
+        /**
+         * Function for cut data of gaussian curvature respect upper and lower outlier.
+        */
+       double cut_data_gaussian_curvature(double val){
+           if(val > upper_outlier)
+                val = upper_outlier;
+           else if(val < lower_outlier)
+                val = lower_outlier;
+
+            // interval from 0 to 1 then it is 1 because (0+1)
+            // I have mapped all values from 0 to 1
+            return 1/(upper_outlier - lower_outlier) * (val - upper_outlier) + 1; //1 is the max of interval
+       }
 
 
         bool load (const char * path, vector<float> &out_vertices, vector<float> &out_normals, vector<float> &gc, vector<float> &color_li) {
@@ -194,13 +265,24 @@ int interval = 2; // max - min = 1 - (-1)
                 color_li[9 * k + 8] = 1.0f; // blue z
             }
 
-            // --------- GAUSSIAN CURVATURE --------------------
-            // add everything to triangle gaussian curvature
-            for(int k = 0; k < num_triangles; k++){
-                triangle_gc[9*k] = triangle_gc[9*k + 1] = triangle_gc[9*k + 2] = 2 * PI - gc_counter[t[k].v[0]];
-                triangle_gc[9*k + 3] = triangle_gc[9*k + 4] = triangle_gc[9*k + 5] = 2 * PI - gc_counter[t[k].v[1]];
-                triangle_gc[9*k + 6] = triangle_gc[9*k + 7] = triangle_gc[9*k + 8] = 2 * PI - gc_counter[t[k].v[2]];
-            }
+                // add everything to triangle gaussian curvature
+                for(int k = 0; k < num_triangles; k++){
+                    triangle_gc[9*k] = triangle_gc[9*k + 1] = triangle_gc[9*k + 2] = 2 * PI - gc_counter[t[k].v[0]];
+                    triangle_gc[9*k + 3] = triangle_gc[9*k + 4] = triangle_gc[9*k + 5] = 2 * PI - gc_counter[t[k].v[1]];
+                    triangle_gc[9*k + 6] = triangle_gc[9*k + 7] = triangle_gc[9*k + 8] = 2 * PI - gc_counter[t[k].v[2]];
+
+                    update_statistics_data(triangle_gc[9*k]);
+                    update_statistics_data(triangle_gc[9*k + 3]);
+                    update_statistics_data(triangle_gc[9*k + 6]);
+                }
+
+                finalize_statistics_data();
+
+                for(int k = 0; k < num_triangles; k++){ // update to remove noisy (smoothing)
+                    triangle_gc[9*k] = triangle_gc[9*k + 1] = triangle_gc[9*k + 2] = cut_data_gaussian_curvature(2 * PI - gc_counter[t[k].v[0]]);
+                    triangle_gc[9*k + 3] = triangle_gc[9*k + 4] = triangle_gc[9*k + 5] = cut_data_gaussian_curvature(2 * PI - gc_counter[t[k].v[1]]);
+                    triangle_gc[9*k + 6] = triangle_gc[9*k + 7] = triangle_gc[9*k + 8] = cut_data_gaussian_curvature(2 * PI - gc_counter[t[k].v[2]]);
+                }
 
            // -------------- END GAUSSIAN CURVATURE -----------------
 

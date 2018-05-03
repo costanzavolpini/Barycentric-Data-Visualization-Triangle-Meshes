@@ -217,7 +217,6 @@ class Object {
     unsigned int getVAO(){
         return VAO;
     }
-
 };
 
 #endif
