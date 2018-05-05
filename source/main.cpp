@@ -73,7 +73,7 @@ void zoom_settings();
 void set_shader();
 void select_model();
 void analyse_gaussian_curvature(GLFWwindow* window);
-void initialize_texture_object(GLFWwindow* window);
+void initialize_texture_object(GLFWwindow* window, int gc_set);
 
 // set-up parameter imgui
 static float angle = 180.0f; // angle of rotation - must be the same of transform_shader
@@ -289,7 +289,7 @@ int main(int argc, char * argv[]) {
 
     // // ---------------- END IMGUI ----------------------
 
-    initialize_texture_object(window);
+    initialize_texture_object(window, 2);
 
 
     /**
@@ -768,12 +768,11 @@ void analyse_gaussian_curvature(GLFWwindow* window){
         glDeleteTextures(1, &rendered_texture);
         glDeleteRenderbuffers(1, &depth_render_buffer);
 
-        initialize_texture_object(window);
-        object.set_selected_gc(gc_set);
+        initialize_texture_object(window, gc_set);
     }
 }
 
-void initialize_texture_object(GLFWwindow* window){
+void initialize_texture_object(GLFWwindow* window, int gc_set){
     /**
         NB. OpenGL works in 3D space we render a 2D triangle with each vertex having a z coordinate of 0.0.
         This way the depth of the triangle remains the same making it look like it's 2D.
@@ -781,6 +780,7 @@ void initialize_texture_object(GLFWwindow* window){
         Send vertex data to vertex shader (load .off file).
      */
     object.set_file(name_file); //load mesh
+    object.set_selected_gc(gc_set);
     object.init(); // fn to initialize VBO and VAO
 
     /**
