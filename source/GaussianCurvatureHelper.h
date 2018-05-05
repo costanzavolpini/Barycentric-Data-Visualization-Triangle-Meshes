@@ -48,6 +48,11 @@ class GCHelper {
                return;
            }
 
+           cout << mean << endl;
+           cout << lower_outlier << endl;
+           cout << upper_outlier << endl;
+
+
            variance = (double) M2/(count_data - 1);
            M2 = variance;
            standard_deviation = sqrt(variance);

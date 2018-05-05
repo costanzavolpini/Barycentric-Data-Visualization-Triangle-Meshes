@@ -246,9 +246,9 @@ class Object {
 
         } else {
 
+
         }
         // triangle_gc_modified
-
     }
 
 };
