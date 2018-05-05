@@ -20,11 +20,6 @@ class Object {
     vector<float> triangle_gc;
     vector<float> triangle_color;
 
-    int isGaussianCurvature = 0;
-    int isLinearInterpolation = 0;
-    int isExtendFlatShading = 1;
-    int isGouraudShading = 0;
-
     /**
         Memory on the GPU where we store the vertex data
         VBO: manage this memory via so called vertex buffer objects (VBO) that can store a large number of vertices in the GPU's memory
@@ -32,7 +27,7 @@ class Object {
     unsigned int VBO, VAO, VBO_NORMAL, VBO_GAUSSIANCURVATURE, VBO_LINEARINTERPOLATION;
 
     // Constructor
-      Object(const std::string &_path) {
+      void set_file(const std::string &_path) {
         if(!load(_path.c_str(), triangle_vertices, triangle_normals, triangle_gc, triangle_color)){
             cout << "error loading file" << endl;
             return;
@@ -55,31 +50,27 @@ class Object {
           */
           glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_vertices.size(), &triangle_vertices[0], GL_STATIC_DRAW); // copies the previously defined vertex data into the buffer's memor
 
-         if(isExtendFlatShading || isGouraudShading){
-            // VBO NORMALS
-            glGenBuffers(1, &VBO_NORMAL); //generate buffer, bufferID = 1
+          // VBO NORMALS
+          glGenBuffers(1, &VBO_NORMAL); //generate buffer, bufferID = 1
 
-            glBindBuffer(GL_ARRAY_BUFFER, VBO_NORMAL);
+          glBindBuffer(GL_ARRAY_BUFFER, VBO_NORMAL);
 
-            glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_normals.size(), &triangle_normals[0], GL_STATIC_DRAW);
-         }
+          glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_normals.size(), &triangle_normals[0], GL_STATIC_DRAW);
 
-          if(isGaussianCurvature){
-                // VBO_GAUSSIANCURVATURE
-                glGenBuffers(1, &VBO_GAUSSIANCURVATURE); //generate buffer, bufferID = 1
 
-                glBindBuffer(GL_ARRAY_BUFFER, VBO_GAUSSIANCURVATURE);
+           // VBO_GAUSSIANCURVATURE
+           glGenBuffers(1, &VBO_GAUSSIANCURVATURE); //generate buffer, bufferID = 1
 
-                glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_gc.size(), &triangle_gc[0], GL_STATIC_DRAW);
+           glBindBuffer(GL_ARRAY_BUFFER, VBO_GAUSSIANCURVATURE);
 
-          } else if(isLinearInterpolation){
-              // VBO_LINEARINTERPOLATION
-                glGenBuffers(1, &VBO_LINEARINTERPOLATION); //generate buffer, bufferID = 1
+           glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_gc.size(), &triangle_gc[0], GL_STATIC_DRAW);
 
-                glBindBuffer(GL_ARRAY_BUFFER, VBO_LINEARINTERPOLATION);
+            // VBO_LINEARINTERPOLATION
+            glGenBuffers(1, &VBO_LINEARINTERPOLATION); //generate buffer, bufferID = 1
 
-                glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_color.size(), &triangle_color[0], GL_STATIC_DRAW);
-          }
+            glBindBuffer(GL_ARRAY_BUFFER, VBO_LINEARINTERPOLATION);
+
+            glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_color.size(), &triangle_color[0], GL_STATIC_DRAW);
 
 
           // ------------- VAO -------------
@@ -103,28 +94,26 @@ class Object {
           glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float))); // 72-bit floating point values, each position is composed of 3 of those values (3 points (one for each vertex))
           glEnableVertexAttribArray(0); //this 0 is referred to the layout on shader
 
-         if(isExtendFlatShading || isGouraudShading){
-                glBindBuffer(GL_ARRAY_BUFFER, VBO_NORMAL);
-                //normal attribute
-                glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float)));
-                glEnableVertexAttribArray(1); //this 1 is referred to the layout on shader
-         }
 
-          if(isGaussianCurvature){
+          // normals
+          glBindBuffer(GL_ARRAY_BUFFER, VBO_NORMAL);
+          //normal attribute
+          glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float)));
+          glEnableVertexAttribArray(1); //this 1 is referred to the layout on shader
 
-                glBindBuffer(GL_ARRAY_BUFFER, VBO_GAUSSIANCURVATURE);
-                //normal attribute
-                glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float)));
-                glEnableVertexAttribArray(2); //this 2 is referred to the layout on shader
 
-          } else if(isLinearInterpolation){
+          // gaussian curvature
+          glBindBuffer(GL_ARRAY_BUFFER, VBO_GAUSSIANCURVATURE);
+          //normal attribute
+          glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float)));
+          glEnableVertexAttribArray(2); //this 2 is referred to the layout on shader
 
-                glBindBuffer(GL_ARRAY_BUFFER, VBO_LINEARINTERPOLATION);
 
-                // color
-                glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float)));
-                glEnableVertexAttribArray(2); //this 2 is referred to the layout on shader
-          }
+          // linear interpolation
+          glBindBuffer(GL_ARRAY_BUFFER, VBO_LINEARINTERPOLATION);
+          // color
+          glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float)));
+          glEnableVertexAttribArray(3); //this 3 is referred to the layout on shader
 
           /**
             Unbind the VAO so other VAO calls won't accidentally modify this VAO, but this rarely happens.
@@ -148,35 +137,85 @@ class Object {
         glBindVertexArray(0);
       }
 
+      void disable(){
+        glDisableVertexAttribArray(1);
+      }
+
 
      // delete the shader objects once we've linked them into the program object; we no longer need them anymore
       void clear(){
         glDeleteVertexArrays(1, &VAO);
         glDeleteBuffers(1, &VBO);
-        if(VBO_NORMAL)
-            glDeleteBuffers(1, &VBO_NORMAL);
-
-        if(VBO_GAUSSIANCURVATURE)
-            glDeleteBuffers(1, &VBO_GAUSSIANCURVATURE);
-
-        if(VBO_LINEARINTERPOLATION)
-            glDeleteBuffers(1, &VBO_LINEARINTERPOLATION);
+        glDeleteBuffers(1, &VBO_NORMAL);
+        glDeleteBuffers(1, &VBO_GAUSSIANCURVATURE);
+        glDeleteBuffers(1, &VBO_LINEARINTERPOLATION);
       }
 
-    void setGaussianCurvature(int flag){
-        isGaussianCurvature = flag;
+    // Point3d interpolation(Point3d v0, Point3d v1, float t) {
+    //     return (1 - t) * v0 + t * v1;
+    // }
+
+    /**
+     * Get the minimum value of gaussian curvature
+    */
+    float get_minimum_gaussian_curvature_value(){
+        return *min_element(triangle_gc.begin(), triangle_gc.end());
     }
 
-    void setLinearInterpolation(int flag){
-        isLinearInterpolation = flag;
+    /**
+     * Get the maximum value of gaussian curvature
+    */
+    float get_maximum_gaussian_curvature_value(){
+        return *max_element(triangle_gc.begin(), triangle_gc.end());
     }
 
-    void setExtendFlatShading(int flag){
-        isExtendFlatShading = flag;
+    /**
+     * Get the mean of positive values of gaussian curvature
+    */
+    float get_positive_mean_gaussian_curvature_value(){
+        float sum = 0.0;
+        int count = 0;
+        for(int k = 0; k < triangle_gc.size(); k++){
+
+        float val = triangle_gc[k]; // gaussian_curvature is a vec3 composed by same value
+        if(val > 0){
+            sum += abs(val);
+            count++;
+        }
+
+        //    Point3d red = Point3d(1.0, 0.0, 0.0);
+        //    Point3d green = Point3d(0.0, 1.0, 0.0);
+        //    Point3d blue = Point3d(0.0, 0.0, 1.0);
+
+        //    if (val < 0) { //negative numbers until 0 -> map from red to green
+        //       //  std::cout << interpolation(red, green, val/(*min_element(triangle_gc.begin(), triangle_gc.end()))) << std::endl;
+        //     } else { //map from green to blue, from 0 to positive
+        //       //  std::cout << interpolation(green, blue, val/(*max_element(triangle_gc.begin(), triangle_gc.end()))) << std::endl;
+        //     }
+        }
+        return sum / count;
     }
 
-    void setGouraudFlatShading(int flag){
-        isGouraudShading = flag;
+    /**
+     * Get the mean of negative values of gaussian curvature
+    */
+    float get_negative_mean_gaussian_curvature_value(){
+        float sum = 0.0;
+        int count = 0;
+        for(int k = 0; k < triangle_gc.size(); k++){
+
+        float val = triangle_gc[k]; // gaussian_curvature is a vec3 composed by same value
+        if(val < 0){
+            sum += abs(val);
+            count++;
+        }
+
+        }
+        return sum / count;
+    }
+
+    unsigned int getVAO(){
+        return VAO;
     }
 };
 
