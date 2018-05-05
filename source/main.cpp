@@ -32,6 +32,12 @@ const unsigned int HEIGHT = 900;
 int current_width = 1200;
 int current_height = 900;
 
+GLuint frame_buffer = 0;
+GLuint rendered_texture;
+GLuint depth_render_buffer;
+
+glm::mat4 view, model;
+
 // Arcball instance
 static Arcball arcball(WIDTH, HEIGHT, 1.5f, true, true);
 
@@ -66,6 +72,8 @@ void rotation_settings();
 void zoom_settings();
 void set_shader();
 void select_model();
+void analyse_gaussian_curvature(GLFWwindow* window);
+void initialize_texture_object(GLFWwindow* window);
 
 // set-up parameter imgui
 static float angle = 180.0f; // angle of rotation - must be the same of transform_shader
@@ -141,9 +149,9 @@ int main(int argc, char * argv[]) {
     glfwMakeContextCurrent(window);
 
     // But on MacOS X with a retina screen it'll be 1024*2 and 768*2, so we get the actual framebuffer size:
-    int windowWidth = WIDTH;
-    int windowHeight = HEIGHT;
-    glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
+    current_width = WIDTH;
+    current_height = HEIGHT;
+    glfwGetFramebufferSize(window, &current_width, &current_height);
 
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
@@ -199,87 +207,89 @@ int main(int argc, char * argv[]) {
     normalShader.initialize_shader("normal.vs", "normal.fs", "normal.gs");
 
 
-    /**
-        NB. OpenGL works in 3D space we render a 2D triangle with each vertex having a z coordinate of 0.0.
-        This way the depth of the triangle remains the same making it look like it's 2D.
+    // /**
+    //     NB. OpenGL works in 3D space we render a 2D triangle with each vertex having a z coordinate of 0.0.
+    //     This way the depth of the triangle remains the same making it look like it's 2D.
 
-        Send vertex data to vertex shader (load .off file).
-     */
-    object.set_file(name_file); //load mesh
-    object.init(); // fn to initialize VBO and VAO
+    //     Send vertex data to vertex shader (load .off file).
+    //  */
+    // object.set_file(name_file); //load mesh
+    // object.init(); // fn to initialize VBO and VAO
 
-    /**
-        IMPORTANT FOR TRANSFORMATION:
-        Since GLM version 0.9.9, GLM default initializates matrix types to a 0-initalized matrix,
-        instead of the identity matrix. From that version it is required to initialize matrix types as: glm::mat4 mat = glm::mat4(1.0f).
-    */
-    // camera position (eye) - look at origin - head is up
-    glm::mat4 view = glm::lookAt(glm::vec3(4.0f, 3.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    // /**
+    //     IMPORTANT FOR TRANSFORMATION:
+    //     Since GLM version 0.9.9, GLM default initializates matrix types to a 0-initalized matrix,
+    //     instead of the identity matrix. From that version it is required to initialize matrix types as: glm::mat4 mat = glm::mat4(1.0f).
+    // */
+    // // camera position (eye) - look at origin - head is up
+    // glm::mat4 view = glm::lookAt(glm::vec3(4.0f, 3.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
-    glm::mat4 model = glm::mat4(1.0f);
-    transform_shader = glm::rotate(transform_shader, 180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+    // glm::mat4 model = glm::mat4(1.0f);
+    // transform_shader = glm::rotate(transform_shader, 180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 
-    // ---------- END SHADER -----------------
-
-
-    // ---------------------------------------------
-	// Render to Texture - specific code begins here
-	// ---------------------------------------------
-
-    // The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
-	GLuint frame_buffer = 0;
-	glGenFramebuffers(1, &frame_buffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
-
-	// The texture we're going to render to
-	GLuint rendered_texture;
-	glGenTextures(1, &rendered_texture);
-
-	// "Bind" the newly created texture : all future texture functions will modify this texture
-	glBindTexture(GL_TEXTURE_2D, rendered_texture);
-
-	// Give an empty image to OpenGL ( the last "0" means "empty" )
-	glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, windowWidth, windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
-
-	// Poor filtering
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-	// The depth buffer
-	GLuint depth_render_buffer;
-	glGenRenderbuffers(1, &depth_render_buffer);
-	glBindRenderbuffer(GL_RENDERBUFFER, depth_render_buffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, windowWidth, windowHeight);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_render_buffer);
-
-    // Set "rendered_texture" as our colour attachement #0
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, rendered_texture, 0);
-
-    // Set the list of draw buffers.
-	GLenum draw_buffers[1] = {GL_COLOR_ATTACHMENT0};
-	glDrawBuffers(1, draw_buffers); // "1" is the size of draw_buffers
-
-	// Always check that our framebuffer is ok
-	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		return false;
+    // // ---------- END SHADER -----------------
 
 
-    // --------------- IMGUI ---------------------
-    // Setup Dear ImGui binding
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
-    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
-    ImGui_ImplGlfwGL3_Init(window, true);
+    // // ---------------------------------------------
+	// // Render to Texture - specific code begins here
+	// // ---------------------------------------------
 
-    // Setup style
-    ImGui::StyleColorsDark();
-    //ImGui::StyleColorsClassic();
+    // // The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
+	// GLuint frame_buffer = 0;
+	// glGenFramebuffers(1, &frame_buffer);
+	// glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
 
-    // ---------------- END IMGUI ----------------------
+	// // The texture we're going to render to
+	// GLuint rendered_texture;
+	// glGenTextures(1, &rendered_texture);
+
+	// // "Bind" the newly created texture : all future texture functions will modify this texture
+	// glBindTexture(GL_TEXTURE_2D, rendered_texture);
+
+	// // Give an empty image to OpenGL ( the last "0" means "empty" )
+	// glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, windowWidth, windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+
+	// // Poor filtering
+	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	// // The depth buffer
+	// GLuint depth_render_buffer;
+	// glGenRenderbuffers(1, &depth_render_buffer);
+	// glBindRenderbuffer(GL_RENDERBUFFER, depth_render_buffer);
+	// glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, windowWidth, windowHeight);
+	// glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_render_buffer);
+
+    // // Set "rendered_texture" as our colour attachement #0
+	// glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, rendered_texture, 0);
+
+    // // Set the list of draw buffers.
+	// GLenum draw_buffers[1] = {GL_COLOR_ATTACHMENT0};
+	// glDrawBuffers(1, draw_buffers); // "1" is the size of draw_buffers
+
+	// // Always check that our framebuffer is ok
+	// if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	// 	return false;
+
+
+    // // --------------- IMGUI ---------------------
+    // // Setup Dear ImGui binding
+    // IMGUI_CHECKVERSION();
+    // ImGui::CreateContext();
+    // ImGuiIO& io = ImGui::GetIO(); (void)io;
+    // // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
+    // // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
+    // ImGui_ImplGlfwGL3_Init(window, true);
+
+    // // Setup style
+    // ImGui::StyleColorsDark();
+    // //ImGui::StyleColorsClassic();
+
+    // // ---------------- END IMGUI ----------------------
+
+    initialize_texture_object(window);
 
 
     /**
@@ -300,7 +310,7 @@ int main(int argc, char * argv[]) {
 
         // Render to our framebuffer
 		glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
-        glViewport(0, 0, windowWidth, windowHeight); // Render on the whole framebuffer, complete from the lower left corner to the upper right
+        glViewport(0, 0, current_width, current_height); // Render on the whole framebuffer, complete from the lower left corner to the upper right
 
 
         // render colours
@@ -550,7 +560,7 @@ void show_window(bool* p_open, GLFWwindow* window){
 
             ImGui::Text("Analyse\n\n");
             if (imgui_isGaussianCurvature){
-                analyse_gaussian_curvature();
+                analyse_gaussian_curvature(window);
             }
 
 
@@ -694,7 +704,7 @@ void select_model(){
 /**
  * Plots about Gaussian Curvature
  */
-void analyse_gaussian_curvature(){
+void analyse_gaussian_curvature(GLFWwindow* window){
     int prev_gc = gc_set;
     ImGui::TextWrapped("Gaussian Curvature plots\n\n");
     int minimum_gc = object.get_minimum_gaussian_curvature_value();
@@ -753,7 +763,95 @@ void analyse_gaussian_curvature(){
     ImGui::RadioButton("Manual GC", &gc_set, 2);
 
     if(prev_gc != gc_set){
+        object.clear();
+        glDeleteFramebuffers(1, &frame_buffer);
+        glDeleteTextures(1, &rendered_texture);
+        glDeleteRenderbuffers(1, &depth_render_buffer);
+
+        initialize_texture_object(window);
         object.set_selected_gc(gc_set);
-        object.init();
     }
+}
+
+void initialize_texture_object(GLFWwindow* window){
+    /**
+        NB. OpenGL works in 3D space we render a 2D triangle with each vertex having a z coordinate of 0.0.
+        This way the depth of the triangle remains the same making it look like it's 2D.
+
+        Send vertex data to vertex shader (load .off file).
+     */
+    object.set_file(name_file); //load mesh
+    object.init(); // fn to initialize VBO and VAO
+
+    /**
+        IMPORTANT FOR TRANSFORMATION:
+        Since GLM version 0.9.9, GLM default initializates matrix types to a 0-initalized matrix,
+        instead of the identity matrix. From that version it is required to initialize matrix types as: glm::mat4 mat = glm::mat4(1.0f).
+    */
+    // camera position (eye) - look at origin - head is up
+    view = glm::lookAt(glm::vec3(4.0f, 3.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    model = glm::mat4(1.0f);
+    transform_shader = glm::rotate(transform_shader, 180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+
+    // ---------- END SHADER -----------------
+
+
+    // ---------------------------------------------
+	// Render to Texture - specific code begins here
+	// ---------------------------------------------
+
+    // The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
+    frame_buffer = 0;
+	glGenFramebuffers(1, &frame_buffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
+
+	// The texture we're going to render to
+	glGenTextures(1, &rendered_texture);
+
+	// "Bind" the newly created texture : all future texture functions will modify this texture
+	glBindTexture(GL_TEXTURE_2D, rendered_texture);
+
+	// Give an empty image to OpenGL ( the last "0" means "empty" )
+	glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, current_width, current_height, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+
+	// Poor filtering
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	// The depth buffer
+	glGenRenderbuffers(1, &depth_render_buffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, depth_render_buffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, current_width, current_height);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_render_buffer);
+
+    // Set "rendered_texture" as our colour attachement #0
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, rendered_texture, 0);
+
+    // Set the list of draw buffers.
+	GLenum draw_buffers[1] = {GL_COLOR_ATTACHMENT0};
+	glDrawBuffers(1, draw_buffers); // "1" is the size of draw_buffers
+
+	// Always check that our framebuffer is ok
+	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
+        cout << "error framebugger" << endl;
+		exit(-1);
+    }
+
+
+    // --------------- IMGUI ---------------------
+    // Setup Dear ImGui binding
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
+    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
+    ImGui_ImplGlfwGL3_Init(window, true);
+
+    // Setup style
+    ImGui::StyleColorsDark();
+    //ImGui::StyleColorsClassic();
+
+    // ---------------- END IMGUI ----------------------
 }
