@@ -21,7 +21,9 @@ class Object {
     vector<float> triangle_gc;
     vector<float> triangle_color;
 
+    vector<float> triangle_gc_modified_auto;
     vector<float> triangle_gc_modified;
+    GCHelper gc_helper = GCHelper();
 
     /**
         Memory on the GPU where we store the vertex data
@@ -34,6 +36,29 @@ class Object {
         if(!load(_path.c_str(), triangle_vertices, triangle_normals, triangle_gc, triangle_color)){
             cout << "error loading file" << endl;
             return;
+        }
+        auto_detect_outliers_gc();
+      }
+
+      void auto_detect_outliers_gc(){
+        // autodetect gaussian curvature outliers, variance...etc.
+        int number_triangles = triangle_gc.size()/9;
+
+        // add everything to triangle gaussian curvature
+        for(int k = 0; k < number_triangles; k++){
+                gc_helper.update_statistics_data(triangle_gc[9*k]);
+                gc_helper.update_statistics_data(triangle_gc[9*k + 3]);
+                gc_helper.update_statistics_data(triangle_gc[9*k + 6]);
+        }
+
+        gc_helper.finalize_statistics_data();
+
+        triangle_gc_modified_auto.resize(triangle_gc.size());
+
+        for(int k = 0; k < number_triangles; k++){ // update to remove noisy (smoothing)
+                triangle_gc_modified_auto[9*k] = triangle_gc_modified_auto[9*k + 1] = triangle_gc_modified_auto[9*k + 2] = gc_helper.cut_data_gaussian_curvature(triangle_gc[9*k]);
+                triangle_gc_modified_auto[9*k + 3] = triangle_gc_modified_auto[9*k + 4] = triangle_gc_modified_auto[9*k + 5] = gc_helper.cut_data_gaussian_curvature(triangle_gc[9*k + 3]);
+                triangle_gc_modified_auto[9*k + 6] = triangle_gc_modified_auto[9*k + 7] = triangle_gc_modified_auto[9*k + 8] = gc_helper.cut_data_gaussian_curvature(triangle_gc[9*k + 6]);
         }
       }
 
@@ -222,35 +247,9 @@ class Object {
     }
 
 
-    void change_values_gaussian_curvature(float max, float min, bool automatic_outliers){
-        if(automatic_outliers){ // calculate everything automatically
-
-            GCHelper gc_helper = GCHelper();
-
-            int number_triangles = triangle_gc.size()/9;
-
-            // add everything to triangle gaussian curvature
-            for(int k = 0; k < number_triangles; k++){
-                gc_helper.update_statistics_data(triangle_gc[9*k]);
-                gc_helper.update_statistics_data(triangle_gc[9*k + 3]);
-                gc_helper.update_statistics_data(triangle_gc[9*k + 6]);
-            }
-
-            gc_helper.finalize_statistics_data();
-
-            for(int k = 0; k < number_triangles; k++){ // update to remove noisy (smoothing)
-                triangle_gc_modified[9*k] = triangle_gc_modified[9*k + 1] = triangle_gc_modified[9*k + 2] = gc_helper.cut_data_gaussian_curvature(triangle_gc[9*k]);
-                triangle_gc_modified[9*k + 3] = triangle_gc_modified[9*k + 4] = triangle_gc_modified[9*k + 5] = gc_helper.cut_data_gaussian_curvature(triangle_gc[9*k + 3]);
-                triangle_gc_modified[9*k + 6] = triangle_gc_modified[9*k + 7] = triangle_gc_modified[9*k + 8] = gc_helper.cut_data_gaussian_curvature(triangle_gc[9*k + 6]);
-            }
-
-        } else {
-
-
-        }
-        // triangle_gc_modified
+    vector<float> change_values_gaussian_curvature(float max, float min){
+            return triangle_gc_modified;
     }
-
 };
 
 #endif

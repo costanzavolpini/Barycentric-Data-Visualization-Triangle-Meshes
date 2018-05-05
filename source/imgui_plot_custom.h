@@ -96,7 +96,6 @@ static void PlotMultiEx(
             {
                 const float v0 = getter(datas[dataIdx], idx0);
                 const float v1 = getter(datas[dataIdx], idx1);
-                std::cout << v0 << std::endl;
                 TextColored(colors[dataIdx], "%8.4g %8.4g | %s", v0, v1, names[dataIdx]);
             }
         }

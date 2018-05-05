@@ -687,30 +687,23 @@ void select_model(){
         // setup vao and vbo and fbo
 }
 
-
+/**
+ * Plots about Gaussian Curvature
+ */
 void analyse_gaussian_curvature(){
+    int minimum_gc = object.get_minimum_gaussian_curvature_value();
+    int maximum_gc = object.get_maximum_gaussian_curvature_value();
+    ImColor green = ImColor(0, 255, 0, 255);
+    ImVec4 white = ImColor(255, 255, 255, 255);
+    ImVec4 red = ImColor(255, 0, 0, 255);
+
     static int values_offset = 0;
     static int display_count = 70;
     ImGui::SliderInt("Sample count", &display_count, 1, object.triangle_gc.size());
-    ImGui::PlotLines("", &object.triangle_gc[0], display_count, values_offset, "Gaussian Curvature", object.get_minimum_gaussian_curvature_value(), object.get_maximum_gaussian_curvature_value(), ImVec2(0,80));
 
-    // const char* label,
-    // int num_datas,
-
-    // // const char** names,
-    // // const ImColor* colors,
-    // float(*getter)(const void* data, int idx),
-    // const void * const * datas,
-
-    // int values_count,
-    // float scale_min,
-    // float scale_max,
-    // ImVec2 graph_size)
-
-    const char* names[] = {"GC", "ZEROS"};
-    ImColor red = ImColor(255, 0, 0, 255);
-    ImVec4 green = ImColor(0, 255, 0, 255);
-    const ImColor colors[2] = {red, green};
+    // Gaussian curvature
+    const char* names[] = {"GC", "ZERO"};
+    const ImColor colors[2] = {green, white};
 
     struct Funcs
     {
@@ -732,10 +725,24 @@ void analyse_gaussian_curvature(){
 
     const float * const * datas = datas_initialize;
 
+    ImGui::PlotMultiLines("##Gaussian Curvature", 2, names, colors, func, datas, display_count, minimum_gc, maximum_gc, ImVec2(0,80));
 
-    ImGui::PlotMultiLines("##Gaussian Curvature", 2, names, colors, func, datas, size, object.get_minimum_gaussian_curvature_value(), object.get_maximum_gaussian_curvature_value(), ImVec2(0,80));
+    // automatic Gaussian Curvature
+    const char* names_auto[] = {"GC", "ZERO", "MEAN"};
+    const ImColor colors_auto[3] = {green, white, red};
 
+    std::vector<float> mean(size, object.gc_helper.mean);
 
+    const float ** datas_initialize_auto = new const float*[3];
+    datas_initialize_auto[0] = &object.triangle_gc_modified_auto[0];
+    datas_initialize_auto[1] = &zeros[0];
+    datas_initialize_auto[2] = &mean[0];
+
+    const float * const * datas_auto = datas_initialize_auto;
+
+    ImGui::PlotMultiLines("##Gaussian Curvature automatic", 3, names_auto, colors_auto, func, datas_auto, display_count, minimum_gc, maximum_gc, ImVec2(0,80));
+
+    //
 
 }
 
