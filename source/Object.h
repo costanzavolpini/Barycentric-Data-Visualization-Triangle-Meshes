@@ -23,7 +23,8 @@ class Object {
 
     vector<float> triangle_gc_modified_auto; //outliers gc
     vector<float> triangle_gc_modified; //user modified gc
-     vector<float> triangle_gc_selected;
+    vector<float> triangle_gc_selected;
+    int type_gc = 2;
     GCHelper gc_helper = GCHelper();
 
     /**
@@ -33,12 +34,19 @@ class Object {
     unsigned int VBO, VAO, VBO_NORMAL, VBO_GAUSSIANCURVATURE, VBO_LINEARINTERPOLATION;
 
     // Constructor
+    //   void set_file(const std::string &_path, std::function<void(void)> callback, std::function<void(void)> callback_2, std::function<void(void)> callback_3) {
       void set_file(const std::string &_path) {
         if(!load(_path.c_str(), triangle_vertices, triangle_normals, triangle_gc, triangle_color)){
             cout << "error loading file" << endl;
             return;
+
         }
-        auto_detect_outliers_gc();
+        // callback(); // auto_detect_outliers_gc
+        // callback_2(); // set_selected_gc
+        // callback_3(); //init
+        auto_detect_outliers_gc(); // auto_detect_outliers_gc
+        set_selected_gc(); // set_selected_gc
+        init(); //init
       }
 
       void auto_detect_outliers_gc(){
@@ -65,6 +73,7 @@ class Object {
       }
 
      // Function to initialize VBO and VAO
+     // name file and the second it is the method gc
       void init() {
 
           // ------------- VBO -------------
@@ -254,8 +263,8 @@ class Object {
     }
 
     // function to select the current gc
-    void set_selected_gc(int gc_set){
-        switch (gc_set) {
+    void set_selected_gc(){
+        switch (type_gc) {
             case 1: // untouched gc
                 triangle_gc_selected = triangle_gc;
                 break;
@@ -269,6 +278,10 @@ class Object {
                 triangle_gc_selected = triangle_gc_modified_auto;
                 break;
         }
+    }
+
+    void set_value_gc(int val){
+        type_gc = val;
     }
 };
 

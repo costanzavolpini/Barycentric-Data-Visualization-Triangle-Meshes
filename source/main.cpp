@@ -73,7 +73,7 @@ void zoom_settings();
 void set_shader();
 void select_model();
 void analyse_gaussian_curvature(GLFWwindow* window);
-void initialize_texture_object(GLFWwindow* window, int gc_set);
+void initialize_texture_object(GLFWwindow* window);
 
 // set-up parameter imgui
 static float angle = 180.0f; // angle of rotation - must be the same of transform_shader
@@ -90,7 +90,7 @@ bool decrease_angle = false;
 
 // imgui shaders
 static int shader_set = 0;
-static int gc_set = 1;
+static int gc_set = 2;
 
 // imgui listbox models
 static int listbox_item_current = 0;
@@ -289,7 +289,7 @@ int main(int argc, char * argv[]) {
 
     // // ---------------- END IMGUI ----------------------
 
-    initialize_texture_object(window, 2);
+    initialize_texture_object(window);
 
 
     /**
@@ -740,7 +740,7 @@ void analyse_gaussian_curvature(GLFWwindow* window){
     datas_initialize[1] = &zeros[0];
 
     const float * const * datas = datas_initialize;
-    ImGui::RadioButton("Untouched GC", &gc_set, 0);
+    ImGui::RadioButton("Untouched GC", &gc_set, 1);
     ImGui::PlotMultiLines("##Gaussian Curvature", 2, names, colors, func, datas, display_count, minimum_gc, maximum_gc, ImVec2(0,80));
 
     // automatic Gaussian Curvature
@@ -756,11 +756,11 @@ void analyse_gaussian_curvature(GLFWwindow* window){
 
     const float * const * datas_auto = datas_initialize_auto;
 
-    ImGui::RadioButton("Automatic best GC", &gc_set, 1);
+    ImGui::RadioButton("Automatic best GC", &gc_set, 2);
     ImGui::PlotMultiLines("##Gaussian Curvature automatic", 3, names_auto, colors_auto, func, datas_auto, display_count, minimum_gc, maximum_gc, ImVec2(0,80));
 
     //
-    ImGui::RadioButton("Manual GC", &gc_set, 2);
+    ImGui::RadioButton("Manual GC", &gc_set, 3);
 
     if(prev_gc != gc_set){
         object.clear();
@@ -768,20 +768,20 @@ void analyse_gaussian_curvature(GLFWwindow* window){
         glDeleteTextures(1, &rendered_texture);
         glDeleteRenderbuffers(1, &depth_render_buffer);
 
-        initialize_texture_object(window, gc_set);
+        initialize_texture_object(window);
     }
 }
 
-void initialize_texture_object(GLFWwindow* window, int gc_set){
+void initialize_texture_object(GLFWwindow* window){
     /**
         NB. OpenGL works in 3D space we render a 2D triangle with each vertex having a z coordinate of 0.0.
         This way the depth of the triangle remains the same making it look like it's 2D.
 
         Send vertex data to vertex shader (load .off file).
      */
+    object.set_value_gc(gc_set);
+    // object.set_file(name_file, std::bind(&Object::auto_detect_outliers_gc, Object()), std::bind(&Object::set_selected_gc, Object()), std::bind(&Object::init, Object())); //load mesh
     object.set_file(name_file); //load mesh
-    object.set_selected_gc(gc_set);
-    object.init(); // fn to initialize VBO and VAO
 
     /**
         IMPORTANT FOR TRANSFORMATION:
