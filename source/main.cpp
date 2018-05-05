@@ -19,6 +19,8 @@
 #include "glm/ext.hpp" //to test
 #include <glm/gtc/type_ptr.hpp>
 
+#include "imgui_plot_custom.h"
+
 #define IS_IN_DEBUG false // to show normals
 
 using namespace std;
@@ -691,7 +693,52 @@ void analyse_gaussian_curvature(){
     static int display_count = 70;
     ImGui::SliderInt("Sample count", &display_count, 1, object.triangle_gc.size());
     ImGui::PlotLines("", &object.triangle_gc[0], display_count, values_offset, "Gaussian Curvature", object.get_minimum_gaussian_curvature_value(), object.get_maximum_gaussian_curvature_value(), ImVec2(0,80));
+
+    // const char* label,
+    // int num_datas,
+
+    // // const char** names,
+    // // const ImColor* colors,
+    // float(*getter)(const void* data, int idx),
+    // const void * const * datas,
+
+    // int values_count,
+    // float scale_min,
+    // float scale_max,
+    // ImVec2 graph_size)
+
+    const char* names[] = {"GC", "ZEROS"};
+    ImColor red = ImColor(255, 0, 0, 255);
+    ImVec4 green = ImColor(0, 255, 0, 255);
+    const ImColor colors[2] = {red, green};
+
+    struct Funcs
+    {
+        // static float values_gc(const void* data, int i) { return object.triangle_gc[i]; }
+        static float function(const float* data, int i) {
+            return data[i];
+        }
+    };
+
+    float (*func)(const float* data, int idx) = Funcs::function;
+
+    const int size = object.triangle_gc.size();
+
+    std::vector<float> zeros(size, 0.0f);
+
+    const float ** datas_initialize = new const float*[2];
+    datas_initialize[0] = &object.triangle_gc[0];
+    datas_initialize[1] = &zeros[0];
+
+    const float * const * datas = datas_initialize;
+
+
+    ImGui::PlotMultiLines("##Gaussian Curvature", 2, names, colors, func, datas, size, object.get_minimum_gaussian_curvature_value(), object.get_maximum_gaussian_curvature_value(), ImVec2(0,80));
+
+
+
 }
+
 
 
 // static float arr[] = { 0.6f, 0.1f, 1.0f, 0.5f, 0.92f, 0.1f, 0.2f };
