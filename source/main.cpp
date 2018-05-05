@@ -691,30 +691,11 @@ void select_model(){
 }
 
 
-void swap_gaussian_curvature(){
-    switch (gc_set) {
-
-        case 1: // extend flat shading
-            // vertex_shader = "vertexShader.vs";
-            // fragment_shader = "maxDiagramFragmentShader.fs";
-            // geometry_shader = "geometryShader.gs";
-
-            // imgui_isExtendFlatShading = 1;
-            // imgui_isGaussianCurvature = 0;
-            // imgui_isGouraudShading = 0;
-            // imgui_isLinearInterpolation = 0;
-            break;
-
-        default:
-        break;
-
-    }
-}
-
 /**
  * Plots about Gaussian Curvature
  */
 void analyse_gaussian_curvature(){
+    int prev_gc = gc_set;
     ImGui::TextWrapped("Gaussian Curvature plots\n\n");
     int minimum_gc = object.get_minimum_gaussian_curvature_value();
     int maximum_gc = object.get_maximum_gaussian_curvature_value();
@@ -771,46 +752,8 @@ void analyse_gaussian_curvature(){
     //
     ImGui::RadioButton("Manual GC", &gc_set, 2);
 
-    swap_gaussian_curvature();
-
+    if(prev_gc != gc_set){
+        object.set_selected_gc(gc_set);
+        object.init();
+    }
 }
-
-
-
-// static float arr[] = { 0.6f, 0.1f, 1.0f, 0.5f, 0.92f, 0.1f, 0.2f };
-
-//             ImGui::PlotHistogram("", arr, IM_ARRAYSIZE(arr), 0, NULL, 0.0f, 1.0f, ImVec2(0,80));
-
-
-//             struct Funcs
-//             {
-//                 static float Sin(void*, int i) { return sinf(i * 0.1f); }
-//                 static float Saw(void*, int i) { return (i & 1) ? 1.0f : -1.0f; }
-//             };
-//             static int func_type = 0, display_count = 70;
-//             // ImGui::Separator();
-//             ImGui::PushItemWidth(100); ImGui::Combo("func", &func_type, "Sin\0Saw\0"); ImGui::PopItemWidth();
-//             ImGui::SameLine();
-//             ImGui::SliderInt("Sample count", &display_count, 1, 400);
-//             float (*func)(void*, int) = (func_type == 0) ? Funcs::Sin : Funcs::Saw;
-//             ImGui::PlotLines("Lines", func, NULL, display_count, 0, NULL, -1.0f, 1.0f, ImVec2(0,80));
-//             ImGui::PlotHistogram("Histogram", func, NULL, display_count, 0, NULL, -1.0f, 1.0f, ImVec2(0,80));
-
-//             // Animate a simple progress bar
-//             static float progress = 0.0f, progress_dir = 1.0f;
-//             progress += progress_dir * 0.4f * ImGui::GetIO().DeltaTime;
-//             if (progress >= +1.1f) { progress = +1.1f; progress_dir *= -1.0f; }
-//             if (progress <= -0.1f) { progress = -0.1f; progress_dir *= -1.0f; }
-
-
-//             // Typically we would use ImVec2(-1.0f,0.0f) to use all available width, or ImVec2(width,0.0f) for a specified width. ImVec2(0.0f,0.0f) uses ItemWidth.
-//             ImGui::ProgressBar(progress, ImVec2(0.0f,0.0f));
-//             ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
-//             ImGui::Text("Progress Bar");
-
-//             float progress_saturated = (progress < 0.0f) ? 0.0f : (progress > 1.0f) ? 1.0f : progress;
-//             char buf[32];
-//             sprintf(buf, "%d/%d", (int)(progress_saturated*1753), 1753);
-//             ImGui::ProgressBar(progress, ImVec2(0.f,0.f), buf);
-
-

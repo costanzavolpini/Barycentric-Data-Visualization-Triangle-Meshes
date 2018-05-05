@@ -18,11 +18,12 @@ class Object {
   public:
     vector<float> triangle_vertices;
     vector<float> triangle_normals;
-    vector<float> triangle_gc;
+    vector<float> triangle_gc; //untouched gc
     vector<float> triangle_color;
 
-    vector<float> triangle_gc_modified_auto;
-    vector<float> triangle_gc_modified;
+    vector<float> triangle_gc_modified_auto; //outliers gc
+    vector<float> triangle_gc_modified; //user modified gc
+     vector<float> triangle_gc_selected;
     GCHelper gc_helper = GCHelper();
 
     /**
@@ -60,6 +61,7 @@ class Object {
                 triangle_gc_modified_auto[9*k + 3] = triangle_gc_modified_auto[9*k + 4] = triangle_gc_modified_auto[9*k + 5] = gc_helper.cut_data_gaussian_curvature(triangle_gc[9*k + 3]);
                 triangle_gc_modified_auto[9*k + 6] = triangle_gc_modified_auto[9*k + 7] = triangle_gc_modified_auto[9*k + 8] = gc_helper.cut_data_gaussian_curvature(triangle_gc[9*k + 6]);
         }
+        triangle_gc_selected = triangle_gc_modified_auto;
       }
 
      // Function to initialize VBO and VAO
@@ -91,7 +93,7 @@ class Object {
 
            glBindBuffer(GL_ARRAY_BUFFER, VBO_GAUSSIANCURVATURE);
 
-           glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_gc.size(), &triangle_gc[0], GL_STATIC_DRAW);
+           glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_gc_selected.size(), &triangle_gc_selected[0], GL_STATIC_DRAW);
 
             // VBO_LINEARINTERPOLATION
             glGenBuffers(1, &VBO_LINEARINTERPOLATION); //generate buffer, bufferID = 1
@@ -249,6 +251,24 @@ class Object {
 
     vector<float> change_values_gaussian_curvature(float max, float min){
             return triangle_gc_modified;
+    }
+
+    // function to select the current gc
+    void set_selected_gc(int gc_set){
+        switch (gc_set) {
+            case 1: // untouched gc
+                triangle_gc_selected = triangle_gc;
+                break;
+
+            case 3: //modified by user
+                triangle_gc_selected = triangle_gc_modified;
+                break;
+
+
+            default: //automatic
+                triangle_gc_selected = triangle_gc_modified_auto;
+                break;
+        }
     }
 };
 
