@@ -82,6 +82,7 @@ bool decrease_angle = false;
 
 // imgui shaders
 static int shader_set = 0;
+static int gc_set = 1;
 
 // imgui listbox models
 static int listbox_item_current = 0;
@@ -90,6 +91,8 @@ static int listbox_item_prev = 0;
 void analyse_gaussian_curvature();
 
 void set_parameters_shader(int selected_shader);
+
+void swap_gaussian_curvature();
 
 // ------- END IMGUI -------------
 
@@ -687,10 +690,32 @@ void select_model(){
         // setup vao and vbo and fbo
 }
 
+
+void swap_gaussian_curvature(){
+    switch (gc_set) {
+
+        case 1: // extend flat shading
+            // vertex_shader = "vertexShader.vs";
+            // fragment_shader = "maxDiagramFragmentShader.fs";
+            // geometry_shader = "geometryShader.gs";
+
+            // imgui_isExtendFlatShading = 1;
+            // imgui_isGaussianCurvature = 0;
+            // imgui_isGouraudShading = 0;
+            // imgui_isLinearInterpolation = 0;
+            break;
+
+        default:
+        break;
+
+    }
+}
+
 /**
  * Plots about Gaussian Curvature
  */
 void analyse_gaussian_curvature(){
+    ImGui::TextWrapped("Gaussian Curvature plots\n\n");
     int minimum_gc = object.get_minimum_gaussian_curvature_value();
     int maximum_gc = object.get_maximum_gaussian_curvature_value();
     ImColor green = ImColor(0, 255, 0, 255);
@@ -724,7 +749,7 @@ void analyse_gaussian_curvature(){
     datas_initialize[1] = &zeros[0];
 
     const float * const * datas = datas_initialize;
-
+    ImGui::RadioButton("Untouched GC", &gc_set, 0);
     ImGui::PlotMultiLines("##Gaussian Curvature", 2, names, colors, func, datas, display_count, minimum_gc, maximum_gc, ImVec2(0,80));
 
     // automatic Gaussian Curvature
@@ -740,9 +765,13 @@ void analyse_gaussian_curvature(){
 
     const float * const * datas_auto = datas_initialize_auto;
 
+    ImGui::RadioButton("Automatic best GC", &gc_set, 1);
     ImGui::PlotMultiLines("##Gaussian Curvature automatic", 3, names_auto, colors_auto, func, datas_auto, display_count, minimum_gc, maximum_gc, ImVec2(0,80));
 
     //
+    ImGui::RadioButton("Manual GC", &gc_set, 2);
+
+    swap_gaussian_curvature();
 
 }
 
