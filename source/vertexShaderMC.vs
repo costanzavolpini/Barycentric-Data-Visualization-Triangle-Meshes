@@ -1,7 +1,9 @@
 #version 330 core
-// Vertex Shader for gaussian curvature
+// Vertex Shader for mean curvature
+// IMPLEMENT
+
     layout (location = 0) in vec3 aPos;
-    layout (location = 2) in vec3 gaussian_curvature;
+    layout (location = 2) in vec3 mean_curvature;
 
     out vec4 color;
 
@@ -14,7 +16,11 @@
     }
 
     vec4 get_result_color_gc(){
-       float val = gaussian_curvature[0]; // gaussian_curvature is a vec3 composed by same value
+       float val = mean_curvature[0];
+       float val1 = mean_curvature[1];
+       float val2 = mean_curvature[2];
+
+       // i have 3 different values, not 1 like in gaussian curvature !!!!!!!
        vec3 red = vec3(1.0, 0.0, 0.0);
        vec3 green = vec3(0.0, 1.0, 0.0);
        vec3 blue = vec3(0.0, 0.0, 1.0);

@@ -16,13 +16,15 @@ Comment:  This file contains all Shader definitions and functions.
     to generate other shapes by emitting new vertices to form new (or other) primitive(s).
 */
 
-class Shader {
-public:
+class Shader
+{
+  public:
     unsigned int shaderProgram;
 
     // constructor generates read the shader (GS is not required)
     // ------------------------------------------------------------------------
-    void initialize_shader(const char * pathVertexShader, const char * pathFragmentShader, const char * pathGeometryShader = nullptr) {
+    void initialize_shader(const char *pathVertexShader, const char *pathFragmentShader, const char *pathGeometryShader = nullptr)
+    {
 
         // 1. retrieve the vertex/fragment(/geometry) source code from filePath
         std::string vertexCode;
@@ -33,11 +35,12 @@ public:
         std::ifstream gShaderFile;
 
         // ensure ifstream objects can throw exceptions:
-        vShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
-        fShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
-        gShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
+        vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        gShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 
-        try {
+        try
+        {
             // open files
             vShaderFile.open(pathVertexShader);
             fShaderFile.open(pathFragmentShader);
@@ -52,11 +55,12 @@ public:
             fShaderFile.close();
 
             // convert stream into string
-            vertexCode   = vShaderStream.str();
+            vertexCode = vShaderStream.str();
             fragmentCode = fShaderStream.str();
 
             // read GS if any
-            if(pathGeometryShader != nullptr) {
+            if (pathGeometryShader != nullptr)
+            {
                 gShaderFile.open(pathGeometryShader);
                 std::stringstream gShaderStream;
                 gShaderStream << gShaderFile.rdbuf();
@@ -64,24 +68,23 @@ public:
                 geometryCode = gShaderStream.str();
             }
         }
-        catch (std::ifstream::failure e) {
+        catch (std::ifstream::failure e)
+        {
             std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
         }
-        const char * vShaderCode = vertexCode.c_str();
-        const char * fShaderCode = fragmentCode.c_str();
+        const char *vShaderCode = vertexCode.c_str();
+        const char *fShaderCode = fragmentCode.c_str();
 
         // 2. compile shaders
         unsigned int vertexShader, fragmentShader;
         int success;
         char infoLog[512];
 
-
         // Vertex Shader: takes as input a single vertex and return normalized device coordinates
         vertexShader = glCreateShader(GL_VERTEX_SHADER);
         glShaderSource(vertexShader, 1, &vShaderCode, NULL); // to use the shader it has to dynamically compile it at run-time from its source code
         glCompileShader(vertexShader);
-        checkCompileErrors(vertexShader, "VERTEX");  // check for shader compile errors (vertex)
-
+        checkCompileErrors(vertexShader, "VERTEX"); // check for shader compile errors (vertex)
 
         // Fragment Shader : is all about calculating the color output of your pixels
         fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -91,8 +94,9 @@ public:
 
         // if geometry shader is given, compile geometry shader
         unsigned int geometry;
-        if(pathGeometryShader != nullptr) {
-            const char * gShaderCode = geometryCode.c_str();
+        if (pathGeometryShader != nullptr)
+        {
+            const char *gShaderCode = geometryCode.c_str();
             geometry = glCreateShader(GL_GEOMETRY_SHADER);
             glShaderSource(geometry, 1, &gShaderCode, NULL);
             glCompileShader(geometry);
@@ -106,7 +110,8 @@ public:
         */
         shaderProgram = glCreateProgram();
         glAttachShader(shaderProgram, vertexShader);
-        if(pathGeometryShader != nullptr){
+        if (pathGeometryShader != nullptr)
+        {
             glAttachShader(shaderProgram, geometry);
         }
         glAttachShader(shaderProgram, fragmentShader);
@@ -117,91 +122,106 @@ public:
         // delete the shaders as they're linked into our program now and no longer necessary
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
-        if(pathGeometryShader != nullptr)
+        if (pathGeometryShader != nullptr)
             glDeleteShader(geometry);
     }
     // activate the shader
     // ------------------------------------------------------------------------
-    void use() {
+    void use()
+    {
         glUseProgram(shaderProgram);
     }
 
     // deactivate
-    void deactivate() {
+    void deactivate()
+    {
         glUseProgram(0);
     }
 
     // utility uniform functions
     // ------------------------------------------------------------------------
-    void setBool(const std::string &name, bool value) const {
+    void setBool(const std::string &name, bool value) const
+    {
         glUniform1i(glGetUniformLocation(shaderProgram, name.c_str()), (int)value);
     }
 
     // ------------------------------------------------------------------------
-    void setInt(const std::string &name, int value) const {
+    void setInt(const std::string &name, int value) const
+    {
         glUniform1i(glGetUniformLocation(shaderProgram, name.c_str()), value);
     }
 
     // ------------------------------------------------------------------------
-    void setFloat(const std::string &name, float value) const {
+    void setFloat(const std::string &name, float value) const
+    {
         glUniform1f(glGetUniformLocation(shaderProgram, name.c_str()), value);
     }
 
     // ------------------------------------------------------------------------
 
-    void setVec2(const std::string &name, const glm::vec2 &value) const {
+    void setVec2(const std::string &name, const glm::vec2 &value) const
+    {
         glUniform2fv(glGetUniformLocation(shaderProgram, name.c_str()), 1, &value[0]);
     }
 
-    void setVec2(const std::string &name, float x, float y) const {
+    void setVec2(const std::string &name, float x, float y) const
+    {
         glUniform2f(glGetUniformLocation(shaderProgram, name.c_str()), x, y);
     }
 
     // ------------------------------------------------------------------------
 
-    void setVec3(const std::string &name, const glm::vec3 &value) const {
+    void setVec3(const std::string &name, const glm::vec3 &value) const
+    {
         glUniform3fv(glGetUniformLocation(shaderProgram, name.c_str()), 1, &value[0]);
     }
 
-    void setVec3(const std::string &name, float x, float y, float z) const {
+    void setVec3(const std::string &name, float x, float y, float z) const
+    {
         glUniform3f(glGetUniformLocation(shaderProgram, name.c_str()), x, y, z);
     }
 
     // ------------------------------------------------------------------------
 
-    void setVec4(const std::string &name, const glm::vec4 &value) const {
+    void setVec4(const std::string &name, const glm::vec4 &value) const
+    {
         glUniform4fv(glGetUniformLocation(shaderProgram, name.c_str()), 1, &value[0]);
     }
 
-    void setVec4(const std::string &name, float x, float y, float z, float w) const {
+    void setVec4(const std::string &name, float x, float y, float z, float w) const
+    {
         glUniform4f(glGetUniformLocation(shaderProgram, name.c_str()), x, y, z, w);
     }
 
     // ------------------------------------------------------------------------
 
-    void setMat2(const std::string &name, const glm::mat2 &mat) const {
+    void setMat2(const std::string &name, const glm::mat2 &mat) const
+    {
         glUniformMatrix2fv(glGetUniformLocation(shaderProgram, name.c_str()), 1, GL_FALSE, &mat[0][0]);
     }
 
     // ------------------------------------------------------------------------
 
-    void setMat3(const std::string &name, const glm::mat3 &mat) const {
+    void setMat3(const std::string &name, const glm::mat3 &mat) const
+    {
         glUniformMatrix3fv(glGetUniformLocation(shaderProgram, name.c_str()), 1, GL_FALSE, &mat[0][0]);
     }
 
     // ------------------------------------------------------------------------
 
-    void setMat4(const std::string &name, const glm::mat4 &mat) const {
+    void setMat4(const std::string &name, const glm::mat4 &mat) const
+    {
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, name.c_str()), 1, GL_FALSE, &mat[0][0]);
     }
 
-private:
+  private:
     /**
         check for linking errors (program)
         When linking the shaders into a program it links the outputs of each shader to the inputs of the next shader.
         This is also where you'll get linking errors if your outputs and inputs do not match.
     */
-    void checkCompileErrors(unsigned int shader, std::string type) {
+    void checkCompileErrors(unsigned int shader, std::string type)
+    {
         int success;
         char infoLog[1024];
         if (type != "PROGRAM")
@@ -210,7 +230,8 @@ private:
             if (!success)
             {
                 glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-                std::cout << "ERROR::SHADER_COMPILATION_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
+                std::cout << "ERROR::SHADER_COMPILATION_ERROR of type: " << type << "\n"
+                          << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
             }
         }
         else
@@ -219,7 +240,8 @@ private:
             if (!success)
             {
                 glGetProgramInfoLog(shader, 1024, NULL, infoLog);
-                std::cout << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
+                std::cout << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n"
+                          << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
             }
         }
     }

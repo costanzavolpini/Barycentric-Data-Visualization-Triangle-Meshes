@@ -1,25 +1,30 @@
-
-\documentclass[12pt]{report}
+\documentclass[12pt, a4paper]{report}
 \usepackage[utf8]{inputenc}
+\usepackage[top=1.65in, bottom=1.65in, left=1.65in, right=1.65in]{geometry}
+\usepackage{listings} %code
+\usepackage{graphicx} %images
+\usepackage{tikz} %graphs
+\usepackage{pgfplots} %plots
+\usepackage[mathscr]{eucal} %letter maths
+\usepackage{gensymb} %degree angles
 
-\usepackage{listings}
-\usepackage{graphicx}
-\usepackage{amsmath}
-\usepackage{amsfonts}
-\usepackage{amssymb}
-\usepackage{pgfgantt}
-\usepackage{amsthm}
-\usepackage{fancyhdr}
-\usepackage{rotating}
-\usepackage[graphicx]{realboxes}
-\renewcommand{\vec}{\bm}
-\usepackage{dsfont}
-\usepackage{xcolor}
-\usepackage{sectsty}
-\usepackage{tikz}
-\usepackage{pgfplots}
-\usepackage[backend=biber]{biblatex}
-\addbibresource{report.bib}
+
+% \usepackage{fancyhdr}
+% \usepackage{rotating}
+% \usepackage[graphicx]{realboxes}
+% \renewcommand{\vec}{\bm}
+% \usepackage{dsfont}
+% \usepackage{xcolor}
+% \usepackage{sectsty}
+% \usepackage{amsthm}
+% \usepackage{amsmath}
+% \usepackage{amsfonts}
+% \usepackage{amssymb}
+% \usepackage{pgfgantt}
+% \usepackage[backend=biber]{biblatex}
+% \addbibresource{report.bib}
+
+
 \pgfplotsset{compat=newest}
 \usepgfplotslibrary{patchplots}
 \usetikzlibrary{calc,intersections,trees,positioning,arrows,chains,shapes.geometric,%
@@ -74,13 +79,12 @@
     stringstyle=\color{red}\ttfamily, % string color
 }
 
-\usepackage[paper=a4paper,top=0.58in,left=1.65in, right=1.65in, bottom=1.65in]{geometry}
-
 \definecolor{lightorange}{RGB}{251,211,168}
 \definecolor{darkred}{RGB}{153,0,0}
 \definecolor{darkgreen}{RGB}{0,51,25}
 
-\title{ \includegraphics[width=\linewidth]{header.png}~
+
+\title{\vspace{-8.0cm}\includegraphics[width=\linewidth]{header.png}~
 \\[0.5cm]
   \huge{Bachelor Project} \\
 \textbf{\Large{Barycentric Data Visualization for Triangle Meshes}}}
@@ -88,26 +92,25 @@
 \author{Costanza \textbf{Volpini} \\ \textcolor{gray}{costanza.volpini@usi.ch} \\ \\ Professor: Kai \textbf{Hormann} \\ Assistant: Jan \textbf{Svoboda}}
 
 \begin{document}
-\pagestyle{fancy}
-\rhead{\bfseries  Costanza Volpini}
-\lhead{\bfseries  Bachelor Project}
+
 \maketitle
-\newgeometry{paper=a4paper,margin=1.65in}
 
 %%%%%%% ref: https://it.sharelatex.com/blog/2013/08/02/thesis-series-pt1.html
 \chapter*{Abstract}
-Abstract goes here
+Abstract goes here (?)
+% The power of barycentric coordinates will grant the exploration of alternative data visualization techniques.
 
 \chapter*{Dedication}
-to somebody
+to somebody (?)
 
 \chapter*{Declaration}
-I declare that..
+I declare that.. (?)
 
 \chapter*{Acknowledgements}
-I want to thank...
+I want to thank... (?)
 
 \tableofcontents
+
 %%%%%%%
 \chapter{Introduction}
 \input{chapters/introduction}
@@ -124,8 +127,10 @@ I want to thank...
 
 % \chapter{Conclusion}
 % \input{chapters/conclusion}
-% See~\cite{DUMMY:1}.
-\printbibliography
+
+
+\bibliography{report}
+\bibliographystyle{acm}
 
 
 \appendix
