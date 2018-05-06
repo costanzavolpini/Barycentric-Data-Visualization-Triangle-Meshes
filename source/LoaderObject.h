@@ -40,6 +40,46 @@ struct edge {
   Point3d n2;
 };
 
+std::map<vector<int>, edge> map_edge; // key: [index_v1, index_v2]    val: struct edge
+
+void insert_edge(int index_v1, int index_v2, vector<int> key, vector<int> key_2, Point3d n){
+    std::map<vector<int>, edge>::iterator it; // iterator
+    std::map<vector<int>, edge>::iterator it_reverse; // iterator
+
+    // convention: from smaller to higher index
+    it = map_edge.find(key); // iterator
+    it_reverse = map_edge.find(key_2);
+
+    if (it != map_edge.end() || it_reverse != map_edge.end()){ // found and v1 < v2
+
+        if(index_v1 < index_v2)
+            it->second.n1 = n;
+        else
+            it_reverse->second.n2 = n;
+
+    } else { // create new
+
+        edge e1; // struct
+        e1.length = abs( sqrt( pow((v[index_v1][0] - v[index_v2][0]), 2) + pow((v[index_v1][1] - v[index_v2][1]), 2) + pow((v[index_v1][2] - v[index_v2][2]), 2) ) );
+        if(index_v1 < index_v2){
+
+            // correct order
+            e1.index_v1 = index_v1;
+            e1.index_v2 = index_v2;
+            e1.n1 = n;
+
+        } else {
+            e1.index_v1 = index_v2;
+            e1.index_v2 = index_v1;
+            e1.n2 = n;
+        }
+
+        map_edge[key] = e1;
+    }
+
+}
+
+
         /**
          * Function to update the minimum value found in coords of an object.
         */
@@ -141,10 +181,6 @@ struct edge {
             vector<int> v_counter(num_vertices);
             std::fill(v_counter.begin(), v_counter.end(), 0); // initialize every vertex normal to (0,0,0)
 
-            // edges
-            std::map<vector<int>, edge> map_edge; // key: [index_v1, index_v2]    val: struct edge
-
-
             // -------------- GAUSSIAN CURVATURE, MEAN CURVATURE and VERTICES TRIANGLES -----------------
             // find gaussian curvature
             vector<float> triangle_gc(num_triangles * 9);
@@ -186,6 +222,33 @@ struct edge {
 
                 normals[t[k].v[2]] += n;
                 v_counter[t[k].v[2]]++; // update counter
+
+
+                // -------------- MEAN CURVATURE --------------
+                // fill map edges
+                int index_v1 = t[k].v[0];
+                int index_v2 = t[k].v[1];
+                int index_v3 = t[k].v[2];
+
+                // index vertices for edges
+                vector<int> v2v1 = {index_v1, index_v2};
+                vector<int> v1v3 = {index_v3, index_v1};
+                vector<int> v3v2 = {index_v2, index_v3};
+
+
+                vector<int> v2v1_reverse = {index_v2, index_v1};
+                vector<int> v1v3_reverse = {index_v1, index_v3};
+                vector<int> v3v2_reverse = {index_v3, index_v2};
+
+                insert_edge(index_v1, index_v2, v2v1, v2v1_reverse, n);
+                insert_edge(index_v3, index_v1, v1v3, v1v3_reverse, n);
+                insert_edge(index_v2, index_v3, v3v2, v3v2_reverse, n);
+
+                  std::cout << "mymap.size() is " << map_edge.size() << '\n';
+
+
+                // cout << v[index_v1] << endl;
+                // -------------- end mean curvature --------------
 
 
                 // GAUSSIAN CURVATURE
@@ -289,5 +352,6 @@ struct edge {
 int get_number_triangles(){
     return num_triangles;
 }
+
 
 #endif
