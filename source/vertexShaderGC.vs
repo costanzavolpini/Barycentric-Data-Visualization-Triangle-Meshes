@@ -21,9 +21,9 @@
 
        if (val < 0) { //negative numbers until 0 -> map from red to green
             // division by 5 to get more smooth (otherwise we cannot see some values)
-            return vec4(interpolation(red, green, log(val + 1)/log(2)), 1.0);
+            return vec4(interpolation(red, green, val), 1.0);
         } else { //map from green to blue, from 0 to positive
-            return vec4(interpolation(green, blue, log(val + 1)/log(2)), 1.0);
+            return vec4(interpolation(green, blue, val), 1.0);
         }
     }
 
