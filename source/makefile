@@ -1,20 +1,28 @@
 CPP = g++
 CC = gcc
 CFLAGS = -c
-CPPFLAGS = -c -std=c++11
+CPPFLAGS = -c -std=c++11 -Wall -Wformat
 FLAGS = -lglfw
 
-OBJECTC = glad.o main.o
+EXE = main
 
-CSOURCES = \
-	 glad.c
+CSOURCES = glad.c
 
-CPPSOURCES = \
-	main.cpp
+CPPSOURCES = main.cpp imgui_impl_glfw_gl3.cpp
+# CPPSOURCES = main.cpp
+CPPSOURCES += imgui.cpp imgui_draw.cpp
 
-main:
-	$(CPP) $(CPPFLAGS) $(CPPSOURCES) && $(CC) $(CFLAGS) $(CSOURCES) && $(CPP) $(FLAGS) $(OBJECTC) -o main
+OBJECTCPP = $(addsuffix .o, $(basename $(notdir $(CPPSOURCES))))
 
-.PHONY: all main clean
+OBJECTC = $(addsuffix .o, $(basename $(notdir $(CSOURCES))))
+
+
+all: $(EXE)
+	@echo Build complete!
+
+$(EXE): $(OBJS)
+	$(CPP) $(CPPFLAGS) $(CPPSOURCES) && $(CC) $(CFLAGS) $(CSOURCES) && $(CPP) $(FLAGS) $(OBJECTCPP) $(OBJECTC) -o main
+
 clean:
-	$(RM) *.o
+	rm -f $(EXE) $(OBJECTCPP) $(OBJECTC)
+

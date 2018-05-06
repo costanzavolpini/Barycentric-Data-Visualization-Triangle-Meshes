@@ -1,7 +1,7 @@
 #version 330 core
 // Vertex Shader for linear interpolation
 layout (location = 0) in vec3 aPos;
-layout (location = 2) in vec3 aColor;
+layout (location = 3) in vec3 aColor;
 
 out vec4 color;
 

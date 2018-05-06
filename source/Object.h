@@ -5,6 +5,7 @@
 #include "Base.h"
 #include <math.h>
 #include "LoaderObject.h"
+#include "GaussianCurvatureHelper.h"
 
 using namespace std;
 
@@ -17,13 +18,14 @@ class Object {
   public:
     vector<float> triangle_vertices;
     vector<float> triangle_normals;
-    vector<float> triangle_gc;
+    vector<float> triangle_gc; //untouched gc
     vector<float> triangle_color;
 
-    int isGaussianCurvature = 0;
-    int isLinearInterpolation = 0;
-    int isExtendFlatShading = 1;
-    int isGouraudShading = 0;
+    vector<float> triangle_gc_modified_auto; //outliers gc
+    vector<float> triangle_gc_modified; //user modified gc
+    vector<float> triangle_gc_selected;
+    int type_gc = 2;
+    GCHelper gc_helper = GCHelper();
 
     /**
         Memory on the GPU where we store the vertex data
@@ -32,14 +34,61 @@ class Object {
     unsigned int VBO, VAO, VBO_NORMAL, VBO_GAUSSIANCURVATURE, VBO_LINEARINTERPOLATION;
 
     // Constructor
-      Object(const std::string &_path) {
+      void set_file(const std::string &_path) {
+        triangle_vertices.clear();
+        triangle_normals.clear();
+        triangle_gc.clear();
+        triangle_color.clear();
+
+        triangle_vertices.shrink_to_fit();
+        triangle_normals.shrink_to_fit();
+        triangle_gc.shrink_to_fit();
+        triangle_color.shrink_to_fit();
+
         if(!load(_path.c_str(), triangle_vertices, triangle_normals, triangle_gc, triangle_color)){
             cout << "error loading file" << endl;
             return;
         }
+
+        triangle_gc_modified_auto.clear();
+        triangle_gc_modified.clear();
+        triangle_gc_selected.clear();
+
+        triangle_gc_modified_auto.shrink_to_fit();
+        triangle_gc_modified.shrink_to_fit();
+        triangle_gc_selected.shrink_to_fit();
+
+        auto_detect_outliers_gc(); // auto_detect_outliers_gc
+        set_selected_gc(); // set_selected_gc
+        init(); //init
+      }
+
+      void auto_detect_outliers_gc(){
+        gc_helper.clear_datas();
+        // autodetect gaussian curvature outliers, variance...etc.
+        int number_triangles = triangle_gc.size()/9;
+
+        // add everything to triangle gaussian curvature
+        for(int k = 0; k < number_triangles; k++){
+                gc_helper.update_statistics_data(triangle_gc[9*k]);
+                gc_helper.update_statistics_data(triangle_gc[9*k + 3]);
+                gc_helper.update_statistics_data(triangle_gc[9*k + 6]);
+        }
+
+        gc_helper.finalize_statistics_data();
+
+        triangle_gc_modified_auto.resize(triangle_gc.size());
+
+        for(int k = 0; k < number_triangles; k++){ // update to remove noisy (smoothing)
+                triangle_gc_modified_auto[9*k] = triangle_gc_modified_auto[9*k + 1] = triangle_gc_modified_auto[9*k + 2] = gc_helper.cut_data_gaussian_curvature(triangle_gc[9*k]);
+                triangle_gc_modified_auto[9*k + 3] = triangle_gc_modified_auto[9*k + 4] = triangle_gc_modified_auto[9*k + 5] = gc_helper.cut_data_gaussian_curvature(triangle_gc[9*k + 3]);
+                triangle_gc_modified_auto[9*k + 6] = triangle_gc_modified_auto[9*k + 7] = triangle_gc_modified_auto[9*k + 8] = gc_helper.cut_data_gaussian_curvature(triangle_gc[9*k + 6]);
+        }
+        triangle_gc_selected = triangle_gc_modified_auto;
       }
 
      // Function to initialize VBO and VAO
+     // name file and the second it is the method gc
       void init() {
 
           // ------------- VBO -------------
@@ -55,31 +104,27 @@ class Object {
           */
           glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_vertices.size(), &triangle_vertices[0], GL_STATIC_DRAW); // copies the previously defined vertex data into the buffer's memor
 
-         if(isExtendFlatShading || isGouraudShading){
-            // VBO NORMALS
-            glGenBuffers(1, &VBO_NORMAL); //generate buffer, bufferID = 1
+          // VBO NORMALS
+          glGenBuffers(1, &VBO_NORMAL); //generate buffer, bufferID = 1
 
-            glBindBuffer(GL_ARRAY_BUFFER, VBO_NORMAL);
+          glBindBuffer(GL_ARRAY_BUFFER, VBO_NORMAL);
 
-            glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_normals.size(), &triangle_normals[0], GL_STATIC_DRAW);
-         }
+          glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_normals.size(), &triangle_normals[0], GL_STATIC_DRAW);
 
-          if(isGaussianCurvature){
-                // VBO_GAUSSIANCURVATURE
-                glGenBuffers(1, &VBO_GAUSSIANCURVATURE); //generate buffer, bufferID = 1
 
-                glBindBuffer(GL_ARRAY_BUFFER, VBO_GAUSSIANCURVATURE);
+           // VBO_GAUSSIANCURVATURE
+           glGenBuffers(1, &VBO_GAUSSIANCURVATURE); //generate buffer, bufferID = 1
 
-                glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_gc.size(), &triangle_gc[0], GL_STATIC_DRAW);
+           glBindBuffer(GL_ARRAY_BUFFER, VBO_GAUSSIANCURVATURE);
 
-          } else if(isLinearInterpolation){
-              // VBO_LINEARINTERPOLATION
-                glGenBuffers(1, &VBO_LINEARINTERPOLATION); //generate buffer, bufferID = 1
+           glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_gc_selected.size(), &triangle_gc_selected[0], GL_STATIC_DRAW);
 
-                glBindBuffer(GL_ARRAY_BUFFER, VBO_LINEARINTERPOLATION);
+            // VBO_LINEARINTERPOLATION
+            glGenBuffers(1, &VBO_LINEARINTERPOLATION); //generate buffer, bufferID = 1
 
-                glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_color.size(), &triangle_color[0], GL_STATIC_DRAW);
-          }
+            glBindBuffer(GL_ARRAY_BUFFER, VBO_LINEARINTERPOLATION);
+
+            glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_color.size(), &triangle_color[0], GL_STATIC_DRAW);
 
 
           // ------------- VAO -------------
@@ -103,28 +148,26 @@ class Object {
           glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float))); // 72-bit floating point values, each position is composed of 3 of those values (3 points (one for each vertex))
           glEnableVertexAttribArray(0); //this 0 is referred to the layout on shader
 
-         if(isExtendFlatShading || isGouraudShading){
-                glBindBuffer(GL_ARRAY_BUFFER, VBO_NORMAL);
-                //normal attribute
-                glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float)));
-                glEnableVertexAttribArray(1); //this 1 is referred to the layout on shader
-         }
 
-          if(isGaussianCurvature){
+          // normals
+          glBindBuffer(GL_ARRAY_BUFFER, VBO_NORMAL);
+          //normal attribute
+          glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float)));
+          glEnableVertexAttribArray(1); //this 1 is referred to the layout on shader
 
-                glBindBuffer(GL_ARRAY_BUFFER, VBO_GAUSSIANCURVATURE);
-                //normal attribute
-                glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float)));
-                glEnableVertexAttribArray(2); //this 2 is referred to the layout on shader
 
-          } else if(isLinearInterpolation){
+          // gaussian curvature
+          glBindBuffer(GL_ARRAY_BUFFER, VBO_GAUSSIANCURVATURE);
+          //normal attribute
+          glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float)));
+          glEnableVertexAttribArray(2); //this 2 is referred to the layout on shader
 
-                glBindBuffer(GL_ARRAY_BUFFER, VBO_LINEARINTERPOLATION);
 
-                // color
-                glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float)));
-                glEnableVertexAttribArray(2); //this 2 is referred to the layout on shader
-          }
+          // linear interpolation
+          glBindBuffer(GL_ARRAY_BUFFER, VBO_LINEARINTERPOLATION);
+          // color
+          glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float)));
+          glEnableVertexAttribArray(3); //this 3 is referred to the layout on shader
 
           /**
             Unbind the VAO so other VAO calls won't accidentally modify this VAO, but this rarely happens.
@@ -148,19 +191,18 @@ class Object {
         glBindVertexArray(0);
       }
 
+      void disable(){
+        glDisableVertexAttribArray(1);
+      }
+
 
      // delete the shader objects once we've linked them into the program object; we no longer need them anymore
       void clear(){
         glDeleteVertexArrays(1, &VAO);
         glDeleteBuffers(1, &VBO);
-        if(VBO_NORMAL)
-            glDeleteBuffers(1, &VBO_NORMAL);
-
-        if(VBO_GAUSSIANCURVATURE)
-            glDeleteBuffers(1, &VBO_GAUSSIANCURVATURE);
-
-        if(VBO_LINEARINTERPOLATION)
-            glDeleteBuffers(1, &VBO_LINEARINTERPOLATION);
+        glDeleteBuffers(1, &VBO_NORMAL);
+        glDeleteBuffers(1, &VBO_GAUSSIANCURVATURE);
+        glDeleteBuffers(1, &VBO_LINEARINTERPOLATION);
       }
 
     // Point3d interpolation(Point3d v0, Point3d v1, float t) {
@@ -226,21 +268,35 @@ class Object {
         return sum / count;
     }
 
-
-    void setGaussianCurvature(int flag){
-        isGaussianCurvature = flag;
+    unsigned int getVAO(){
+        return VAO;
     }
 
-    void setLinearInterpolation(int flag){
-        isLinearInterpolation = flag;
+
+    vector<float> change_values_gaussian_curvature(float max, float min){
+            return triangle_gc_modified;
     }
 
-    void setExtendFlatShading(int flag){
-        isExtendFlatShading = flag;
+    // function to select the current gc
+    void set_selected_gc(){
+        switch (type_gc) {
+            case 1: // untouched gc
+                triangle_gc_selected = triangle_gc;
+                break;
+
+            case 3: //modified by user
+                triangle_gc_selected = triangle_gc_modified;
+                break;
+
+
+            default: //automatic
+                triangle_gc_selected = triangle_gc_modified_auto;
+                break;
+        }
     }
 
-    void setGouraudFlatShading(int flag){
-        isGouraudShading = flag;
+    void set_value_gc(int val){
+        type_gc = val;
     }
 };
 
