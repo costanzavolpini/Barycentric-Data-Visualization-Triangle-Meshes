@@ -112,7 +112,7 @@ int imgui_isGaussianCurvature;
 int imgui_isLinearInterpolation;
 int imgui_isExtendFlatShading;
 int imgui_isGouraudShading;
-string name_file = "models/armadillo.off"; //default armadillo
+string name_file = "models/icosahedron_1.off"; //default armadillo
 
 
 // ----------- END SETTINGS SHADERS ----------
