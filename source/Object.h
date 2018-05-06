@@ -23,7 +23,6 @@ class Object
     vector<float> triangle_color;
 
     vector<float> triangle_gc_modified_auto; //outliers gc
-    vector<float> triangle_gc_modified;      //user modified gc
     vector<float> triangle_gc_selected;
     int type_gc = 2;
     GCHelper gc_helper = GCHelper();
@@ -54,11 +53,9 @@ class Object
         }
 
         triangle_gc_modified_auto.clear();
-        triangle_gc_modified.clear();
         triangle_gc_selected.clear();
 
         triangle_gc_modified_auto.shrink_to_fit();
-        triangle_gc_modified.shrink_to_fit();
         triangle_gc_selected.shrink_to_fit();
 
         auto_detect_outliers_gc(); // auto_detect_outliers_gc
@@ -284,26 +281,17 @@ class Object
         return VAO;
     }
 
-    vector<float> change_values_gaussian_curvature(float max, float min)
-    {
-        return triangle_gc_modified;
-    }
-
     // function to select the current gc
     void set_selected_gc()
     {
         switch (type_gc)
         {
-        case 1: // untouched gc
-            triangle_gc_selected = triangle_gc;
-            break;
-
-        case 3: //modified by user
-            triangle_gc_selected = triangle_gc_modified;
+        case 2: //automatic
+            triangle_gc_selected = triangle_gc_modified_auto;
             break;
 
         default: //automatic
-            triangle_gc_selected = triangle_gc_modified_auto;
+            triangle_gc_selected = triangle_gc;
             break;
         }
     }

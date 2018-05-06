@@ -709,14 +709,14 @@ void analyse_gaussian_curvature(GLFWwindow *window)
     // max_val = (float) max_gc * 3;
     // ImGui::DragFloatRange2("range", &begin, &end, 0.25f, min_val, max_val, "Min: %.1f", "Max: %.1f");
 
-//     ImGui::DragFloatRange2();
-// ImGui::DragIntRange2();
+    //     ImGui::DragFloatRange2();
+    // ImGui::DragIntRange2();
 
-// static float begin = 10, end = 90;
-// static float begin = (float) min_gc;
-// static float end = (float) max_gc;
-// float min_val = (float) min_gc * 3;
-// float max_val = (float) max_gc * 3;
+    // static float begin = 10, end = 90;
+    // static float begin = (float) min_gc;
+    // static float end = (float) max_gc;
+    // float min_val = (float) min_gc * 3;
+    // float max_val = (float) max_gc * 3;
 
     if (prev_gc != gc_set)
     {
