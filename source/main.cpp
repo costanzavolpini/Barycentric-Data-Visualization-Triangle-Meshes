@@ -89,7 +89,7 @@ int count_angle = 0;
 bool decrease_angle = false;
 
 // imgui shaders
-static int shader_set = 0;
+static int shader_set = 3; // default 0
 static int gc_set = 2;
 
 // imgui listbox models
@@ -112,14 +112,14 @@ int imgui_isGaussianCurvature;
 int imgui_isLinearInterpolation;
 int imgui_isExtendFlatShading;
 int imgui_isGouraudShading;
-string name_file = "models/armadillo.off"; //default name
+string name_file = "models/icosahedron_1.off"; //default armadillo
 
 
 // ----------- END SETTINGS SHADERS ----------
 
 
 int main(int argc, char * argv[]) {
-    set_parameters_shader(0);
+    set_parameters_shader(shader_set);
 
     /**
         ------------- GLFW -------------
