@@ -85,50 +85,59 @@ The curvature of a surface is characterized by the principal curvatures, the \te
 %cite: A quick and dirty introduction to the curvature of surfaces (brickisland.net/cs177/?p=144)
 %---------
 \begin{figure}[h]
-  \minipage[b]{.5\linewidth}
   \centering
-  \scalebox{0.7}{\begin{tikzpicture}
-  \begin{axis}[view={60}{30}]
-      \addplot3[surf,shader=flat,
-          samples=20,
-          domain=1:0,y domain=0:2*pi,
-          z buffer=sort]
-          ({sqrt(1-x^2) * cos(deg(y))},
-       {sqrt( 1-x^2 ) * sin(deg(y))},
-       x);
-  \end{axis}
-  \end{tikzpicture}}
-  \caption{Positive GC}\label{fig:positive-gaussian}
-  \endminipage
-  \minipage[b]{.5\linewidth}
-  \centering
-  \begin{tikzpicture}[scale=0.7]
-    \begin{axis}[view={60}{30}]
-    \addplot3[patch,patch refines=3,
-    shader=faceted interp,
-    patch type=biquadratic]
-    table[z expr=x^2-y^2]
-    {
-        x  y
-        -2 -2
-        2  -2
-        2  2
-        -2 2
-        0  -2
-        2  0
-        0  2
-        -2 0
-        0  0
-    };
-  \end{axis}
-  \end{tikzpicture}
-  \caption{Negative GC}\label{fig:negative-gaussian}
-  \endminipage
+\includegraphics[scale=0.5]{images/gaussian_curvature_examples.png}
+\caption{Negative curvature, zero curvature and positive curvature.}\label{fig:curvature-gaussian}
 \end{figure}
+% \begin{figure}[h]
+%   \minipage[b]{.5\linewidth}
+%   \centering
+%   \scalebox{0.7}{\begin{tikzpicture}
+%   \begin{axis}[view={60}{30}]
+%       \addplot3[surf,shader=flat,
+%           samples=20,
+%           domain=1:0,y domain=0:2*pi,
+%           z buffer=sort]
+%           ({sqrt(1-x^2) * cos(deg(y))},
+%        {sqrt( 1-x^2 ) * sin(deg(y))},
+%        x);
+%   \end{axis}
+%   \end{tikzpicture}}
+%   \caption{Positive GC}\label{fig:positive-gaussian}
+%   \endminipage
+%   \minipage[b]{.5\linewidth}
+%   \centering
+%   \begin{tikzpicture}[scale=0.7]
+%     \begin{axis}[view={60}{30}]
+%     \addplot3[patch,patch refines=3,
+%     shader=faceted interp,
+%     patch type=biquadratic]
+%     table[z expr=x^2-y^2]
+%     {
+%         x  y
+%         -2 -2
+%         2  -2
+%         2  2
+%         -2 2
+%         0  -2
+%         2  0
+%         0  2
+%         -2 0
+%         0  0
+%     };
+%   \end{axis}
+%   \end{tikzpicture}
+%   \caption{Negative GC}\label{fig:negative-gaussian}
+%   \endminipage
+% \end{figure}
 Surfaces that have a zero gaussian curvature are called \textit{developable surfaces} because they can be flattened out into the plane without any stretching. \textit{Gaussian curvature} should be zero inside each mesh triangle and the same along edges since it can be flattened symmetrically into the plane by simply rotating one triangle about the common edge into the plane defined by the other. Consequently the \textit{Gaussian curvature} is concentrated at the vertices of a triangle and defined as the \textit{angle defect}
 $$K(V) = 2 \pi - \sum_{i=1}^n \theta_i$$
 where $\theta_i$ are the angles of the triangle $T_i$ adjacent to the vertex $V$ at $V$. This should be seen as the integral of the Gaussian curvature over a certain region $S(V)$ around $V$, where these $S(V)$ form a partition of the surface of the entire mesh.
 $$ K(V) = \int_{S(V)} KdA  $$
+\textit{Negative curvature} can be recognized by the fact that external directions curve in opposite directions, \textit{zero curvature} has one external direction that has zero curvature, \textit{positive curvature} has external directions that curve in the same direction (Fig. \ref{fig:curvature-gaussian}).
+The \textit{Theorema Egregium}, discovered by C.F. Gauss in 1827, states that the \textit{Gaussian curvature} is an intrinsic property of the surface that does not depend on the space, despite by the fact that is define as the product of the principal curvatures (whose value depends on how the surface is immersed in the space). Technically, the \textit{Gaussian curvature} is invariant under isometries.
+We can then notice that triangle angles add up to less than $180 \degree$ in negative curature, exactly $180 \degree$ in zero curature, and more than $180 \degree$ in positive curature.
+
 %cite: Geometry Processing Kai Hormann (paper)
 
 
