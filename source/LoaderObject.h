@@ -114,11 +114,18 @@ int interval = 2; // max - min = 1 - (-1)
             gc.clear();
             color_li.clear();
 
+            out_vertices.shrink_to_fit();
+            out_normals.shrink_to_fit();
+            gc.shrink_to_fit();
+            color_li.shrink_to_fit();
+
+
             // vertices array
             vector<Point3d> normals(num_vertices);
             std::fill(normals.begin(), normals.end(), Point3d(0.0f, 0.0f, 0.0f));
 
             vector<float> triangle_vertices(num_triangles * 9);
+
             vector<float> triangle_normals(num_triangles * 9);
 
             // save normals
@@ -129,6 +136,7 @@ int interval = 2; // max - min = 1 - (-1)
             // -------------- GAUSSIAN CURVATURE and VERTICES TRIANGLES -----------------
             // find gaussian curvature
             vector<float> triangle_gc(num_triangles * 9);
+
             color_li.resize(num_triangles * 9);
             vector<float> gc_counter(num_vertices);
             std::fill(gc_counter.begin(), gc_counter.end(), 0);

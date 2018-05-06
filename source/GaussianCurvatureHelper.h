@@ -14,7 +14,7 @@ Comment:  This file contains all Statistics definitions to recalcuate the correc
 
 class GCHelper {
   public:
-        int count_data = 0.0f;
+        int count_data = 0;
         double mean = 0.0f;
         double M2 = 0.0f;
         double variance;
@@ -48,16 +48,15 @@ class GCHelper {
                return;
            }
 
-           cout << mean << endl;
-           cout << lower_outlier << endl;
-           cout << upper_outlier << endl;
-
-
            variance = (double) M2/(count_data - 1);
            M2 = variance;
            standard_deviation = sqrt(variance);
            lower_outlier = mean - (standard_deviation * multiplier);
            upper_outlier = mean + (standard_deviation * multiplier);
+
+            cout << mean << endl;
+           cout << lower_outlier << endl;
+           cout << upper_outlier << endl;
        }
 
 
@@ -75,5 +74,14 @@ class GCHelper {
             return 2/(upper_outlier - lower_outlier) * (val - upper_outlier) + 1; //1 is the max of interval
        }
 
+       void clear_datas(){
+        count_data = 0;
+        mean = 0.0f;
+        M2 = 0.0f;
+        standard_deviation = 0.0f;
+        variance = 0.0f;
+        lower_outlier = 0.0f;
+        upper_outlier = 0.0f;
+       }
 };
 #endif

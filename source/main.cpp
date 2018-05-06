@@ -172,26 +172,9 @@ int main(int argc, char * argv[]) {
 
     // ------------- END GLAD -------------
 
-
-    // --------- SET UP ------------
-
     // Set the mouse at the center of the screen
     glfwPollEvents();
     glfwSetCursorPos(window, WIDTH/2, HEIGHT/2);
-
-    // Black background
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
-
-    // Enable depth test
-	glEnable(GL_DEPTH_TEST);
-	// Accept fragment if it closer to the camera than the former one
-	glDepthFunc(GL_LESS);
-
-    // Cull triangles which normal is not towards the camera
-	glEnable(GL_CULL_FACE);
-
-    // ----------------------
 
     // --------------- SHADER -------------------------------
     /**
@@ -228,7 +211,6 @@ int main(int argc, char * argv[]) {
         // Render to our framebuffer
 		glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
         glViewport(0, 0, current_width, current_height); // Render on the whole framebuffer, complete from the lower left corner to the upper right
-
 
         // render colours
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); //black screen
@@ -618,7 +600,7 @@ void select_model(GLFWwindow* window){
         glDeleteFramebuffers(1, &frame_buffer);
         glDeleteTextures(1, &rendered_texture);
         glDeleteRenderbuffers(1, &depth_render_buffer);
-
+            // clean/delete all resources that were allocated
         initialize_texture_object(window);
     }
 }
@@ -691,11 +673,29 @@ void analyse_gaussian_curvature(GLFWwindow* window){
         glDeleteTextures(1, &rendered_texture);
         glDeleteRenderbuffers(1, &depth_render_buffer);
 
+        mean.clear();
+        mean.shrink_to_fit();
+
         initialize_texture_object(window);
     }
 }
 
 void initialize_texture_object(GLFWwindow* window){
+    // --------- SET UP ------------
+
+    // Black background
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+    // Enable depth test
+	glEnable(GL_DEPTH_TEST);
+	// Accept fragment if it closer to the camera than the former one
+	glDepthFunc(GL_LESS);
+
+    // Cull triangles which normal is not towards the camera
+	glEnable(GL_CULL_FACE);
+
+    // ----------------------
+
     /**
         NB. OpenGL works in 3D space we render a 2D triangle with each vertex having a z coordinate of 0.0.
         This way the depth of the triangle remains the same making it look like it's 2D.
@@ -758,7 +758,7 @@ void initialize_texture_object(GLFWwindow* window){
 
 	// Always check that our framebuffer is ok
 	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
-        cout << "error framebugger" << endl;
+        cout << "error framebuffer" << endl;
 		exit(-1);
     }
 
@@ -774,7 +774,5 @@ void initialize_texture_object(GLFWwindow* window){
 
     // Setup style
     ImGui::StyleColorsDark();
-    //ImGui::StyleColorsClassic();
-
     // ---------------- END IMGUI ----------------------
 }

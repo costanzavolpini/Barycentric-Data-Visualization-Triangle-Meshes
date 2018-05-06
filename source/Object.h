@@ -34,22 +34,37 @@ class Object {
     unsigned int VBO, VAO, VBO_NORMAL, VBO_GAUSSIANCURVATURE, VBO_LINEARINTERPOLATION;
 
     // Constructor
-    //   void set_file(const std::string &_path, std::function<void(void)> callback, std::function<void(void)> callback_2, std::function<void(void)> callback_3) {
       void set_file(const std::string &_path) {
+        triangle_vertices.clear();
+        triangle_normals.clear();
+        triangle_gc.clear();
+        triangle_color.clear();
+
+        triangle_vertices.shrink_to_fit();
+        triangle_normals.shrink_to_fit();
+        triangle_gc.shrink_to_fit();
+        triangle_color.shrink_to_fit();
+
         if(!load(_path.c_str(), triangle_vertices, triangle_normals, triangle_gc, triangle_color)){
             cout << "error loading file" << endl;
             return;
-
         }
-        // callback(); // auto_detect_outliers_gc
-        // callback_2(); // set_selected_gc
-        // callback_3(); //init
+
+        triangle_gc_modified_auto.clear();
+        triangle_gc_modified.clear();
+        triangle_gc_selected.clear();
+
+        triangle_gc_modified_auto.shrink_to_fit();
+        triangle_gc_modified.shrink_to_fit();
+        triangle_gc_selected.shrink_to_fit();
+
         auto_detect_outliers_gc(); // auto_detect_outliers_gc
         set_selected_gc(); // set_selected_gc
         init(); //init
       }
 
       void auto_detect_outliers_gc(){
+        gc_helper.clear_datas();
         // autodetect gaussian curvature outliers, variance...etc.
         int number_triangles = triangle_gc.size()/9;
 
