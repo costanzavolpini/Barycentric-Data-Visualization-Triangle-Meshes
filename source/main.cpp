@@ -17,17 +17,26 @@
 #include "imgui_impl_glfw_gl3.h"
 #include <cstdlib>
 #include "glm/ext.hpp" //to test
+#include <glm/gtc/type_ptr.hpp>
+
+#include "imgui_plot_custom.h"
 
 #define IS_IN_DEBUG false // to show normals
 
 using namespace std;
 
 // settings
-const unsigned int WIDTH = 800;
-const unsigned int HEIGHT = 600;
+const unsigned int WIDTH = 1200;
+const unsigned int HEIGHT = 900;
 
-int current_width = 800;
-int current_height = 600;
+int current_width = 1200;
+int current_height = 900;
+
+GLuint frame_buffer = 0;
+GLuint rendered_texture;
+GLuint depth_render_buffer;
+
+glm::mat4 view, model;
 
 // Arcball instance
 static Arcball arcball(WIDTH, HEIGHT, 1.5f, true, true);
@@ -62,7 +71,9 @@ bool window_showed = true;
 void rotation_settings();
 void zoom_settings();
 void set_shader();
-void select_model();
+void select_model(GLFWwindow* window);
+void analyse_gaussian_curvature(GLFWwindow* window);
+void initialize_texture_object(GLFWwindow* window);
 
 // set-up parameter imgui
 static float angle = 180.0f; // angle of rotation - must be the same of transform_shader
@@ -78,13 +89,18 @@ int count_angle = 0;
 bool decrease_angle = false;
 
 // imgui shaders
-static int shader_set = 0;
+static int shader_set = 3; // default 0
+static int gc_set = 2;
 
 // imgui listbox models
 static int listbox_item_current = 0;
 static int listbox_item_prev = 0;
 
+void analyse_gaussian_curvature();
+
 void set_parameters_shader(int selected_shader);
+
+void swap_gaussian_curvature();
 
 // ------- END IMGUI -------------
 
@@ -96,14 +112,14 @@ int imgui_isGaussianCurvature;
 int imgui_isLinearInterpolation;
 int imgui_isExtendFlatShading;
 int imgui_isGouraudShading;
-string name_file = "models/armadillo.off"; //default name
+string name_file = "models/icosahedron_1.off"; //default armadillo
 
 
 // ----------- END SETTINGS SHADERS ----------
 
 
 int main(int argc, char * argv[]) {
-    set_parameters_shader(0);
+    set_parameters_shader(shader_set);
 
     /**
         ------------- GLFW -------------
@@ -133,9 +149,9 @@ int main(int argc, char * argv[]) {
     glfwMakeContextCurrent(window);
 
     // But on MacOS X with a retina screen it'll be 1024*2 and 768*2, so we get the actual framebuffer size:
-    int windowWidth = WIDTH;
-    int windowHeight = HEIGHT;
-    glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
+    current_width = WIDTH;
+    current_height = HEIGHT;
+    glfwGetFramebufferSize(window, &current_width, &current_height);
 
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
@@ -156,26 +172,9 @@ int main(int argc, char * argv[]) {
 
     // ------------- END GLAD -------------
 
-
-    // --------- SET UP ------------
-
     // Set the mouse at the center of the screen
     glfwPollEvents();
     glfwSetCursorPos(window, WIDTH/2, HEIGHT/2);
-
-    // Black background
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
-
-    // Enable depth test
-	glEnable(GL_DEPTH_TEST);
-	// Accept fragment if it closer to the camera than the former one
-	glDepthFunc(GL_LESS);
-
-    // Cull triangles which normal is not towards the camera
-	glEnable(GL_CULL_FACE);
-
-    // ----------------------
 
     // --------------- SHADER -------------------------------
     /**
@@ -190,88 +189,7 @@ int main(int argc, char * argv[]) {
     Shader normalShader = Shader();
     normalShader.initialize_shader("normal.vs", "normal.fs", "normal.gs");
 
-
-    /**
-        NB. OpenGL works in 3D space we render a 2D triangle with each vertex having a z coordinate of 0.0.
-        This way the depth of the triangle remains the same making it look like it's 2D.
-
-        Send vertex data to vertex shader (load .off file).
-     */
-    object.set_file(name_file); //load mesh
-    object.init(); // fn to initialize VBO and VAO
-
-    /**
-        IMPORTANT FOR TRANSFORMATION:
-        Since GLM version 0.9.9, GLM default initializates matrix types to a 0-initalized matrix,
-        instead of the identity matrix. From that version it is required to initialize matrix types as: glm::mat4 mat = glm::mat4(1.0f).
-    */
-    // camera position (eye) - look at origin - head is up
-    glm::mat4 view = glm::lookAt(glm::vec3(4.0f, 3.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
-    glm::mat4 model = glm::mat4(1.0f);
-    transform_shader = glm::rotate(transform_shader, 180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-
-    // ---------- END SHADER -----------------
-
-
-    // ---------------------------------------------
-	// Render to Texture - specific code begins here
-	// ---------------------------------------------
-
-    // The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
-	GLuint frame_buffer = 0;
-	glGenFramebuffers(1, &frame_buffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
-
-	// The texture we're going to render to
-	GLuint rendered_texture;
-	glGenTextures(1, &rendered_texture);
-
-	// "Bind" the newly created texture : all future texture functions will modify this texture
-	glBindTexture(GL_TEXTURE_2D, rendered_texture);
-
-	// Give an empty image to OpenGL ( the last "0" means "empty" )
-	glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, windowWidth, windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
-
-	// Poor filtering
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-	// The depth buffer
-	GLuint depth_render_buffer;
-	glGenRenderbuffers(1, &depth_render_buffer);
-	glBindRenderbuffer(GL_RENDERBUFFER, depth_render_buffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, windowWidth, windowHeight);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_render_buffer);
-
-    // Set "rendered_texture" as our colour attachement #0
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, rendered_texture, 0);
-
-    // Set the list of draw buffers.
-	GLenum draw_buffers[1] = {GL_COLOR_ATTACHMENT0};
-	glDrawBuffers(1, draw_buffers); // "1" is the size of draw_buffers
-
-	// Always check that our framebuffer is ok
-	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		return false;
-
-
-    // --------------- IMGUI ---------------------
-    // Setup Dear ImGui binding
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
-    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
-    ImGui_ImplGlfwGL3_Init(window, true);
-
-    // Setup style
-    ImGui::StyleColorsDark();
-    //ImGui::StyleColorsClassic();
-
-    // ---------------- END IMGUI ----------------------
+    initialize_texture_object(window);
 
 
     /**
@@ -292,8 +210,7 @@ int main(int argc, char * argv[]) {
 
         // Render to our framebuffer
 		glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
-        glViewport(0, 0, windowWidth, windowHeight); // Render on the whole framebuffer, complete from the lower left corner to the upper right
-
+        glViewport(0, 0, current_width, current_height); // Render on the whole framebuffer, complete from the lower left corner to the upper right
 
         // render colours
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); //black screen
@@ -514,7 +431,7 @@ void show_window(bool* p_open, GLFWwindow* window){
                 zoom_settings();
             }
             if (ImGui::CollapsingHeader("Models")) {
-                select_model();
+                select_model(window);
             }
             if (ImGui::CollapsingHeader("Shaders")) {
                 set_shader();
@@ -541,45 +458,9 @@ void show_window(bool* p_open, GLFWwindow* window){
             ImGui::SetColumnOffset(2, size_x * 6);
 
             ImGui::Text("Analyse\n\n");
-            // ------------------ example analyse ------------------
-
-            static float arr[] = { 0.6f, 0.1f, 1.0f, 0.5f, 0.92f, 0.1f, 0.2f };
-
-            ImGui::PlotHistogram("", arr, IM_ARRAYSIZE(arr), 0, NULL, 0.0f, 1.0f, ImVec2(0,80));
-
-
-            struct Funcs
-            {
-                static float Sin(void*, int i) { return sinf(i * 0.1f); }
-                static float Saw(void*, int i) { return (i & 1) ? 1.0f : -1.0f; }
-            };
-            static int func_type = 0, display_count = 70;
-            // ImGui::Separator();
-            ImGui::PushItemWidth(100); ImGui::Combo("func", &func_type, "Sin\0Saw\0"); ImGui::PopItemWidth();
-            ImGui::SameLine();
-            ImGui::SliderInt("Sample count", &display_count, 1, 400);
-            float (*func)(void*, int) = (func_type == 0) ? Funcs::Sin : Funcs::Saw;
-            ImGui::PlotLines("Lines", func, NULL, display_count, 0, NULL, -1.0f, 1.0f, ImVec2(0,80));
-            ImGui::PlotHistogram("Histogram", func, NULL, display_count, 0, NULL, -1.0f, 1.0f, ImVec2(0,80));
-
-            // Animate a simple progress bar
-            static float progress = 0.0f, progress_dir = 1.0f;
-            progress += progress_dir * 0.4f * ImGui::GetIO().DeltaTime;
-            if (progress >= +1.1f) { progress = +1.1f; progress_dir *= -1.0f; }
-            if (progress <= -0.1f) { progress = -0.1f; progress_dir *= -1.0f; }
-
-
-            // Typically we would use ImVec2(-1.0f,0.0f) to use all available width, or ImVec2(width,0.0f) for a specified width. ImVec2(0.0f,0.0f) uses ItemWidth.
-            ImGui::ProgressBar(progress, ImVec2(0.0f,0.0f));
-            ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
-            ImGui::Text("Progress Bar");
-
-            float progress_saturated = (progress < 0.0f) ? 0.0f : (progress > 1.0f) ? 1.0f : progress;
-            char buf[32];
-            sprintf(buf, "%d/%d", (int)(progress_saturated*1753), 1753);
-            ImGui::ProgressBar(progress, ImVec2(0.f,0.f), buf);
-
-            // ------------------ end example analyse ------------------
+            if (imgui_isGaussianCurvature){
+                analyse_gaussian_curvature(window);
+            }
 
 
             ImGui::SetCursorPosY(io.DisplaySize.y-18.0f); // columns end at the end of window
@@ -705,7 +586,7 @@ void set_parameters_shader(int selected_shader){
 }
 
 // function to select a model to render
-void select_model(){
+void select_model(GLFWwindow* window){
     listbox_item_prev = listbox_item_current;
     ImGui::TextWrapped("Select a model to render:\n\n");
     const char* listbox_items[] = { "armadillo", "eight", "genus3", "horse", "icosahedron_0", "icosahedron_1", "icosahedron_2", "icosahedron_3", "icosahedron_4"};
@@ -714,8 +595,184 @@ void select_model(){
 
     name_file = "models/" + std::string(listbox_items[listbox_item_current]) + ".off"; // generate name file
 
-    // if(listbox_item_current != listbox_item_prev)
-        // setup vao and vbo and fbo
+    if(listbox_item_current != listbox_item_prev){
+        object.clear();
+        glDeleteFramebuffers(1, &frame_buffer);
+        glDeleteTextures(1, &rendered_texture);
+        glDeleteRenderbuffers(1, &depth_render_buffer);
+            // clean/delete all resources that were allocated
+        initialize_texture_object(window);
+    }
 }
 
 
+/**
+ * Plots about Gaussian Curvature
+ */
+void analyse_gaussian_curvature(GLFWwindow* window){
+    int prev_gc = gc_set;
+    ImGui::TextWrapped("Gaussian Curvature plots\n\n");
+    int minimum_gc = object.get_minimum_gaussian_curvature_value();
+    int maximum_gc = object.get_maximum_gaussian_curvature_value();
+    ImColor green = ImColor(0, 255, 0, 255);
+    ImVec4 white = ImColor(255, 255, 255, 255);
+    ImVec4 red = ImColor(255, 0, 0, 255);
+
+    static int values_offset = 0;
+    static int display_count = 70;
+    ImGui::SliderInt("Sample count", &display_count, 1, object.triangle_gc.size());
+
+    // Gaussian curvature
+    const char* names[] = {"GC", "ZERO"};
+    const ImColor colors[2] = {green, white};
+
+    struct Funcs
+    {
+        // static float values_gc(const void* data, int i) { return object.triangle_gc[i]; }
+        static float function(const float* data, int i) {
+            return data[i];
+        }
+    };
+
+    float (*func)(const float* data, int idx) = Funcs::function;
+
+    const int size = object.triangle_gc.size();
+
+    std::vector<float> zeros(size, 0.0f);
+
+    const float ** datas_initialize = new const float*[2];
+    datas_initialize[0] = &object.triangle_gc[0];
+    datas_initialize[1] = &zeros[0];
+
+    const float * const * datas = datas_initialize;
+    ImGui::RadioButton("Untouched GC", &gc_set, 1);
+    ImGui::PlotMultiLines("##Gaussian Curvature", 2, names, colors, func, datas, display_count, minimum_gc, maximum_gc, ImVec2(0,80));
+
+    // automatic Gaussian Curvature
+    const char* names_auto[] = {"GC", "ZERO", "MEAN"};
+    const ImColor colors_auto[3] = {green, white, red};
+
+    std::vector<float> mean(size, object.gc_helper.mean);
+
+    const float ** datas_initialize_auto = new const float*[3];
+    datas_initialize_auto[0] = &object.triangle_gc_modified_auto[0];
+    datas_initialize_auto[1] = &zeros[0];
+    datas_initialize_auto[2] = &mean[0];
+
+    const float * const * datas_auto = datas_initialize_auto;
+
+    ImGui::RadioButton("Automatic best GC", &gc_set, 2);
+    ImGui::PlotMultiLines("##Gaussian Curvature automatic", 3, names_auto, colors_auto, func, datas_auto, display_count, minimum_gc, maximum_gc, ImVec2(0,80));
+
+    //
+    ImGui::RadioButton("Manual GC", &gc_set, 3);
+
+    if(prev_gc != gc_set){
+        object.clear();
+        glDeleteFramebuffers(1, &frame_buffer);
+        glDeleteTextures(1, &rendered_texture);
+        glDeleteRenderbuffers(1, &depth_render_buffer);
+
+        mean.clear();
+        mean.shrink_to_fit();
+
+        initialize_texture_object(window);
+    }
+}
+
+void initialize_texture_object(GLFWwindow* window){
+    // --------- SET UP ------------
+
+    // Black background
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+    // Enable depth test
+	glEnable(GL_DEPTH_TEST);
+	// Accept fragment if it closer to the camera than the former one
+	glDepthFunc(GL_LESS);
+
+    // Cull triangles which normal is not towards the camera
+	glEnable(GL_CULL_FACE);
+
+    // ----------------------
+
+    /**
+        NB. OpenGL works in 3D space we render a 2D triangle with each vertex having a z coordinate of 0.0.
+        This way the depth of the triangle remains the same making it look like it's 2D.
+
+        Send vertex data to vertex shader (load .off file).
+     */
+    object.set_value_gc(gc_set);
+    // object.set_file(name_file, std::bind(&Object::auto_detect_outliers_gc, Object()), std::bind(&Object::set_selected_gc, Object()), std::bind(&Object::init, Object())); //load mesh
+    object.set_file(name_file); //load mesh
+
+    /**
+        IMPORTANT FOR TRANSFORMATION:
+        Since GLM version 0.9.9, GLM default initializates matrix types to a 0-initalized matrix,
+        instead of the identity matrix. From that version it is required to initialize matrix types as: glm::mat4 mat = glm::mat4(1.0f).
+    */
+    // camera position (eye) - look at origin - head is up
+    view = glm::lookAt(glm::vec3(4.0f, 3.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    model = glm::mat4(1.0f);
+    transform_shader = glm::rotate(transform_shader, 180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+
+    // ---------- END SHADER -----------------
+
+
+    // ---------------------------------------------
+	// Render to Texture - specific code begins here
+	// ---------------------------------------------
+
+    // The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
+    frame_buffer = 0;
+	glGenFramebuffers(1, &frame_buffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
+
+	// The texture we're going to render to
+	glGenTextures(1, &rendered_texture);
+
+	// "Bind" the newly created texture : all future texture functions will modify this texture
+	glBindTexture(GL_TEXTURE_2D, rendered_texture);
+
+	// Give an empty image to OpenGL ( the last "0" means "empty" )
+	glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, current_width, current_height, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+
+	// Poor filtering
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	// The depth buffer
+	glGenRenderbuffers(1, &depth_render_buffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, depth_render_buffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, current_width, current_height);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_render_buffer);
+
+    // Set "rendered_texture" as our colour attachement #0
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, rendered_texture, 0);
+
+    // Set the list of draw buffers.
+	GLenum draw_buffers[1] = {GL_COLOR_ATTACHMENT0};
+	glDrawBuffers(1, draw_buffers); // "1" is the size of draw_buffers
+
+	// Always check that our framebuffer is ok
+	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
+        cout << "error framebuffer" << endl;
+		exit(-1);
+    }
+
+
+    // --------------- IMGUI ---------------------
+    // Setup Dear ImGui binding
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
+    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
+    ImGui_ImplGlfwGL3_Init(window, true);
+
+    // Setup style
+    ImGui::StyleColorsDark();
+    // ---------------- END IMGUI ----------------------
+}

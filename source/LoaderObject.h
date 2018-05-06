@@ -75,63 +75,6 @@ int interval = 2; // max - min = 1 - (-1)
         }
 
 
-        int count_data = 0.0f;
-        double mean = 0.0f;
-        double M2 = 0.0f;
-        double variance;
-        double standard_deviation;
-        double multiplier = 1.5f; // 3 to get extreme case (usually is 1.5)
-        double lower_outlier;
-        double upper_outlier;
-
-        /**
-         * Function for update a new_value, compute the count, new mean, the new M2.
-         * mean accumulates the mean of the entire dataset
-         * M2 aggregates the squared distance from the mean
-         * count aggregates the number of samples seen so far
-        */
-       void update_statistics_data(double new_value){
-           count_data++;
-           double delta = new_value - mean;
-           mean = mean + (double) delta/count_data;
-           double delta2 = new_value - mean;
-           M2 = M2 + delta * delta2;
-       }
-
-
-        /**
-         * Function for calculate the final mean and variance from a dataset.
-        */
-       void finalize_statistics_data(){
-           if(count_data < 2){ // error case, that means that we have just one data
-               mean = 0.0f;
-               M2 = 0.0f;
-               return;
-           }
-
-           variance = (double) M2/(count_data - 1);
-           M2 = variance;
-           standard_deviation = sqrt(variance);
-           lower_outlier = mean - (standard_deviation * multiplier);
-           upper_outlier = mean + (standard_deviation * multiplier);
-       }
-
-
-        /**
-         * Function for cut data of gaussian curvature respect upper and lower outlier.
-        */
-       double cut_data_gaussian_curvature(double val){
-           if(val > upper_outlier)
-                val = upper_outlier;
-           else if(val < lower_outlier)
-                val = lower_outlier;
-
-            // interval from 0 to 1 then it is 1 because (0+1)
-            // I have mapped all values from 0 to 1
-            return 1/(upper_outlier - lower_outlier) * (val - upper_outlier) + 1; //1 is the max of interval
-       }
-
-
         bool load (const char * path, vector<float> &out_vertices, vector<float> &out_normals, vector<float> &gc, vector<float> &color_li) {
             // --------------------- COMPUTATIONS -----------------------------
             /**
@@ -171,11 +114,18 @@ int interval = 2; // max - min = 1 - (-1)
             gc.clear();
             color_li.clear();
 
+            out_vertices.shrink_to_fit();
+            out_normals.shrink_to_fit();
+            gc.shrink_to_fit();
+            color_li.shrink_to_fit();
+
+
             // vertices array
             vector<Point3d> normals(num_vertices);
             std::fill(normals.begin(), normals.end(), Point3d(0.0f, 0.0f, 0.0f));
 
             vector<float> triangle_vertices(num_triangles * 9);
+
             vector<float> triangle_normals(num_triangles * 9);
 
             // save normals
@@ -186,6 +136,7 @@ int interval = 2; // max - min = 1 - (-1)
             // -------------- GAUSSIAN CURVATURE and VERTICES TRIANGLES -----------------
             // find gaussian curvature
             vector<float> triangle_gc(num_triangles * 9);
+
             color_li.resize(num_triangles * 9);
             vector<float> gc_counter(num_vertices);
             std::fill(gc_counter.begin(), gc_counter.end(), 0);
@@ -209,11 +160,6 @@ int interval = 2; // max - min = 1 - (-1)
                 Point3d v0 = get_rescaled_value(v[t[k].v[0]]);
                 Point3d v1 = get_rescaled_value(v[t[k].v[1]]);
                 Point3d v2 = get_rescaled_value(v[t[k].v[2]]);
-
-                // Point3d v0 = v[t[k].v[0]];
-                // Point3d v1 = v[t[k].v[1]];
-                // Point3d v2 = v[t[k].v[2]];
-
 
                 //normals
                 // for every triangle face compute face normal and normalize it
@@ -270,19 +216,8 @@ int interval = 2; // max - min = 1 - (-1)
                     triangle_gc[9*k] = triangle_gc[9*k + 1] = triangle_gc[9*k + 2] = 2 * PI - gc_counter[t[k].v[0]];
                     triangle_gc[9*k + 3] = triangle_gc[9*k + 4] = triangle_gc[9*k + 5] = 2 * PI - gc_counter[t[k].v[1]];
                     triangle_gc[9*k + 6] = triangle_gc[9*k + 7] = triangle_gc[9*k + 8] = 2 * PI - gc_counter[t[k].v[2]];
-
-                    update_statistics_data(triangle_gc[9*k]);
-                    update_statistics_data(triangle_gc[9*k + 3]);
-                    update_statistics_data(triangle_gc[9*k + 6]);
                 }
 
-                finalize_statistics_data();
-
-                for(int k = 0; k < num_triangles; k++){ // update to remove noisy (smoothing)
-                    triangle_gc[9*k] = triangle_gc[9*k + 1] = triangle_gc[9*k + 2] = cut_data_gaussian_curvature(2 * PI - gc_counter[t[k].v[0]]);
-                    triangle_gc[9*k + 3] = triangle_gc[9*k + 4] = triangle_gc[9*k + 5] = cut_data_gaussian_curvature(2 * PI - gc_counter[t[k].v[1]]);
-                    triangle_gc[9*k + 6] = triangle_gc[9*k + 7] = triangle_gc[9*k + 8] = cut_data_gaussian_curvature(2 * PI - gc_counter[t[k].v[2]]);
-                }
 
            // -------------- END GAUSSIAN CURVATURE -----------------
 
