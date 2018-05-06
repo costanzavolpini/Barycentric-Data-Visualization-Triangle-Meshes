@@ -41,9 +41,12 @@ struct edge
     int index_v2;
     Point3d n1;
     Point3d n2;
+    double value_mean_curvature;
 };
 
 std::map<vector<int>, edge> map_edge; // key: [index_v1, index_v2]    val: struct edge
+
+
 
 void insert_edge(int index_v1, int index_v2, vector<int> key, vector<int> key_2, Point3d n)
 {
@@ -54,11 +57,15 @@ void insert_edge(int index_v1, int index_v2, vector<int> key, vector<int> key_2,
     it = map_edge.find(key); // iterator
     it_reverse = map_edge.find(key_2);
 
-    if (it != map_edge.end() || it_reverse != map_edge.end())
+    if (it != map_edge.end())
     { // found and v1 < v2
-
         if (index_v1 < index_v2)
             it->second.n1 = n;
+        else
+            it->second.n2 = n;
+    } else if(it_reverse != map_edge.end()){
+        if (index_v1 < index_v2)
+            it_reverse->second.n1 = n;
         else
             it_reverse->second.n2 = n;
     }
@@ -82,8 +89,31 @@ void insert_edge(int index_v1, int index_v2, vector<int> key, vector<int> key_2,
             e1.n2 = n;
         }
 
+        e1.value_mean_curvature = e1.length * (v[e1.index_v1]).getAngle(v[e1.index_v2]) / 2;
         map_edge[key] = e1;
     }
+}
+
+int get_mean_curvature(int index_v1, int index_v2, vector<int> key, vector<int> key_2)
+{
+    std::map<vector<int>, edge>::iterator it;         // iterator
+    std::map<vector<int>, edge>::iterator it_reverse; // iterator
+
+    // convention: from smaller to higher index
+    it = map_edge.find(key); // iterator
+    it_reverse = map_edge.find(key_2);
+
+    if (it != map_edge.end()){
+        return it->second.value_mean_curvature;
+    } else if(it_reverse != map_edge.end())
+    {
+        return it_reverse->second.value_mean_curvature;
+    }
+
+    cout << key[0] << " " <<  key[1] << endl;
+
+    cout << "ERROR MEAN CURVATURE" << endl;
+    exit(-1);
 }
 
 /**
@@ -203,6 +233,9 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
     vector<float> gc_counter(num_vertices);
     std::fill(gc_counter.begin(), gc_counter.end(), 0);
 
+    // mean curvature
+    vector<float> triangle_mc(num_triangles * 9);
+
     // found max and min
     for (int k = 0; k < num_triangles; k++)
     {
@@ -240,6 +273,8 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         v_counter[t[k].v[2]]++; // update counter
 
         // -------------- MEAN CURVATURE --------------
+
+
         // fill map edges
         int index_v1 = t[k].v[0];
         int index_v2 = t[k].v[1];
@@ -258,9 +293,6 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         insert_edge(index_v3, index_v1, v1v3, v1v3_reverse, n);
         insert_edge(index_v2, index_v3, v3v2, v3v2_reverse, n);
 
-        std::cout << "mymap.size() is " << map_edge.size() << '\n';
-
-        // cout << v[index_v1] << endl;
         // -------------- end mean curvature --------------
 
         // GAUSSIAN CURVATURE
@@ -347,6 +379,37 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         triangle_normals[9 * k + 6] = normals[t[k].v[2]].x();
         triangle_normals[9 * k + 7] = normals[t[k].v[2]].y();
         triangle_normals[9 * k + 8] = normals[t[k].v[2]].z();
+
+        // -------- insert mean curvature --------------
+        // v1 -> v3v2 {index_v2, index_v3};
+        // v2 -> v1v3 {index_v3, index_v1};
+        // v3 -> v2v1 {index_v1, index_v2};
+
+        int mc_1, mc_2, mc_3;
+
+        int index_v1 = t[k].v[0];
+        int index_v2 = t[k].v[1];
+        int index_v3 = t[k].v[2];
+
+        vector<int> v2v1 = {index_v1, index_v2};
+        vector<int> v1v3 = {index_v3, index_v1};
+        vector<int> v3v2 = {index_v2, index_v3};
+
+        vector<int> v2v1_reverse = {index_v2, index_v1};
+        vector<int> v1v3_reverse = {index_v1, index_v3};
+        vector<int> v3v2_reverse = {index_v3, index_v2};
+
+        mc_1 = get_mean_curvature(index_v2, index_v3, v3v2, v3v2_reverse);
+        mc_2 = get_mean_curvature(index_v3, index_v1, v1v3, v1v3_reverse);
+        mc_3 = get_mean_curvature(index_v1, index_v2, v2v1, v2v1_reverse);
+
+        std::cout << "mymap.size() is " << map_edge.size() << '\n';
+
+        triangle_mc[9 * k] = triangle_mc[9 * k + 1] = triangle_mc[9 * k + 2] = mc_1;
+        triangle_mc[9 * k + 3] = triangle_mc[9 * k + 4] = triangle_mc[9 * k + 5] = mc_2;
+        triangle_mc[9 * k + 6] = triangle_mc[9 * k + 7] = triangle_mc[9 * k + 8] = mc_3;
+        // create vector of mean curvature
+
     }
 
     // output vectors
