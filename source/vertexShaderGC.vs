@@ -9,7 +9,6 @@
     uniform mat4 view;
     uniform mat4 projection;
 
-
     vec3 interpolation(vec3 v0, vec3 v1, float t) {
         return (1 - t) * v0 + t * v1;
     }

@@ -10,6 +10,7 @@
 #include <iterator>
 #include <math.h>       /* fmin, sqrt */
 #include "glm/ext.hpp"
+#include <map>
 
 using namespace std;
 
@@ -30,6 +31,14 @@ double min_coord;
 double max_coord;
 
 int interval = 2; // max - min = 1 - (-1)
+
+struct edge {
+  double length;
+  int index_v1;
+  int index_v2;
+  Point3d n1;
+  Point3d n2;
+};
 
         /**
          * Function to update the minimum value found in coords of an object.
@@ -132,8 +141,11 @@ int interval = 2; // max - min = 1 - (-1)
             vector<int> v_counter(num_vertices);
             std::fill(v_counter.begin(), v_counter.end(), 0); // initialize every vertex normal to (0,0,0)
 
+            // edges
+            std::map<vector<int>, edge> map_edge; // key: [index_v1, index_v2]    val: struct edge
 
-            // -------------- GAUSSIAN CURVATURE and VERTICES TRIANGLES -----------------
+
+            // -------------- GAUSSIAN CURVATURE, MEAN CURVATURE and VERTICES TRIANGLES -----------------
             // find gaussian curvature
             vector<float> triangle_gc(num_triangles * 9);
 
