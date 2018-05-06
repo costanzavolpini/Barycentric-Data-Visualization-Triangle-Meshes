@@ -89,7 +89,7 @@ int count_angle = 0;
 bool decrease_angle = false;
 
 // imgui shaders
-static int shader_set = 3; // default 0
+static int shader_set = 1; // default 0
 static int gc_set = 2;
 
 // imgui listbox models
@@ -112,7 +112,9 @@ int imgui_isGaussianCurvature;
 int imgui_isLinearInterpolation;
 int imgui_isExtendFlatShading;
 int imgui_isGouraudShading;
-string name_file = "models/icosahedron_1.off"; //default armadillo
+string name_file = "models/armadillo.off"; //default armadillo
+
+    float min_val, max_val;
 
 // ----------- END SETTINGS SHADERS ----------
 
@@ -186,6 +188,7 @@ int main(int argc, char *argv[])
         (GLSL version 420 corresponds to OpenGL version 4.2 for example).
     */
     Shader ourShader = Shader();
+    ourShader.setBool("custom_flag", false);
 
     Shader normalShader = Shader();
     normalShader.initialize_shader("normal.vs", "normal.fs", "normal.gs");
@@ -237,7 +240,6 @@ int main(int argc, char *argv[])
         }
         else if (imgui_isGaussianCurvature)
         {
-
             // gaussian curvature
             ourShader.setFloat("min_gc", object.get_minimum_gaussian_curvature_value());
             ourShader.setFloat("max_gc", object.get_maximum_gaussian_curvature_value());
@@ -689,8 +691,32 @@ void analyse_gaussian_curvature(GLFWwindow *window)
     ImGui::RadioButton("Automatic best GC", &gc_set, 2);
     ImGui::PlotMultiLines("##Gaussian Curvature automatic", 3, names_auto, colors_auto, func, datas_auto, display_count, minimum_gc, maximum_gc, ImVec2(0, 80));
 
-    //
+    // section where the user can set its own minimum and maximum value for gaussian curvature
     ImGui::RadioButton("Manual GC", &gc_set, 3);
+    double min_gc, max_gc;
+    if(gc_set == 2){ // automatic best GC
+        min_gc = object.gc_helper.lower_outlier;
+        max_gc = object.gc_helper.upper_outlier;
+    } else if(gc_set == 1){ // classic
+        min_gc = object.get_minimum_gaussian_curvature_value();
+        max_gc = object.get_maximum_gaussian_curvature_value();
+    }
+    ImGui::TextWrapped("\n\nNegative values are mapped from red to green and positive values from green to blue.\n");
+    ImGui::Text("min = %f, max = %f", min_gc, max_gc);
+    // static float begin = (float) min_gc;
+    // static float end = (float) max_gc;
+    // min_val = (float) min_gc * 3;
+    // max_val = (float) max_gc * 3;
+    // ImGui::DragFloatRange2("range", &begin, &end, 0.25f, min_val, max_val, "Min: %.1f", "Max: %.1f");
+
+//     ImGui::DragFloatRange2();
+// ImGui::DragIntRange2();
+
+// static float begin = 10, end = 90;
+// static float begin = (float) min_gc;
+// static float end = (float) max_gc;
+// float min_val = (float) min_gc * 3;
+// float max_val = (float) max_gc * 3;
 
     if (prev_gc != gc_set)
     {

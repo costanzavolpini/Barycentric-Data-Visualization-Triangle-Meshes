@@ -29,8 +29,8 @@ vector<Triangle> t;
 double PI = atan(1) * 4;
 int num_triangles;
 
-double min_coord;
-double max_coord;
+double min_coord = NULL;
+double max_coord = NULL;
 
 int interval = 2; // max - min = 1 - (-1)
 
@@ -166,6 +166,15 @@ Point3d get_rescaled_value(Point3d value)
     return interval / (max_coord - min_coord) * (value - max_coord) + 1; //1 is the max of interval
 }
 
+
+void clean(){
+    int num_triangles = 0;
+
+    double min_coord = NULL;
+    double max_coord = NULL;
+}
+
+
 bool load(const char *path, vector<float> &out_vertices, vector<float> &out_normals, vector<float> &gc, vector<float> &color_li)
 {
     // --------------------- COMPUTATIONS -----------------------------
@@ -207,6 +216,7 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
     out_normals.clear();
     gc.clear();
     color_li.clear();
+    clean();
 
     out_vertices.shrink_to_fit();
     out_normals.shrink_to_fit();
@@ -403,7 +413,7 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         mc_2 = get_mean_curvature(index_v3, index_v1, v1v3, v1v3_reverse);
         mc_3 = get_mean_curvature(index_v1, index_v2, v2v1, v2v1_reverse);
 
-        std::cout << "mymap.size() is " << map_edge.size() << '\n';
+        // std::cout << "mymap.size() is " << map_edge.size() << '\n';
 
         triangle_mc[9 * k] = triangle_mc[9 * k + 1] = triangle_mc[9 * k + 2] = mc_1;
         triangle_mc[9 * k + 3] = triangle_mc[9 * k + 4] = triangle_mc[9 * k + 5] = mc_2;
