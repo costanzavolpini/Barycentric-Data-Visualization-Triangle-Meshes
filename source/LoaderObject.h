@@ -371,7 +371,6 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
     // average of norms of adj triangle of a vertex (sum of triangle norms / number of triangles)
     for (int k = 0; k < num_vertices; k++)
     {
-        // normals[k].normalize();
         if (v_counter[k] != 0)
         {
             normals[k] = normals[k] / v_counter[k];

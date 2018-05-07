@@ -113,7 +113,7 @@ int imgui_isGaussianCurvature;
 int imgui_isLinearInterpolation;
 int imgui_isExtendFlatShading;
 int imgui_isGouraudShading;
-string name_file = "models/armadillo.off"; //default armadillo
+string name_file = "models/icosahedron_0.off"; //default armadillo
 
 float min_val, max_val;
 
@@ -241,12 +241,6 @@ int main(int argc, char *argv[])
         }
         else if (imgui_isGaussianCurvature)
         {
-            // gaussian curvature
-            ourShader.setFloat("min_gc", object.get_minimum_gaussian_curvature_value());
-            ourShader.setFloat("max_gc", object.get_maximum_gaussian_curvature_value());
-            ourShader.setFloat("mean_negative_gc", object.get_negative_mean_gaussian_curvature_value());
-            ourShader.setFloat("mean_positive_gc", object.get_positive_mean_gaussian_curvature_value());
-
             if (gc_set == 3)
             {
                 ourShader.setBool("custom_flag", true);
@@ -779,8 +773,6 @@ void initialize_texture_object(GLFWwindow *window)
 
         Send vertex data to vertex shader (load .off file).
      */
-    horse.set_file("models/icosahedron_1.off");
-
     object.set_value_gc(gc_set);
     // object.set_file(name_file, std::bind(&Object::auto_detect_outliers_gc, Object()), std::bind(&Object::set_selected_gc, Object()), std::bind(&Object::init, Object())); //load mesh
     object.set_file(name_file); //load mesh

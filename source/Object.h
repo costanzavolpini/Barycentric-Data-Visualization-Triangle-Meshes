@@ -62,7 +62,7 @@ class Object
 
     void auto_detect_outliers_gc()
     {
-        gc_helper.clear_datas();
+        gc_helper.clean();
         // autodetect gaussian curvature outliers, variance...etc.
         int number_triangles = triangle_gc.size() / 9;
 
@@ -225,55 +225,45 @@ class Object
         return *max_element(triangle_gc.begin(), triangle_gc.end());
     }
 
-    /**
-     * Get the mean of positive values of gaussian curvature
-    */
-    float get_positive_mean_gaussian_curvature_value()
-    {
-        float sum = 0.0;
-        int count = 0;
-        for (int k = 0; k < triangle_gc.size(); k++)
-        {
+    // /**
+    //  * Get the mean of positive values of gaussian curvature
+    // */
+    // float get_positive_mean_gaussian_curvature_value()
+    // {
+    //     float sum = 0.0;
+    //     int count = 0;
+    //     for (int k = 0; k < triangle_gc.size(); k++)
+    //     {
 
-            float val = triangle_gc[k]; // gaussian_curvature is a vec3 composed by same value
-            if (val > 0)
-            {
-                sum += abs(val);
-                count++;
-            }
+    //         float val = triangle_gc[k]; // gaussian_curvature is a vec3 composed by same value
+    //         if (val > 0)
+    //         {
+    //             sum += abs(val);
+    //             count++;
+    //         }
+    //     }
+    //     return sum / count;
+    // }
 
-            //    Point3d red = Point3d(1.0, 0.0, 0.0);
-            //    Point3d green = Point3d(0.0, 1.0, 0.0);
-            //    Point3d blue = Point3d(0.0, 0.0, 1.0);
+    // /**
+    //  * Get the mean of negative values of gaussian curvature
+    // */
+    // float get_negative_mean_gaussian_curvature_value()
+    // {
+    //     float sum = 0.0;
+    //     int count = 0;
+    //     for (int k = 0; k < triangle_gc.size(); k++)
+    //     {
 
-            //    if (val < 0) { //negative numbers until 0 -> map from red to green
-            //       //  std::cout << interpolation(red, green, val/(*min_element(triangle_gc.begin(), triangle_gc.end()))) << std::endl;
-            //     } else { //map from green to blue, from 0 to positive
-            //       //  std::cout << interpolation(green, blue, val/(*max_element(triangle_gc.begin(), triangle_gc.end()))) << std::endl;
-            //     }
-        }
-        return sum / count;
-    }
-
-    /**
-     * Get the mean of negative values of gaussian curvature
-    */
-    float get_negative_mean_gaussian_curvature_value()
-    {
-        float sum = 0.0;
-        int count = 0;
-        for (int k = 0; k < triangle_gc.size(); k++)
-        {
-
-            float val = triangle_gc[k]; // gaussian_curvature is a vec3 composed by same value
-            if (val < 0)
-            {
-                sum += abs(val);
-                count++;
-            }
-        }
-        return sum / count;
-    }
+    //         float val = triangle_gc[k]; // gaussian_curvature is a vec3 composed by same value
+    //         if (val < 0)
+    //         {
+    //             sum += abs(val);
+    //             count++;
+    //         }
+    //     }
+    //     return sum / count;
+    // }
 
     unsigned int getVAO()
     {
