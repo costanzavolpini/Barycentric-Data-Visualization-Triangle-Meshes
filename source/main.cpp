@@ -483,6 +483,9 @@ void show_window(bool *p_open, GLFWwindow *window)
                                                 ImGui::GetCursorScreenPos().y + io.DisplaySize.y / 2),
                                          ImVec2(0, 1), ImVec2(1, 0));
 
+        //  ImGui::Image(my_tex_id, ImVec2(my_tex_w, my_tex_h), ImVec2(0,0), ImVec2(1,1), ImColor(255,255,255,255), ImColor(255,255,255,128));
+
+
     ImGui::NextColumn();
 
     ImGui::SetColumnOffset(2, size_x * 6);
@@ -495,6 +498,8 @@ void show_window(bool *p_open, GLFWwindow *window)
 
     ImGui::SetCursorPosY(io.DisplaySize.y - 18.0f); // columns end at the end of window
     ImGui::NextColumn();
+
+        // ImGui::ShowMetricsWindow(p_open);
 
     ImGui::End();
     ImGui::PopStyleColor();
