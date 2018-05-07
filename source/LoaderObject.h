@@ -38,7 +38,8 @@ struct Triangle
 };
 vector<Triangle> t; // vector of triangles
 
-int num_triangles = 0; // number of triangles in the mesh
+static int num_triangles; // number of triangles in the mesh
+static int num_vertices ; // number of vertices in the mesh
 // -------------------------
 
 // ----- CROP DATA BETWEEN [-1, 1] -----
@@ -78,8 +79,8 @@ void insert_edge(int index_v1, int index_v2, vector<int> key, vector<int> key_2,
     it = map_edge.find(key);
     it_reverse = map_edge.find(key_2);
 
-    if (it != map_edge.end()) // update information edge struct
-    {                         // found and v1 < v2
+    if (it != map_edge.end()) // update information edge struct if exist
+    {
         if (index_v1 < index_v2)
             it->second.n1 = n;
         else
@@ -188,24 +189,22 @@ Point3d get_rescaled_value(Point3d value)
 void clean()
 {
     t.clear();
+    t.shrink_to_fit();
     v.clear();
+    v.shrink_to_fit();
 }
 
 /**
- * Function to load the mesh, find Gaussian Curvature, Mean Curvature...etc.
+ * Function to read the file.off and fill vectors
 */
-bool load(const char *path, vector<float> &out_vertices, vector<float> &out_normals, vector<float> &gc, vector<float> &color_li)
-{
-    // --------------------- COMPUTATIONS -----------------------------
-    /**
-        Read .OFF file
-    */
-    ifstream in(path); // substitute with path
+bool read_off_file(const char *path){
+    ifstream in(path);
     if (!in)
     {
         cout << "\nError reading file." << endl;
         return false;
     }
+
     string s;
     string offName = "OFF";
     getline(in, s);
@@ -216,7 +215,7 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         return false;
     }
 
-    int i, dummy, num_triangles, num_vertices;
+    int i, dummy;
     in >> num_vertices >> num_triangles >> dummy;
 
     v.resize(num_vertices);
@@ -229,19 +228,22 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         in >> dummy >> t[i].v[0] >> t[i].v[1] >> t[i].v[2];
 
     in.close();
+    return true;
+
+}
+
+/**
+ * Function to load the mesh, find Gaussian Curvature, Mean Curvature...etc.
+*/
+bool load(const char *path, vector<float> &out_vertices, vector<float> &out_normals, vector<float> &gc, vector<float> &color_li)
+{
+    // --------------------- Read file -----------------------------
+    if(!read_off_file(path))
+        return false;
+
+    first_min_max = true;
 
     // --------- Vector initializations -------------
-    out_vertices.clear();
-    out_normals.clear();
-    gc.clear();
-    color_li.clear();
-    clean();
-
-    out_vertices.shrink_to_fit();
-    out_normals.shrink_to_fit();
-    gc.shrink_to_fit();
-    color_li.shrink_to_fit();
-
     // vertices array
     vector<Point3d> normals(num_vertices);
     std::fill(normals.begin(), normals.end(), Point3d(0.0f, 0.0f, 0.0f));
@@ -364,7 +366,7 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
 
     // -------------- END GAUSSIAN CURVATURE -----------------
 
-    //normals
+    // normals
     // normalize every vertex normal
     // average of norms of adj triangle of a vertex (sum of triangle norms / number of triangles)
     for (int k = 0; k < num_vertices; k++)
@@ -447,6 +449,29 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
     }
 
     cout << "Object loaded" << endl;
+
+    // ------- clear vectors -------
+    normals.clear();
+    normals.shrink_to_fit();
+
+    triangle_normals.clear();
+    triangle_normals.shrink_to_fit();
+
+    triangle_vertices.clear();
+    triangle_vertices.shrink_to_fit();
+
+    v_counter.clear();
+    v_counter.shrink_to_fit();
+
+    triangle_gc.clear();
+    triangle_gc.shrink_to_fit();
+
+    gc_counter.clear();
+    gc_counter.shrink_to_fit();
+
+    triangle_mc.clear();
+    triangle_mc.shrink_to_fit();
+    // ----------------------------
     return true;
 }
 

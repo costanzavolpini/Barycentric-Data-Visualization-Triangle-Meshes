@@ -46,6 +46,7 @@ class Object
         triangle_gc.shrink_to_fit();
         triangle_color.shrink_to_fit();
 
+
         if (!load(_path.c_str(), triangle_vertices, triangle_normals, triangle_gc, triangle_color))
         {
             cout << "error loading file" << endl;
