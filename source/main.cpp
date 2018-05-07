@@ -768,7 +768,6 @@ void analyse_gaussian_curvature(GLFWwindow *window)
 void initialize_texture_object(GLFWwindow *window, bool reload_mesh)
 {
     // --------- SET UP ------------
-
     // Black background
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
@@ -779,7 +778,6 @@ void initialize_texture_object(GLFWwindow *window, bool reload_mesh)
 
     // Cull triangles which normal is not towards the camera
     glEnable(GL_CULL_FACE);
-
     // ----------------------
 
     /**
