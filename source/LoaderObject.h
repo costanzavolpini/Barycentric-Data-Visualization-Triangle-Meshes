@@ -8,9 +8,19 @@
 #include <stdlib.h>
 #include <map>
 #include <iterator>
-#include <math.h> /* fmin, sqrt */
 #include "glm/ext.hpp"
 #include <map>
+
+#define _USE_MATH_DEFINES
+#include <math.h> /* fmin, sqrt */
+
+#ifndef M_PI
+#define M_PI (3.14159265358979323846)
+#endif
+
+#ifndef M_PIl
+#define M_PIl (3.14159265358979323846264338327950288)
+#endif
 
 using namespace std;
 
@@ -19,21 +29,29 @@ LoaderObject.h
 Comment:  This file load the mesh using an .OFF file.
 ***************************************************************************/
 
-// List of vertices and triangles
-vector<Point3d> v;
+// ----- SET UP DATA AND VERTICES -----
+vector<Point3d> v; // vector of vertices
+
 struct Triangle
 {
     int v[3];
 };
-vector<Triangle> t;
-double PI = atan(1) * 4;
-int num_triangles;
+vector<Triangle> t; // vector of triangles
 
-double min_coord = NULL;
-double max_coord = NULL;
+int num_triangles = 0; // number of triangles in the mesh
+// -------------------------
 
+// ----- CROP DATA BETWEEN [-1, 1] -----
+// minimum and maximum value found in the mesh
+double min_coord = 0.0f;
+double max_coord = 0.0f;
+bool first_min_max = true;
+
+// interval of loaded mesh will be from -1 to 1
 int interval = 2; // max - min = 1 - (-1)
+// -------------------------
 
+// ----- MEAN CURVATURE -----
 struct edge
 {
     double length;
@@ -44,46 +62,49 @@ struct edge
     double value_mean_curvature;
 };
 
+// map for struct edge
 std::map<vector<int>, edge> map_edge; // key: [index_v1, index_v2]    val: struct edge
+// -------------------------
 
-
-
+/**
+ * Function to insert a struct edge inside edge-map.
+ */
 void insert_edge(int index_v1, int index_v2, vector<int> key, vector<int> key_2, Point3d n)
 {
     std::map<vector<int>, edge>::iterator it;         // iterator
-    std::map<vector<int>, edge>::iterator it_reverse; // iterator
+    std::map<vector<int>, edge>::iterator it_reverse; // iterator for reverse vertices index
 
     // convention: from smaller to higher index
-    it = map_edge.find(key); // iterator
+    it = map_edge.find(key);
     it_reverse = map_edge.find(key_2);
 
-    if (it != map_edge.end())
-    { // found and v1 < v2
+    if (it != map_edge.end()) // update information edge struct
+    {                         // found and v1 < v2
         if (index_v1 < index_v2)
             it->second.n1 = n;
         else
             it->second.n2 = n;
-    } else if(it_reverse != map_edge.end()){
+    }
+    else if (it_reverse != map_edge.end())
+    { // update information edge struct
         if (index_v1 < index_v2)
             it_reverse->second.n1 = n;
         else
             it_reverse->second.n2 = n;
     }
     else
-    { // create new
-
+    {            // create new edge struct
         edge e1; // struct
         e1.length = abs(sqrt(pow((v[index_v1][0] - v[index_v2][0]), 2) + pow((v[index_v1][1] - v[index_v2][1]), 2) + pow((v[index_v1][2] - v[index_v2][2]), 2)));
         if (index_v1 < index_v2)
         {
-
             // correct order
             e1.index_v1 = index_v1;
             e1.index_v2 = index_v2;
             e1.n1 = n;
         }
         else
-        {
+        { // reverse case
             e1.index_v1 = index_v2;
             e1.index_v2 = index_v1;
             e1.n2 = n;
@@ -94,93 +115,91 @@ void insert_edge(int index_v1, int index_v2, vector<int> key, vector<int> key_2,
     }
 }
 
+/**
+ * Function to get the value of mean curvature of an edge from the edge-map.
+ */
 int get_mean_curvature(int index_v1, int index_v2, vector<int> key, vector<int> key_2)
 {
     std::map<vector<int>, edge>::iterator it;         // iterator
-    std::map<vector<int>, edge>::iterator it_reverse; // iterator
+    std::map<vector<int>, edge>::iterator it_reverse; // iterator for reverse vertices index
 
-    // convention: from smaller to higher index
-    it = map_edge.find(key); // iterator
+    // convention: from smaller to higher index to avoid to count double
+    it = map_edge.find(key);
     it_reverse = map_edge.find(key_2);
 
-    if (it != map_edge.end()){
+    if (it != map_edge.end())
+    {
         return it->second.value_mean_curvature;
-    } else if(it_reverse != map_edge.end())
+    }
+    else if (it_reverse != map_edge.end())
     {
         return it_reverse->second.value_mean_curvature;
     }
 
-    cout << key[0] << " " <<  key[1] << endl;
-
+    // cout << key[0] << " " <<  key[1] << endl;
+    // no mean curvature value found
     cout << "ERROR MEAN CURVATURE" << endl;
     exit(-1);
 }
 
 /**
-         * Function to update the minimum value found in coords of an object.
-        */
-void set_min(Point3d current)
-{ // only negative values
-    if (!min_coord)
+ * Function to update the minimum and the maximum value found in coords of an object.
+ */
+void set_min_max(Point3d current)
+{
+    if (first_min_max)
     {
         min_coord = fmin(fmin(current.x(), current.y()), current.z());
+        max_coord = fmax(fmax(current.x(), current.y()), current.z());
+        first_min_max = false;
         return;
     }
     min_coord = fmin(fmin(current.x(), current.y()), fmin(current.z(), min_coord));
-}
-
-/**
-         * Function to update the maximum value found in coords of an object.
-        */
-void set_max(Point3d current)
-{
-    if (!max_coord)
-    {
-        max_coord = fmax(fmax(current.x(), current.y()), current.z());
-        return;
-    }
     max_coord = fmax(fmax(current.x(), current.y()), fmax(current.z(), max_coord));
 }
 
 /**
-         * Function to get the maximum value found in coords of an object.
-        */
+ * Function to get the maximum value found in coords of an object.
+*/
 double get_max_coord()
 {
     return max_coord;
 }
 
 /**
-         * Function to get the minimum value found in coords of an object.
-        */
+ * Function to get the minimum value found in coords of an object.
+*/
 double get_min_coord()
 {
     return min_coord;
 }
 
 /**
-         * Function to rescale a coord such that the coords is in a range between -1 and 1.
-        */
+ * Function to rescale a coord such that the coords is in a range between -1 and 1.
+*/
 Point3d get_rescaled_value(Point3d value)
 {
     return interval / (max_coord - min_coord) * (value - max_coord) + 1; //1 is the max of interval
 }
 
-
-void clean(){
-    int num_triangles = 0;
-
-    double min_coord = NULL;
-    double max_coord = NULL;
+/**
+ * Function to clean allocated memory in order to load correctly different meshes.
+ */
+void clean()
+{
+    t.clear();
+    v.clear();
 }
 
-
+/**
+ * Function to load the mesh, find Gaussian Curvature, Mean Curvature...etc.
+*/
 bool load(const char *path, vector<float> &out_vertices, vector<float> &out_normals, vector<float> &gc, vector<float> &color_li)
 {
     // --------------------- COMPUTATIONS -----------------------------
     /**
-                Read .OFF file
-            */
+        Read .OFF file
+    */
     ifstream in(path); // substitute with path
     if (!in)
     {
@@ -250,14 +269,11 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
     for (int k = 0; k < num_triangles; k++)
     {
         // Update max and min
-        set_min(v[t[k].v[0]]);
-        set_max(v[t[k].v[0]]);
+        set_min_max(v[t[k].v[0]]);
 
-        set_min(v[t[k].v[1]]);
-        set_max(v[t[k].v[1]]);
+        set_min_max(v[t[k].v[1]]);
 
-        set_min(v[t[k].v[2]]);
-        set_max(v[t[k].v[2]]);
+        set_min_max(v[t[k].v[2]]);
     }
 
     // iterate inside triangles and calculates angle_defeact
@@ -283,7 +299,6 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         v_counter[t[k].v[2]]++; // update counter
 
         // -------------- MEAN CURVATURE --------------
-
 
         // fill map edges
         int index_v1 = t[k].v[0];
@@ -342,9 +357,9 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
     // add everything to triangle gaussian curvature
     for (int k = 0; k < num_triangles; k++)
     {
-        triangle_gc[9 * k] = triangle_gc[9 * k + 1] = triangle_gc[9 * k + 2] = 2 * PI - gc_counter[t[k].v[0]];
-        triangle_gc[9 * k + 3] = triangle_gc[9 * k + 4] = triangle_gc[9 * k + 5] = 2 * PI - gc_counter[t[k].v[1]];
-        triangle_gc[9 * k + 6] = triangle_gc[9 * k + 7] = triangle_gc[9 * k + 8] = 2 * PI - gc_counter[t[k].v[2]];
+        triangle_gc[9 * k] = triangle_gc[9 * k + 1] = triangle_gc[9 * k + 2] = 2 * M_PI - gc_counter[t[k].v[0]];
+        triangle_gc[9 * k + 3] = triangle_gc[9 * k + 4] = triangle_gc[9 * k + 5] = 2 * M_PI - gc_counter[t[k].v[1]];
+        triangle_gc[9 * k + 6] = triangle_gc[9 * k + 7] = triangle_gc[9 * k + 8] = 2 * M_PI - gc_counter[t[k].v[2]];
     }
 
     // -------------- END GAUSSIAN CURVATURE -----------------
@@ -419,7 +434,6 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         triangle_mc[9 * k + 3] = triangle_mc[9 * k + 4] = triangle_mc[9 * k + 5] = mc_2;
         triangle_mc[9 * k + 6] = triangle_mc[9 * k + 7] = triangle_mc[9 * k + 8] = mc_3;
         // create vector of mean curvature
-
     }
 
     // output vectors

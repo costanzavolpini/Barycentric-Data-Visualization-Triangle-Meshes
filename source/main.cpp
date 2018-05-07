@@ -45,6 +45,7 @@ void error_callback(int error, const char *desc);
 
 // create object
 Object object = Object();
+Object horse = Object();
 
 // Camera options
 float Zoom = 45.0f;
@@ -471,20 +472,22 @@ void show_window(bool *p_open, GLFWwindow *window)
 
     ImGui::SetColumnOffset(1, size_x * 2);
 
+    // --------- draw image inside GUI --------------
     //pass the texture of the FBO
     //object.getVAO() is the texture of the FBO
     //the next parameter is the upper left corner for the uvs to be applied at
     //the third parameter is the lower right corner
     //the last two parameters are the UVs
     //they have to be flipped (normally they would be (0,0);(1,1)
+    double width_image = ImGui::GetCursorScreenPos().x + io.DisplaySize.x / 2;
+    double height_image = ImGui::GetCursorScreenPos().y + io.DisplaySize.y / 2;
+
     ImGui::GetWindowDrawList()->AddImage((void *)object.getVAO(),
                                          ImVec2(ImGui::GetCursorScreenPos()),
-                                         ImVec2(ImGui::GetCursorScreenPos().x + io.DisplaySize.x / 2,
-                                                ImGui::GetCursorScreenPos().y + io.DisplaySize.y / 2),
+                                         ImVec2(width_image,
+                                                height_image),
                                          ImVec2(0, 1), ImVec2(1, 0));
-
-        //  ImGui::Image(my_tex_id, ImVec2(my_tex_w, my_tex_h), ImVec2(0,0), ImVec2(1,1), ImColor(255,255,255,255), ImColor(255,255,255,128));
-
+    // ----------- end draw image inside GUI --------------------
 
     ImGui::NextColumn();
 
@@ -499,7 +502,7 @@ void show_window(bool *p_open, GLFWwindow *window)
     ImGui::SetCursorPosY(io.DisplaySize.y - 18.0f); // columns end at the end of window
     ImGui::NextColumn();
 
-        // ImGui::ShowMetricsWindow(p_open);
+    ImGui::ShowMetricsWindow(p_open); //to test and find informations about window
 
     ImGui::End();
     ImGui::PopStyleColor();
@@ -776,9 +779,12 @@ void initialize_texture_object(GLFWwindow *window)
 
         Send vertex data to vertex shader (load .off file).
      */
+    horse.set_file("models/icosahedron_1.off");
+
     object.set_value_gc(gc_set);
     // object.set_file(name_file, std::bind(&Object::auto_detect_outliers_gc, Object()), std::bind(&Object::set_selected_gc, Object()), std::bind(&Object::init, Object())); //load mesh
     object.set_file(name_file); //load mesh
+    object.init();
 
     /**
         IMPORTANT FOR TRANSFORMATION:

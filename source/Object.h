@@ -57,10 +57,6 @@ class Object
 
         triangle_gc_modified_auto.shrink_to_fit();
         triangle_gc_selected.shrink_to_fit();
-
-        auto_detect_outliers_gc(); // auto_detect_outliers_gc
-        set_selected_gc();         // set_selected_gc
-        init();                    //init
     }
 
     void auto_detect_outliers_gc()
@@ -94,6 +90,8 @@ class Object
     // name file and the second it is the method gc
     void init()
     {
+        auto_detect_outliers_gc(); // auto_detect_outliers_gc
+        set_selected_gc();         // set_selected_gc
 
         // ------------- VBO -------------
         // Use VBO to avoid to send data vertex at a time (we send everything together)
