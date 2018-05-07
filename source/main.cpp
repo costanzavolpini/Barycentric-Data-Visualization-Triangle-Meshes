@@ -114,7 +114,7 @@ int imgui_isExtendFlatShading;
 int imgui_isGouraudShading;
 string name_file = "models/armadillo.off"; //default armadillo
 
-    float min_val, max_val;
+float min_val, max_val;
 
 // ----------- END SETTINGS SHADERS ----------
 
@@ -245,6 +245,15 @@ int main(int argc, char *argv[])
             ourShader.setFloat("max_gc", object.get_maximum_gaussian_curvature_value());
             ourShader.setFloat("mean_negative_gc", object.get_negative_mean_gaussian_curvature_value());
             ourShader.setFloat("mean_positive_gc", object.get_positive_mean_gaussian_curvature_value());
+
+            if (gc_set == 3)
+            {
+                ourShader.setBool("custom_flag", true);
+                ourShader.setFloat("custom_min", min_val);
+                ourShader.setFloat("custom_max", max_val);
+            } else {
+                ourShader.setBool("custom_flag", false);
+            }
         }
         // --- end settings shaders ---
 
@@ -694,29 +703,36 @@ void analyse_gaussian_curvature(GLFWwindow *window)
     // section where the user can set its own minimum and maximum value for gaussian curvature
     ImGui::RadioButton("Manual GC", &gc_set, 3);
     double min_gc, max_gc;
-    if(gc_set == 2){ // automatic best GC
+    if (gc_set == 2)
+    { // automatic best GC
         min_gc = object.gc_helper.lower_outlier;
         max_gc = object.gc_helper.upper_outlier;
-    } else if(gc_set == 1){ // classic
+    }
+    else if (gc_set == 1)
+    { // classic
         min_gc = object.get_minimum_gaussian_curvature_value();
         max_gc = object.get_maximum_gaussian_curvature_value();
     }
+    else
+    {
+        if (!min_val || !max_val)
+        {
+            min_gc = object.get_minimum_gaussian_curvature_value();
+            max_gc = object.get_maximum_gaussian_curvature_value();
+        }
+        else
+        {
+            min_gc = min_val;
+            max_gc = max_val;
+        }
+    }
     ImGui::TextWrapped("\n\nNegative values are mapped from red to green and positive values from green to blue.\n");
     ImGui::Text("min = %f, max = %f", min_gc, max_gc);
-    // static float begin = (float) min_gc;
-    // static float end = (float) max_gc;
-    // min_val = (float) min_gc * 3;
-    // max_val = (float) max_gc * 3;
-    // ImGui::DragFloatRange2("range", &begin, &end, 0.25f, min_val, max_val, "Min: %.1f", "Max: %.1f");
-
-    //     ImGui::DragFloatRange2();
-    // ImGui::DragIntRange2();
-
-    // static float begin = 10, end = 90;
-    // static float begin = (float) min_gc;
-    // static float end = (float) max_gc;
-    // float min_val = (float) min_gc * 3;
-    // float max_val = (float) max_gc * 3;
+    min_val = (float)min_gc;
+    max_val = (float)max_gc;
+    float min_val_bound = (float)object.get_minimum_gaussian_curvature_value() * 10;
+    float max_val_bound = (float)object.get_maximum_gaussian_curvature_value() * 10;
+    ImGui::DragFloatRange2("range", &min_val, &max_val, 0.25f, min_val_bound, max_val_bound, "Min: %.1f", "Max: %.1f");
 
     if (prev_gc != gc_set)
     {
