@@ -74,7 +74,8 @@ void zoom_settings();
 void set_shader();
 void select_model(GLFWwindow *window);
 void analyse_gaussian_curvature(GLFWwindow *window);
-void initialize_texture_object(GLFWwindow *window);
+void initialize_texture_object(GLFWwindow *window, bool reload_mesh);
+
 
 // set-up parameter imgui
 static float angle = 180.0f;                // angle of rotation - must be the same of transform_shader
@@ -113,6 +114,7 @@ int imgui_isGaussianCurvature;
 int imgui_isLinearInterpolation;
 int imgui_isExtendFlatShading;
 int imgui_isGouraudShading;
+int imgui_isMeanCurvatureShading;
 string name_file = "models/icosahedron_0.off"; //default armadillo
 
 float min_val, max_val;
@@ -194,7 +196,7 @@ int main(int argc, char *argv[])
     Shader normalShader = Shader();
     normalShader.initialize_shader("normal.vs", "normal.fs", "normal.gs");
 
-    initialize_texture_object(window);
+    initialize_texture_object(window, true);
 
     /**
         application to keep drawing images and handling user input until the program has been explicitly told to stop
@@ -549,6 +551,7 @@ void set_shader()
     ImGui::RadioButton("Gouraud Shading", &shader_set, 2);
     ImGui::RadioButton("Gaussian Curvature", &shader_set, 3);
     ImGui::RadioButton("Linear Interpolation GC", &shader_set, 4);
+    ImGui::RadioButton("Mean Curvature", &shader_set, 5);
 
     set_parameters_shader(shader_set);
 }
@@ -607,6 +610,18 @@ void set_parameters_shader(int selected_shader)
         imgui_isExtendFlatShading = 0;
         break;
 
+    case 5: // mean curvature
+        vertex_shader = "vertexShaderMC.vs";
+        fragment_shader = "fragmentShader.fs";
+        geometry_shader = NULL;
+
+        imgui_isGaussianCurvature = 0;
+        imgui_isGouraudShading = 0;
+        imgui_isLinearInterpolation = 0;
+        imgui_isExtendFlatShading = 0;
+        imgui_isMeanCurvatureShading = 1;
+        break;
+
     default: // linear interpolation
         vertex_shader = "vertexShaderLI.vs";
         fragment_shader = "fragmentShader.fs";
@@ -633,12 +648,13 @@ void select_model(GLFWwindow *window)
 
     if (listbox_item_current != listbox_item_prev)
     {
+        // clean/delete all resources that were allocated
         object.clear();
         glDeleteFramebuffers(1, &frame_buffer);
         glDeleteTextures(1, &rendered_texture);
         glDeleteRenderbuffers(1, &depth_render_buffer);
-        // clean/delete all resources that were allocated
-        initialize_texture_object(window);
+
+        initialize_texture_object(window, true);
     }
 }
 
@@ -665,7 +681,6 @@ void analyse_gaussian_curvature(GLFWwindow *window)
 
     struct Funcs
     {
-        // static float values_gc(const void* data, int i) { return object.triangle_gc[i]; }
         static float function(const float *data, int i)
         {
             return data[i];
@@ -746,11 +761,11 @@ void analyse_gaussian_curvature(GLFWwindow *window)
         mean.clear();
         mean.shrink_to_fit();
 
-        initialize_texture_object(window);
+        initialize_texture_object(window, false);
     }
 }
 
-void initialize_texture_object(GLFWwindow *window)
+void initialize_texture_object(GLFWwindow *window, bool reload_mesh)
 {
     // --------- SET UP ------------
 
@@ -775,7 +790,8 @@ void initialize_texture_object(GLFWwindow *window)
      */
     object.set_value_gc(gc_set);
     // object.set_file(name_file, std::bind(&Object::auto_detect_outliers_gc, Object()), std::bind(&Object::set_selected_gc, Object()), std::bind(&Object::init, Object())); //load mesh
-    object.set_file(name_file); //load mesh
+    if(reload_mesh)
+        object.set_file(name_file); //load mesh
     object.init();
 
     /**

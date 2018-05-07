@@ -235,7 +235,7 @@ bool read_off_file(const char *path){
 /**
  * Function to load the mesh, find Gaussian Curvature, Mean Curvature...etc.
 */
-bool load(const char *path, vector<float> &out_vertices, vector<float> &out_normals, vector<float> &gc, vector<float> &color_li)
+bool load(const char *path, vector<float> &out_vertices, vector<float> &out_normals, vector<float> &gc, vector<float> &mc, vector<float> &color_li)
 {
     // --------------------- Read file -----------------------------
     if(!read_off_file(path))
@@ -445,6 +445,7 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         out_vertices.push_back(triangle_vertices[i]);
         out_normals.push_back(triangle_normals[i]);
         gc.push_back(triangle_gc[i]);
+        mc.push_back(triangle_mc[i]);
     }
 
     cout << "Object loaded" << endl;

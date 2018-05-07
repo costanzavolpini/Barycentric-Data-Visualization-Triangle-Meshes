@@ -20,6 +20,7 @@ class Object
     vector<float> triangle_vertices;
     vector<float> triangle_normals;
     vector<float> triangle_gc; //untouched gc
+    vector<float> triangle_mc;
     vector<float> triangle_color;
 
     vector<float> triangle_gc_modified_auto; //outliers gc
@@ -39,30 +40,33 @@ class Object
         triangle_vertices.clear();
         triangle_normals.clear();
         triangle_gc.clear();
+        triangle_mc.clear();
         triangle_color.clear();
 
         triangle_vertices.shrink_to_fit();
         triangle_normals.shrink_to_fit();
         triangle_gc.shrink_to_fit();
+        triangle_mc.shrink_to_fit();
         triangle_color.shrink_to_fit();
 
 
-        if (!load(_path.c_str(), triangle_vertices, triangle_normals, triangle_gc, triangle_color))
+        if (!load(_path.c_str(), triangle_vertices, triangle_normals, triangle_gc, triangle_mc, triangle_color))
         {
             cout << "error loading file" << endl;
             return;
         }
+    }
 
+    void auto_detect_outliers_gc()
+    {
+        // clean
         triangle_gc_modified_auto.clear();
         triangle_gc_selected.clear();
 
         triangle_gc_modified_auto.shrink_to_fit();
         triangle_gc_selected.shrink_to_fit();
-    }
-
-    void auto_detect_outliers_gc()
-    {
         gc_helper.clean();
+
         // autodetect gaussian curvature outliers, variance...etc.
         int number_triangles = triangle_gc.size() / 9;
 
