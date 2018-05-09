@@ -68,6 +68,7 @@ static void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 static glm::mat4 transform_shader = glm::mat4(1.0f);
 glm::mat4 rotated_model;
 glm::mat4 rotated_view;
+glm::mat4 projection;
 
 // ------- IMGUI -----------
 void show_window(bool *p_open, GLFWwindow *window);
@@ -84,8 +85,7 @@ static float angle = 180.0f;                // angle of rotation - must be the s
 static float axis_x = 0.0f;                 // axis of rotation - must be the same of transform_shader
 static float axis_y = 1.0f;                 // axis of rotation - must be the same of transform_shader
 static float axis_z = 0.0f;                 // axis of rotation - must be the same of transform_shader
-static bool rotate_animation = false;       // animate rotation or not
-static bool rotate_mouse = true;            // mouse rotation or not
+static int rotation_set = 0; // 0 mouse - 1 auto - 2 manual
 static bool last_time_was_animated = false; // if was moving and now we have stopped it
 
 static ImVec4 color_imgui = ImColor(0, 0, 0, 255);
@@ -227,7 +227,7 @@ int main(int argc, char *argv[])
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);               //black screen
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the depth buffer before each render iteration (otherwise the depth information of the previous frame stays in the buffer).
 
-        glm::mat4 projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 10.f);
+        projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 10.f);
 
         ourShader.initialize_shader(vertex_shader, fragment_shader, geometry_shader);
         ourShader.use();
@@ -259,51 +259,55 @@ int main(int argc, char *argv[])
             }
         }
         // --- end settings shaders ---
-        // imgui rotation automatic
-        if (rotate_animation == true)
-        {
 
-            if (!last_time_was_animated)
-                count_angle = 0;
+        // ------ ROTATION ------
+        // imgui rotation
+        switch(rotation_set){
+            case 1: // auto
+                if (!last_time_was_animated)
+                    count_angle = 0;
 
-            angle = count_angle;
+                angle = count_angle;
 
-            // if(count_angle > 360){
-            //     decrease_angle = true;
-            // } else if(count_angle < 0){
-            //     decrease_angle = false;
-            // }
+                // if(count_angle > 360){
+                //     decrease_angle = true;
+                // } else if(count_angle < 0){
+                //     decrease_angle = false;
+                // }
 
-            // if(decrease_angle)
-            //     count_angle--;
-            // else
-            //     count_angle++;
+                // if(decrease_angle)
+                //     count_angle--;
+                // else
+                //     count_angle++;
 
-            if (count_angle > 360)
-                count_angle = 0;
-            count_angle++;
+                if (count_angle > 360)
+                    count_angle = 0;
+                count_angle++;
 
-            transform_shader = glm::rotate(glm::mat4(1.0f), glm::radians((float)angle), glm::vec3(axis_x, axis_y, axis_z));
-            last_time_was_animated = true;
-            ourShader.setMat4("model", transform_shader);
-            ourShader.setMat4("view", view);
-            ourShader.setMat4("projection", projection);
-        }
-        else if (!rotate_animation && !rotate_mouse)
-        { // set rotation manually
-            transform_shader = glm::rotate(glm::mat4(1.0f), glm::radians((float)angle), glm::vec3(axis_x, axis_y, axis_z));
-            ourShader.setMat4("view", view);
-            ourShader.setMat4("projection", projection);
-            ourShader.setMat4("model", transform_shader);
-        }
-        else
-        {   // arcball
-            rotated_view = view * arcball.rotation_matrix_view();
-            rotated_model = model * arcball.rotation_matrix_model(rotated_view);
+                transform_shader = glm::rotate(glm::mat4(1.0f), glm::radians((float)angle), glm::vec3(axis_x, axis_y, axis_z));
+                last_time_was_animated = true;
+                ourShader.setMat4("model", transform_shader);
+                ourShader.setMat4("view", view);
+                ourShader.setMat4("projection", projection);
+                break;
 
-            ourShader.setMat4("projection", projection);
-            ourShader.setMat4("view", rotated_view);
-            ourShader.setMat4("model", rotated_model);
+            case 2: // manual
+                transform_shader = glm::rotate(glm::mat4(1.0f), glm::radians((float)angle), glm::vec3(axis_x, axis_y, axis_z));
+                ourShader.setMat4("view", view);
+                ourShader.setMat4("projection", projection);
+                ourShader.setMat4("model", transform_shader);
+                break;
+
+            default: // mouse
+                // arcball
+                rotated_view = view * arcball.rotation_matrix_view();
+                rotated_model = model * arcball.rotation_matrix_model(rotated_view);
+
+                ourShader.setMat4("projection", projection);
+                ourShader.setMat4("view", rotated_view);
+                ourShader.setMat4("model", rotated_model);
+                break;
+
         }
 
         object.draw(); // draw
@@ -522,42 +526,41 @@ void show_window(bool *p_open, GLFWwindow *window)
 void rotation_settings()
 {
     ImGui::TextWrapped("You can rotate the object using the mouse, setting the angle or automatically.\n\n");
-    ImGui::Checkbox("rotate with the mouse", &rotate_mouse);
-
-    if (rotate_mouse)
-        rotate_animation = false;
+    ImGui::RadioButton("Rotate with the mouse", &rotation_set, 0);
+    ImGui::RadioButton("Rotate automatically", &rotation_set, 1);
+    ImGui::RadioButton("Set rotation parameters", &rotation_set, 2);
 
     float prev_angle, prev_axis_x, prev_axis_y, prev_axis_z;
 
-    if (!rotate_mouse)
-    {
-        prev_angle = angle;
-        prev_axis_x = axis_x;
-        prev_axis_y = axis_y;
-        prev_axis_z = axis_z;
-
-        ImGui::Text("Set the angle of rotation:");
-        ImGui::SliderFloat("angle", &angle, 0.0f, 360.0f); // Edit 1 angle from 0 to 360
-
-        ImGui::Text("Set axis of rotation:");
-
-        ImGui::InputFloat("x", &axis_x, 0.01f, 1.0f);
-        ImGui::InputFloat("y", &axis_y, 0.01f, 1.0f);
-        ImGui::InputFloat("z", &axis_z, 0.01f, 1.0f);
-    }
-
-    ImGui::Checkbox("rotate/stop", &rotate_animation);
-
-    if (rotate_animation)
-        rotate_mouse = false;
-
-    if (last_time_was_animated && rotate_animation == false)
+    if (last_time_was_animated && rotation_set != 1)
     {
         axis_x = 0.0f;
         axis_y = 1.0f;
         axis_z = 0.0f;
         angle = 180;
         last_time_was_animated = false;
+    }
+
+    switch (rotation_set)
+    {
+        case 2:
+            prev_angle = angle;
+            prev_axis_x = axis_x;
+            prev_axis_y = axis_y;
+            prev_axis_z = axis_z;
+
+            ImGui::Text("Set the angle of rotation:");
+            ImGui::SliderFloat("angle", &angle, 0.0f, 360.0f); // Edit 1 angle from 0 to 360
+
+            ImGui::Text("Set axis of rotation:");
+
+            ImGui::InputFloat("x", &axis_x, 0.01f, 1.0f);
+            ImGui::InputFloat("y", &axis_y, 0.01f, 1.0f);
+            ImGui::InputFloat("z", &axis_z, 0.01f, 1.0f);
+            break;
+
+        default:
+            break;
     }
 
     if ((prev_angle != angle) || (prev_axis_x != axis_x) || (prev_axis_y != axis_y) || (prev_axis_z != axis_z))
@@ -567,8 +570,16 @@ void rotation_settings()
 // function to set zoom into imgui window
 void zoom_settings()
 {
-    ImGui::Text("Zoom-in/out:");
-    ImGui::SliderFloat("zoom", &Zoom, 100, 1); // Zoom
+    switch(rotation_set){
+        case 0:
+            ImGui::TextWrapped("Scroll to zoom in/out");
+            break;
+        default:
+            ImGui::Text("Zoom-in/out:");
+            ImGui::SliderFloat("zoom", &Zoom, 100, 1); // Zoom
+            break;
+    }
+
 }
 
 void set_shader()
