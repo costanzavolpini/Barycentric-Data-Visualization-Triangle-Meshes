@@ -48,6 +48,8 @@
         "queue": "cpp",
         "ios": "cpp",
         "__functional_base_03": "cpp",
-        "__tuple": "cpp"
+        "__tuple": "cpp",
+        "thread": "cpp",
+        "__string": "cpp"
     }
 }
