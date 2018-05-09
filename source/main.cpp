@@ -54,14 +54,14 @@ float Zoom = 45.0f;
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 
 // keyboard
-void process_input(GLFWwindow *window);
+static void process_input(GLFWwindow *window);
 
 double last_mx = 0, last_my = 0, cur_mx = 0, cur_my = 0;
 int arcball_on = false;
 
-void mouse_button_callback(GLFWwindow *window, int button, int action, int mods);
+static void mouse_button_callback(GLFWwindow *window, int button, int action, int mods);
 static void cursor_position_callback(GLFWwindow *window, double xpos, double ypos);
-void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
+static void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 
 
 // ------- TRANSFORMATION -------
@@ -168,6 +168,7 @@ int main(int argc, char *argv[])
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback); // user resizes the window the viewport should be adjusted as well
     glfwSetMouseButtonCallback(window, mouse_button_callback);         // call the callback when the user press a button. It corresponds to glutMouseFunc
     glfwSetCursorPosCallback(window, cursor_position_callback);        // call the callback when the user move the cursor. It corresponds to glutMotionFunc
+
 
     /**
         ------------- GLAD -------------
@@ -374,7 +375,7 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 
 // Function that activate arcball when button left is pressed.
 // mouse button, button action and modifier bits.
-void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
+static void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 {
     arcball.mouse_btn_callback(window, button, action, mods);
 }
@@ -386,14 +387,14 @@ static void cursor_position_callback(GLFWwindow *window, double xpos, double ypo
 }
 
 // keyboard
-void process_input(GLFWwindow *window)
+static void process_input(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
-void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
+static void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 {
     if (Zoom >= 1.0f && Zoom <= 45.0f)
         Zoom -= yoffset;
@@ -883,7 +884,7 @@ void initialize_texture_object(GLFWwindow *window, bool reload_mesh)
     (void)io;
     // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
     // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
-    ImGui_ImplGlfwGL3_Init(window, true);
+    ImGui_ImplGlfwGL3_Init(window, false);
 
     // Setup style
     ImGui::StyleColorsDark();
