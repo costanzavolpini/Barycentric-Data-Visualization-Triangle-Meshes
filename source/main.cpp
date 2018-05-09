@@ -63,8 +63,11 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 static void cursor_position_callback(GLFWwindow *window, double xpos, double ypos);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 
+
 // ------- TRANSFORMATION -------
 static glm::mat4 transform_shader = glm::mat4(1.0f);
+glm::mat4 rotated_model;
+glm::mat4 rotated_view;
 
 // ------- IMGUI -----------
 void show_window(bool *p_open, GLFWwindow *window);
@@ -76,13 +79,13 @@ void select_model(GLFWwindow *window);
 void analyse_gaussian_curvature(GLFWwindow *window);
 void initialize_texture_object(GLFWwindow *window, bool reload_mesh);
 
-
 // set-up parameter imgui
 static float angle = 180.0f;                // angle of rotation - must be the same of transform_shader
 static float axis_x = 0.0f;                 // axis of rotation - must be the same of transform_shader
 static float axis_y = 1.0f;                 // axis of rotation - must be the same of transform_shader
 static float axis_z = 0.0f;                 // axis of rotation - must be the same of transform_shader
 static bool rotate_animation = false;       // animate rotation or not
+static bool rotate_mouse = true;            // mouse rotation or not
 static bool last_time_was_animated = false; // if was moving and now we have stopped it
 
 static ImVec4 color_imgui = ImColor(0, 0, 0, 255);
@@ -248,21 +251,14 @@ int main(int argc, char *argv[])
                 ourShader.setBool("custom_flag", true);
                 ourShader.setFloat("custom_min", min_val);
                 ourShader.setFloat("custom_max", max_val);
-            } else {
+            }
+            else
+            {
                 ourShader.setBool("custom_flag", false);
             }
         }
         // --- end settings shaders ---
-
-        // arcball
-        glm::mat4 rotated_view = view * arcball.rotation_matrix_view();
-        glm::mat4 rotated_model = model * arcball.rotation_matrix_model(rotated_view);
-
-        ourShader.setMat4("projection", projection);
-        ourShader.setMat4("view", rotated_view);
-        // ourShader.setMat4("model", rotated_model);
-
-        // imgui rotation
+        // imgui rotation automatic
         if (rotate_animation == true)
         {
 
@@ -288,9 +284,26 @@ int main(int argc, char *argv[])
 
             transform_shader = glm::rotate(glm::mat4(1.0f), glm::radians((float)angle), glm::vec3(axis_x, axis_y, axis_z));
             last_time_was_animated = true;
+            ourShader.setMat4("model", transform_shader);
+            ourShader.setMat4("view", view);
+            ourShader.setMat4("projection", projection);
         }
+        else if (!rotate_animation && !rotate_mouse)
+        { // set rotation manually
+            transform_shader = glm::rotate(glm::mat4(1.0f), glm::radians((float)angle), glm::vec3(axis_x, axis_y, axis_z));
+            ourShader.setMat4("view", view);
+            ourShader.setMat4("projection", projection);
+            ourShader.setMat4("model", transform_shader);
+        }
+        else
+        {   // arcball
+            rotated_view = view * arcball.rotation_matrix_view();
+            rotated_model = model * arcball.rotation_matrix_model(rotated_view);
 
-        ourShader.setMat4("model", transform_shader);
+            ourShader.setMat4("projection", projection);
+            ourShader.setMat4("view", rotated_view);
+            ourShader.setMat4("model", rotated_model);
+        }
 
         object.draw(); // draw
 
@@ -507,21 +520,35 @@ void show_window(bool *p_open, GLFWwindow *window)
 // Function to handle rotation made by GUI
 void rotation_settings()
 {
-    float prev_angle = angle;
-    float prev_axis_x = axis_x;
-    float prev_axis_y = axis_y;
-    float prev_axis_z = axis_z;
+    ImGui::TextWrapped("You can rotate the object using the mouse, setting the angle or automatically.\n\n");
+    ImGui::Checkbox("rotate with the mouse", &rotate_mouse);
 
-    ImGui::Text("Set the angle of rotation:");
-    ImGui::SliderFloat("angle", &angle, 0.0f, 360.0f); // Edit 1 angle from 0 to 360
+    if (rotate_mouse)
+        rotate_animation = false;
 
-    ImGui::Text("Set axis of rotation:");
+    float prev_angle, prev_axis_x, prev_axis_y, prev_axis_z;
 
-    ImGui::InputFloat("x", &axis_x, 0.01f, 1.0f);
-    ImGui::InputFloat("y", &axis_y, 0.01f, 1.0f);
-    ImGui::InputFloat("z", &axis_z, 0.01f, 1.0f);
+    if (!rotate_mouse)
+    {
+        prev_angle = angle;
+        prev_axis_x = axis_x;
+        prev_axis_y = axis_y;
+        prev_axis_z = axis_z;
+
+        ImGui::Text("Set the angle of rotation:");
+        ImGui::SliderFloat("angle", &angle, 0.0f, 360.0f); // Edit 1 angle from 0 to 360
+
+        ImGui::Text("Set axis of rotation:");
+
+        ImGui::InputFloat("x", &axis_x, 0.01f, 1.0f);
+        ImGui::InputFloat("y", &axis_y, 0.01f, 1.0f);
+        ImGui::InputFloat("z", &axis_z, 0.01f, 1.0f);
+    }
 
     ImGui::Checkbox("rotate/stop", &rotate_animation);
+
+    if (rotate_animation)
+        rotate_mouse = false;
 
     if (last_time_was_animated && rotate_animation == false)
     {
@@ -788,7 +815,7 @@ void initialize_texture_object(GLFWwindow *window, bool reload_mesh)
      */
     object.set_value_gc(gc_set);
     // object.set_file(name_file, std::bind(&Object::auto_detect_outliers_gc, Object()), std::bind(&Object::set_selected_gc, Object()), std::bind(&Object::init, Object())); //load mesh
-    if(reload_mesh)
+    if (reload_mesh)
         object.set_file(name_file); //load mesh
     object.init();
 
