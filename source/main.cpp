@@ -115,7 +115,7 @@ int imgui_isLinearInterpolation;
 int imgui_isExtendFlatShading;
 int imgui_isGouraudShading;
 int imgui_isMeanCurvatureShading;
-string name_file = "models/icosahedron_0.off"; //default armadillo
+string name_file = "models/armadillo.off"; //default armadillo
 
 float min_val, max_val;
 
@@ -498,7 +498,7 @@ void show_window(bool *p_open, GLFWwindow *window)
     ImGui::SetCursorPosY(io.DisplaySize.y - 18.0f); // columns end at the end of window
     ImGui::NextColumn();
 
-    ImGui::ShowMetricsWindow(p_open); //to test and find informations about window
+    // ImGui::ShowMetricsWindow(p_open); //to test and find informations about window
 
     ImGui::End();
     ImGui::PopStyleColor();
@@ -612,8 +612,8 @@ void set_parameters_shader(int selected_shader)
 
     case 5: // mean curvature
         vertex_shader = "vertexShaderMC.vs";
-        fragment_shader = "fragmentShader.fs";
-        geometry_shader = NULL;
+        fragment_shader = "minDiagramFragmentShader.fs";
+        geometry_shader = "geometryShaderMC.gs";
 
         imgui_isGaussianCurvature = 0;
         imgui_isGouraudShading = 0;
