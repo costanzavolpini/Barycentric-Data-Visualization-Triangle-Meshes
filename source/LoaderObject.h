@@ -213,13 +213,33 @@ double get_area_triangle(int index_triangle){
 }
 
 /**
+ * Function to get the cotangent of an angle
+ */
+double get_cotangent(double angle){
+    return tan(M_PI_2 - angle);
+}
+
+/**
+ * Function to get Voronoi region of vertex P in triangle [P, Q, R]
+ */
+double get_voronoi_region_triangle(int index_triangle, int P_index, int Q_index, int R_index, float Q_angle, float R_angle){
+    Point3d P = get_rescaled_value(v[t[index_triangle].v[P_index]]);
+    Point3d Q = get_rescaled_value(v[t[index_triangle].v[Q_index]]);
+    Point3d R = get_rescaled_value(v[t[index_triangle].v[R_index]]);
+    double first_part = pow(get_distance_points(P, R), 2) * get_cotangent(Q_angle);
+    double second_part = pow(get_distance_points(P, Q), 2) * get_cotangent(R_angle);
+    return 1/8 * (first_part + second_part);
+
+}
+
+/**
  * Calculate Area mixed, given the index of the triangle, index of the  vertex and 3 angles of the triangle
 */
-void calculate_A_mixed(int index_triangle, int index_vertex, float current_angle, float other_angle, float other_angle_1){
+void calculate_A_mixed(int index_triangle, int index_vertex, int index_vertex_other, int index_vertex_other1, float current_angle, float other_angle, float other_angle_1){
     if(current_angle <= 90 && other_angle <= 90 && other_angle_1 <= 0) // Triangle is not obtuse -> Voronoi-safe
     {
-        // TODO: voronoi formula
-        // area_mixed[index_vertex] += Voronoi region of x in T
+        // Voronoi region of x in T
+        area_mixed[index_vertex] += get_voronoi_region_triangle(index_triangle, index_vertex, index_vertex_other, index_vertex_other1, other_angle, other_angle_1);
     } else  // Voronoi inappropriate
     {
         if (current_angle > 90) //obtuse angle
@@ -310,7 +330,8 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
     vector<float> value_gc_summed(num_vertices);
     std::fill(value_gc_summed.begin(), value_gc_summed.end(), 0);
 
-    area_mixed.resize(num_triangles);
+    area_mixed.resize(num_vertices);
+    std::fill(area_mixed.begin(), area_mixed.end(), 0);
 
     // mean curvature
     vector<float> triangle_mc(num_triangles * 9);
@@ -407,7 +428,11 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         value_gc_summed[t[k].v[1]] += angle_2;
         value_gc_summed[t[k].v[2]] += angle_3;
 
-        //LINEAR INTERPOLATION
+        calculate_A_mixed(k, index_v1, index_v2, index_v3, angle_1, angle_2, angle_3);
+        calculate_A_mixed(k, index_v2, index_v1, index_v3, angle_2, angle_1, angle_3);
+        calculate_A_mixed(k, index_v3, index_v1, index_v2, angle_3, angle_1, angle_2);
+
+        // -------- LINEAR INTERPOLATION ----------
         color_li[9 * k] = 1.0f;     //red x
         color_li[9 * k + 1] = 0.0f; // red y
         color_li[9 * k + 2] = 0.0f; // red z
@@ -422,10 +447,9 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
     // add everything to triangle gaussian curvature
     for (int k = 0; k < num_triangles; k++)
     {
-        // TODO: divide everything by A_mixed
-        triangle_gc[9 * k]  = 2 * M_PI - value_gc_summed[t[k].v[0]]; //vertex 0
-        triangle_gc[9 * k + 3] = 2 * M_PI - value_gc_summed[t[k].v[1]]; //vertex 1
-        triangle_gc[9 * k + 6] = 2 * M_PI - value_gc_summed[t[k].v[2]]; //vertex 2
+        triangle_gc[9 * k]  = (2 * M_PI - value_gc_summed[t[k].v[0]]) / area_mixed[t[k].v[0]]; //vertex 0
+        triangle_gc[9 * k + 3] = (2 * M_PI - value_gc_summed[t[k].v[1]]) / area_mixed[t[k].v[1]]; //vertex 1
+        triangle_gc[9 * k + 6] = (2 * M_PI - value_gc_summed[t[k].v[2]]) / area_mixed[t[k].v[2]]; //vertex 2
 
         cout << "1: " << 2 * M_PI - value_gc_summed[t[k].v[0]] << endl;
         cout << "2: " << 2 * M_PI - value_gc_summed[t[k].v[1]] << endl;
