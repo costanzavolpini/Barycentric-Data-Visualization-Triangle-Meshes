@@ -65,7 +65,16 @@ struct edge
 
 // map for struct edge
 std::map<vector<int>, edge> map_edge; // key: [index_v1, index_v2]    val: struct edge
+
+vector<float> area_mixed;
 // -------------------------
+
+/**
+ * Get distance between 2 points
+ */
+double get_distance_points(Point3d v0, Point3d v1){
+    return abs(sqrt(pow((v0[0] -v1[0]), 2) + pow((v0[1] -v1[1]), 2) + pow((v0[2] -v1[2]), 2)));
+}
 
 /**
  * Function to insert a struct edge inside edge-map.
@@ -96,7 +105,7 @@ void insert_edge(int index_v1, int index_v2, vector<int> key, vector<int> key_2,
     else
     {            // create new edge struct
         edge e1; // struct
-        e1.length = abs(sqrt(pow((v[index_v1][0] - v[index_v2][0]), 2) + pow((v[index_v1][1] - v[index_v2][1]), 2) + pow((v[index_v1][2] - v[index_v2][2]), 2)));
+        e1.length = get_distance_points(v[index_v1], v[index_v2]);
         if (index_v1 < index_v2)
         {
             // correct order
@@ -184,6 +193,42 @@ Point3d get_rescaled_value(Point3d value)
     return interval / (max_coord - min_coord) * (value - max_coord) + 1; //1 is the max of interval
 }
 
+
+/**
+ * Find area of triangle using Heron's formula.
+ * s = (a + b + c) / 2
+ * A = sqrt(s (s - a) (s - b) (s-c))
+*/
+double get_area_triangle(int index_triangle){
+    Point3d v0 = get_rescaled_value(v[t[index_triangle].v[0]]);
+    Point3d v1 = get_rescaled_value(v[t[index_triangle].v[1]]);
+    Point3d v2 = get_rescaled_value(v[t[index_triangle].v[2]]);
+
+    double edge0 = get_distance_points(v0, v1);
+    double edge1 = get_distance_points(v0, v2);
+    double edge2 = get_distance_points(v1, v2);
+
+    double s = (edge0 + edge1 + edge2) / 2;
+    return sqrt(s * (s - edge0) * (s - edge1) * (s - edge2));
+}
+
+/**
+ * Calculate Area mixed, given the index of the triangle, index of the  vertex and 3 angles of the triangle
+*/
+void calculate_A_mixed(int index_triangle, int index_vertex, float current_angle, float other_angle, float other_angle_1){
+    if(current_angle <= 90 && other_angle <= 90 && other_angle_1 <= 0) // Triangle is not obtuse -> Voronoi-safe
+    {
+        // TODO: voronoi formula
+        // area_mixed[index_vertex] += Voronoi region of x in T
+    } else  // Voronoi inappropriate
+    {
+        if (current_angle > 90) //obtuse angle
+            area_mixed[index_vertex] += get_area_triangle(index_triangle)/2;
+        else // not-obtuse triangle
+            area_mixed[index_vertex] += get_area_triangle(index_triangle)/4;
+    }
+}
+
 /**
  * Function to clean allocated memory in order to load correctly different meshes.
  */
@@ -265,6 +310,8 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
     vector<float> value_gc_summed(num_vertices);
     std::fill(value_gc_summed.begin(), value_gc_summed.end(), 0);
 
+    area_mixed.resize(num_triangles);
+
     // mean curvature
     vector<float> triangle_mc(num_triangles * 9);
 
@@ -336,29 +383,29 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         // v1 -> v0 -> v2
         Point3d v0v1 = v1 - v0;
         Point3d v0v2 = v2 - v0;
-        double sum_angles_1 = v0v1.getAngle(v0v2);
+        double angle_1 = v0v1.getAngle(v0v2);
 
-        cout << "sum_angles_1 with v0v2 " << sum_angles_1 << endl;
+        cout << "angle_1 with v0v2 " << angle_1 << endl;
 
         // VERTEX 2
         // v2 -> v1 -> v0
         Point3d v1v2 = v2 - v1;
-        double sum_angles_2 = v1v2.getAngle(-v0v1);
+        double angle_2 = v1v2.getAngle(-v0v1);
 
-        cout << "sum_angles_2 with -v0v1 " << sum_angles_2 << endl;
+        cout << "angle_2 with -v0v1 " << angle_2 << endl;
 
         // VERTEX 3
         // v0 -> v2 -> v1
-        double sum_angles_3 = v0v2.getAngle(v1v2);
+        double angle_3 = v0v2.getAngle(v1v2);
 
-        cout << "sum_angles_3 with v0v2 with v1v2 " << sum_angles_3 << endl;
+        cout << "angle_3 with v0v2 with v1v2 " << angle_3 << endl;
 
         cout << "end!! --------- " << endl;
 
         // for each vertex of the triangle updated its value of gc (sum_(j=1)^(#faces around this vertex) vertex_j)
-        value_gc_summed[t[k].v[0]] += sum_angles_1;
-        value_gc_summed[t[k].v[1]] += sum_angles_2;
-        value_gc_summed[t[k].v[2]] += sum_angles_3;
+        value_gc_summed[t[k].v[0]] += angle_1;
+        value_gc_summed[t[k].v[1]] += angle_2;
+        value_gc_summed[t[k].v[2]] += angle_3;
 
         //LINEAR INTERPOLATION
         color_li[9 * k] = 1.0f;     //red x
@@ -375,6 +422,7 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
     // add everything to triangle gaussian curvature
     for (int k = 0; k < num_triangles; k++)
     {
+        // TODO: divide everything by A_mixed
         triangle_gc[9 * k]  = 2 * M_PI - value_gc_summed[t[k].v[0]]; //vertex 0
         triangle_gc[9 * k + 3] = 2 * M_PI - value_gc_summed[t[k].v[1]]; //vertex 1
         triangle_gc[9 * k + 6] = 2 * M_PI - value_gc_summed[t[k].v[2]]; //vertex 2
