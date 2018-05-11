@@ -180,6 +180,7 @@ double get_min_coord()
 */
 Point3d get_rescaled_value(Point3d value)
 {
+    return value; // need to remove afer
     return interval / (max_coord - min_coord) * (value - max_coord) + 1; //1 is the max of interval
 }
 
@@ -261,8 +262,8 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
     vector<float> triangle_gc(num_triangles * 9);
 
     color_li.resize(num_triangles * 9);
-    vector<float> gc_counter(num_vertices);
-    std::fill(gc_counter.begin(), gc_counter.end(), 0);
+    vector<float> value_gc_summed(num_vertices);
+    std::fill(value_gc_summed.begin(), value_gc_summed.end(), 0);
 
     // mean curvature
     vector<float> triangle_mc(num_triangles * 9);
@@ -286,18 +287,25 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         Point3d v1 = get_rescaled_value(v[t[k].v[1]]);
         Point3d v2 = get_rescaled_value(v[t[k].v[2]]);
 
+        cout << "TRIANGLE " << endl;
+        cout << "v0 " << v0 << endl;
+        cout  << "v1 " <<  v1 << endl;
+        cout  << "v2 " <<  v2 << endl;
+
         //normals
         // for every triangle face compute face normal and normalize it
         Point3d n = (v1 - v0) ^ (v2 - v0);
         n.normalize();
 
         normals[t[k].v[0]] += n;
-        v_counter[t[k].v[0]]++; // update counter
 
         normals[t[k].v[1]] += n;
-        v_counter[t[k].v[1]]++; // update counter
 
         normals[t[k].v[2]] += n;
+
+
+        v_counter[t[k].v[0]]++; // update counter for normals
+        v_counter[t[k].v[1]]++; // update counter
         v_counter[t[k].v[2]]++; // update counter
 
         // -------------- MEAN CURVATURE --------------
@@ -330,19 +338,27 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         Point3d v0v2 = v2 - v0;
         double sum_angles_1 = v0v1.getAngle(v0v2);
 
+        cout << "sum_angles_1 with v0v2 " << sum_angles_1 << endl;
+
         // VERTEX 2
         // v2 -> v1 -> v0
         Point3d v1v2 = v2 - v1;
         double sum_angles_2 = v1v2.getAngle(-v0v1);
 
+        cout << "sum_angles_2 with -v0v1 " << sum_angles_2 << endl;
+
         // VERTEX 3
         // v0 -> v2 -> v1
         double sum_angles_3 = v0v2.getAngle(v1v2);
 
-        // for each triangle-vertex selected add sum_angles
-        gc_counter[t[k].v[0]] += sum_angles_1;
-        gc_counter[t[k].v[1]] += sum_angles_2;
-        gc_counter[t[k].v[2]] += sum_angles_3;
+        cout << "sum_angles_3 with v0v2 with v1v2 " << sum_angles_3 << endl;
+
+        cout << "end!! --------- " << endl;
+
+        // for each vertex of the triangle updated its value of gc (sum_(j=1)^(#faces around this vertex) vertex_j)
+        value_gc_summed[t[k].v[0]] += sum_angles_1;
+        value_gc_summed[t[k].v[1]] += sum_angles_2;
+        value_gc_summed[t[k].v[2]] += sum_angles_3;
 
         //LINEAR INTERPOLATION
         color_li[9 * k] = 1.0f;     //red x
@@ -359,9 +375,15 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
     // add everything to triangle gaussian curvature
     for (int k = 0; k < num_triangles; k++)
     {
-        triangle_gc[9 * k] = triangle_gc[9 * k + 1] = triangle_gc[9 * k + 2] = 2 * M_PI - gc_counter[t[k].v[0]];
-        triangle_gc[9 * k + 3] = triangle_gc[9 * k + 4] = triangle_gc[9 * k + 5] = 2 * M_PI - gc_counter[t[k].v[1]];
-        triangle_gc[9 * k + 6] = triangle_gc[9 * k + 7] = triangle_gc[9 * k + 8] = 2 * M_PI - gc_counter[t[k].v[2]];
+        triangle_gc[9 * k]  = 2 * M_PI - value_gc_summed[t[k].v[0]]; //vertex 0
+        triangle_gc[9 * k + 3] = 2 * M_PI - value_gc_summed[t[k].v[1]]; //vertex 1
+        triangle_gc[9 * k + 6] = 2 * M_PI - value_gc_summed[t[k].v[2]]; //vertex 2
+
+        cout << "1: " << 2 * M_PI - value_gc_summed[t[k].v[0]] << endl;
+        cout << "2: " << 2 * M_PI - value_gc_summed[t[k].v[1]] << endl;
+        cout << "3: " << 2 * M_PI - value_gc_summed[t[k].v[2]] << endl;
+
+        triangle_gc[9 * k + 1] = triangle_gc[9 * k + 2] = triangle_gc[9 * k + 4] = triangle_gc[9 * k + 5] = triangle_gc[9 * k + 7] = triangle_gc[9 * k + 8] = 0.0f;
     }
 
     // -------------- END GAUSSIAN CURVATURE -----------------
@@ -466,8 +488,8 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
     triangle_gc.clear();
     triangle_gc.shrink_to_fit();
 
-    gc_counter.clear();
-    gc_counter.shrink_to_fit();
+    value_gc_summed.clear();
+    value_gc_summed.shrink_to_fit();
 
     triangle_mc.clear();
     triangle_mc.shrink_to_fit();

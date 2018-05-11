@@ -164,11 +164,10 @@ int main(int argc, char *argv[])
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
     // callback functions
-    glfwSetScrollCallback(window, scroll_callback);                    //zoom
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback); // user resizes the window the viewport should be adjusted as well
     glfwSetMouseButtonCallback(window, mouse_button_callback);         // call the callback when the user press a button. It corresponds to glutMouseFunc
     glfwSetCursorPosCallback(window, cursor_position_callback);        // call the callback when the user move the cursor. It corresponds to glutMotionFunc
-
+    glfwSetScrollCallback(window, scroll_callback);                    //zoom
 
     /**
         ------------- GLAD -------------
@@ -486,6 +485,11 @@ void show_window(bool *p_open, GLFWwindow *window)
 
     ImGui::SetColumnOffset(1, size_x * 2);
 
+    //TODO: enable arcball just in the column not in the window, otherwise when we set the sample in GC everything will be moved (same for zoom)
+
+    // const bool itemHovered = ImGui::IsItemHovered() && ImGui::IsWindowHovered();
+    // cout << ImGui::IsItemHovered(ImGuiHoveredFlags_Default) << endl;
+
     // --------- draw image inside GUI --------------
     //pass the texture of the FBO
     //object.getVAO() is the texture of the FBO
@@ -679,7 +683,7 @@ void select_model(GLFWwindow *window)
 {
     listbox_item_prev = listbox_item_current;
     ImGui::TextWrapped("Select a model to render:\n\n");
-    const char *listbox_items[] = {"armadillo", "eight", "genus3", "horse", "icosahedron_0", "icosahedron_1", "icosahedron_2", "icosahedron_3", "icosahedron_4"};
+    const char *listbox_items[] = {"armadillo", "eight", "genus3", "horse", "icosahedron_1", "icosahedron_2", "icosahedron_3", "icosahedron_4"};
     ImGui::PushItemWidth(-1);
     ImGui::ListBox("", &listbox_item_current, listbox_items, IM_ARRAYSIZE(listbox_items), 10);
 

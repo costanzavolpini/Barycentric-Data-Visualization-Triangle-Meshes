@@ -26,11 +26,11 @@
        if (val < 0) { //negative numbers until 0 -> map from red to green
             if(custom_flag && val < custom_min)
                 return vec4(red, 1.0);
-            return vec4(interpolation(red, green, val), 1.0);
+            return vec4(interpolation(red, green, val), 1.0); //divide val by min_curvature
         } else { //map from green to blue, from 0 to positive
             if(custom_flag && val > custom_max)
                 return vec4(blue, 1.0);
-            return vec4(interpolation(green, blue, val), 1.0);
+            return vec4(interpolation(green, blue, val), 1.0); //divide val by max_curvature
         }
     }
 

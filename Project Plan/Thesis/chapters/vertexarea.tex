@@ -4,7 +4,7 @@ The usual way to visualize data for a triangle mesh is to associate data to vert
 
 %%%%%%%%%%%%%
 
-\section{Region around a vertex}
+\subsection{Region around a vertex}
 We can split the surface of triangle meshes into regions around vertex (Fig. \ref{fig:vertex-area}) and color them.
 These regions can be determined using barycentric coordinates and GPU fragment program. Visualizing data given at the vertices or edges of the mesh in a piecewise constant simulates the classical triangle flat shading.
 An example of this vertex data is the discrete Gaussian curvature.
@@ -22,7 +22,7 @@ An example of this vertex data is the discrete Gaussian curvature.
 
 %%%%%%%%%%%%%
 
-\subsection{Max diagram - Vertex based area} \label{section:max-diagram}
+\subsubsection{Max diagram - Vertex based area} \label{section:max-diagram}
 Passing barycentric coordinates to the \textit{fragment shader} will clearly demonstrate that we can get results different from the classic color interpolation.
 %https://www.redblobgames.com/x/1730-terrain-shader-experiments/
 \cite{WEBSITE:1}
@@ -33,19 +33,19 @@ The color is given by the region farthest from a vertex (Fig. \ref{fig:max-diagr
 
 %%%%%%%%%%%%%
 
-\section{Flat shading extension} \label{section:extend-flat-shading-lighting}
+\subsection{Flat shading extension} \label{section:extend-flat-shading-lighting}
 An extension of \textit{flat shading} would be to have each vertex area to be in one constant color. This color can be taken from shading interpolation using the normal at the vertex and the vertex position.
 The color will then be computed as in \textit{Gouraud shading}.
 The idea is to compute the color per vertex but instead of linearly interpolated it in each triangle (as \textit{Gouraud shading} does) we color regions around a vertex with that constant color.
 To implement it, the barycentric coordinates, the vertex color, the normal at the vertex and the lighting calculations must be passed to the \textit{fragment shader}.
 We want to avoid an automatic interpolation of colors, in order to return the resulting color using the \textit{max diagram} we have used a \textit{Geometry shader} that have access to all three vertex colors in \textit{fragment shader}. (Pseudocodes: \ref{appendix:vs-flat-shading-lighting}, \ref{appendix:gs-flat-shading-lighting}, \ref{appendix:fs-flat-shading-lighting})
 
-\subsection{Comparison}
+\subsubsection{Comparison}
 Gouraud shading vs extension flat shading.
 TODO
 
 %%%
-\section{Discrete Gaussian Curvature}
+\subsection{Discrete Gaussian Curvature}
 \label{section:vertex-area-gaussian-curvature}
 Another interesting alternative data visualization technique is to compute the \textit{Gaussian curvature} per vertex. That can be done summing up, for each vertex, angles at this vertex with adjacent triangles and then subtracting this value to $2\pi$.
 After having obtain this value, called \textit{angle defect} (Fig. \ref{fig:gc-angle}), we map linearly this value to a color range.
@@ -76,11 +76,11 @@ $$K(V) = 2\pi - \sum_j \theta_j$$
 TODO: update image 3.4
 %%%%%%%%
 
-\section{Interpolated Gaussian Curvature}
+\subsection{Interpolated Gaussian Curvature}
 aka Gouraud Shading Gaussian Curvature
 TODO
 
-\subsection{Comparison}
+\subsubsection{Comparison}
 We want now to compare the \textit{Gaussian curvature} (Fig. \ref{fig:gaussian-interpolated-horse}) with the \textit{interpolated Gaussian curvature}. In Fig. \ref{fig:gaussian-horse} each vertex area is colored applying the method \textit{max diagram} described in the above subsection \ref{section:max-diagram}. Instead, in Fig. \ref{fig:gaussian-interpolated-horse} the color is obtained with a linear interpolation.
 \begin{figure}[!htb]
 \centering
