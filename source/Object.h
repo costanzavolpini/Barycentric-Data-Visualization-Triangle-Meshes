@@ -21,7 +21,6 @@ class Object
     vector<float> triangle_normals;
     vector<float> triangle_gc; //untouched gc
     vector<float> triangle_mc;
-    vector<float> triangle_color;
 
     vector<float> triangle_gc_modified_auto; //outliers gc
     vector<float> triangle_gc_selected;
@@ -32,7 +31,7 @@ class Object
         Memory on the GPU where we store the vertex data
         VBO: manage this memory via so called vertex buffer objects (VBO) that can store a large number of vertices in the GPU's memory
     */
-    unsigned int VBO, VAO, VBO_NORMAL, VBO_GAUSSIANCURVATURE, VBO_LINEARINTERPOLATION;
+    unsigned int VBO, VAO, VBO_NORMAL, VBO_GAUSSIANCURVATURE;
 
     // Constructor
     void set_file(const std::string &_path)
@@ -41,16 +40,14 @@ class Object
         triangle_normals.clear();
         triangle_gc.clear();
         triangle_mc.clear();
-        triangle_color.clear();
 
         triangle_vertices.shrink_to_fit();
         triangle_normals.shrink_to_fit();
         triangle_gc.shrink_to_fit();
         triangle_mc.shrink_to_fit();
-        triangle_color.shrink_to_fit();
 
 
-        if (!load(_path.c_str(), triangle_vertices, triangle_normals, triangle_gc, triangle_mc, triangle_color))
+        if (!load(_path.c_str(), triangle_vertices, triangle_normals, triangle_gc, triangle_mc))
         {
             cout << "error loading file" << endl;
             return;
@@ -125,13 +122,6 @@ class Object
 
         glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_gc_selected.size(), &triangle_gc_selected[0], GL_STATIC_DRAW);
 
-        // VBO_LINEARINTERPOLATION
-        glGenBuffers(1, &VBO_LINEARINTERPOLATION); //generate buffer, bufferID = 1
-
-        glBindBuffer(GL_ARRAY_BUFFER, VBO_LINEARINTERPOLATION);
-
-        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_color.size(), &triangle_color[0], GL_STATIC_DRAW);
-
         // ------------- VAO -------------
         glGenVertexArrays(1, &VAO);
 
@@ -165,11 +155,6 @@ class Object
         glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)(0 * sizeof(float)));
         glEnableVertexAttribArray(2); //this 2 is referred to the layout on shader
 
-        // linear interpolation
-        glBindBuffer(GL_ARRAY_BUFFER, VBO_LINEARINTERPOLATION);
-        // color
-        glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)(0 * sizeof(float)));
-        glEnableVertexAttribArray(3); //this 3 is referred to the layout on shader
 
         /**
             Unbind the VAO so other VAO calls won't accidentally modify this VAO, but this rarely happens.
@@ -206,7 +191,6 @@ class Object
         glDeleteBuffers(1, &VBO);
         glDeleteBuffers(1, &VBO_NORMAL);
         glDeleteBuffers(1, &VBO_GAUSSIANCURVATURE);
-        glDeleteBuffers(1, &VBO_LINEARINTERPOLATION);
     }
 
     // Point3d interpolation(Point3d v0, Point3d v1, float t) {

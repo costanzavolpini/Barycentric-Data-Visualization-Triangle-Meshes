@@ -218,20 +218,20 @@ double get_area_triangle(int index_triangle){
  * Function to get the cotangent of an angle
  */
 double get_cotangent(double angle){
-    return tan(M_PI_2 - angle);
+    return cos(angle)/sin(angle);
 }
 
 /**
  * Function to get Voronoi region of vertex P in triangle [P, Q, R].
  * See paper http://www.geometry.caltech.edu/pubs/DMSB_III.pdf (section 3.3)
  */
-double get_voronoi_region_triangle(int index_triangle, int P_index, int Q_index, int R_index, float Q_angle, float R_angle){
-    Point3d P = get_rescaled_value(v[t[index_triangle].v[P_index]]);
-    Point3d Q = get_rescaled_value(v[t[index_triangle].v[Q_index]]);
-    Point3d R = get_rescaled_value(v[t[index_triangle].v[R_index]]);
+double get_voronoi_region_triangle(int P_index, int Q_index, int R_index, float Q_angle, float R_angle){
+    Point3d P = get_rescaled_value(v[P_index]);
+    Point3d Q = get_rescaled_value(v[Q_index]);
+    Point3d R = get_rescaled_value(v[R_index]);
     double first_part = pow(get_distance_points(P, R), 2) * get_cotangent(Q_angle);
     double second_part = pow(get_distance_points(P, Q), 2) * get_cotangent(R_angle);
-    return 1/8 * (first_part + second_part);
+    return (first_part + second_part)/8;
 }
 
 /**
@@ -239,10 +239,10 @@ double get_voronoi_region_triangle(int index_triangle, int P_index, int Q_index,
  * This function will be called for each triangle T from the 1-ring neighborhood of x (current angle)
 */
 void calculate_A_mixed(int index_triangle, int index_vertex, int index_vertex_other, int index_vertex_other1, float current_angle, float other_angle, float other_angle_1){
-    if(current_angle <= 90 && other_angle <= 90 && other_angle_1 <= 0) // Triangle is not obtuse -> Voronoi-safe
+    if(current_angle <= 90.0f && other_angle <= 90.0f && other_angle_1 <= 90.0f) // Triangle is not obtuse -> Voronoi-safe
     {
         // Voronoi region of x in T
-        area_mixed[index_vertex] += get_voronoi_region_triangle(index_triangle, index_vertex, index_vertex_other, index_vertex_other1, other_angle, other_angle_1);
+        area_mixed[index_vertex] += get_voronoi_region_triangle(index_vertex, index_vertex_other, index_vertex_other1, other_angle, other_angle_1);
     } else  // Voronoi inappropriate
     {
         if (current_angle > 90) //obtuse angle
@@ -250,6 +250,8 @@ void calculate_A_mixed(int index_triangle, int index_vertex, int index_vertex_ot
         else // not-obtuse triangle
             area_mixed[index_vertex] += get_area_triangle(index_triangle)/4;
     }
+                cout << "ej" << endl;
+
 }
 
 /**
@@ -304,7 +306,7 @@ bool read_off_file(const char *path){
 /**
  * Function to load the mesh, find Gaussian Curvature, Mean Curvature...etc.
 */
-bool load(const char *path, vector<float> &out_vertices, vector<float> &out_normals, vector<float> &gc, vector<float> &mc, vector<float> &color_li)
+bool load(const char *path, vector<float> &out_vertices, vector<float> &out_normals, vector<float> &gc, vector<float> &mc)
 {
     // --------------------- Read file -----------------------------
     if(!read_off_file(path))
@@ -336,7 +338,6 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
     std::fill(area_mixed.begin(), area_mixed.end(), 0);
     // ---
 
-    color_li.resize(num_triangles * 9);
 
     // mean curvature
     vector<float> triangle_mc(num_triangles * 9);
@@ -406,6 +407,7 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         Point3d v0v2 = v2 - v0;
         double angle_1 = v0v1.getAngle(v0v2);
 
+
         // VERTEX 2
         // v2 -> v1 -> v0
         Point3d v1v2 = v2 - v1;
@@ -420,21 +422,14 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         value_gc_summed[t[k].v[1]] += angle_2;
         value_gc_summed[t[k].v[2]] += angle_3;
 
+        cout << angle_1 << " " <<  angle_2 << " " << angle_3 << endl;
+
         calculate_A_mixed(k, index_v1, index_v2, index_v3, angle_1, angle_2, angle_3);
         calculate_A_mixed(k, index_v2, index_v1, index_v3, angle_2, angle_1, angle_3);
         calculate_A_mixed(k, index_v3, index_v1, index_v2, angle_3, angle_1, angle_2);
-
-        // -------- LINEAR INTERPOLATION ----------
-        color_li[9 * k] = 1.0f;     //red x
-        color_li[9 * k + 1] = 0.0f; // red y
-        color_li[9 * k + 2] = 0.0f; // red z
-        color_li[9 * k + 3] = 0.0f; // green x
-        color_li[9 * k + 4] = 1.0f; // green y
-        color_li[9 * k + 5] = 0.0f; // green z
-        color_li[9 * k + 6] = 0.0f; // blue x
-        color_li[9 * k + 7] = 0.0f; // blue y
-        color_li[9 * k + 8] = 1.0f; // blue z
     }
+            cout << "lll" << endl;
+
 
     // add everything to triangle gaussian curvature
     for (int k = 0; k < num_triangles; k++)

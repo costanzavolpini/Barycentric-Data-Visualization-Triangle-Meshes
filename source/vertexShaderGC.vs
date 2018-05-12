@@ -28,11 +28,15 @@
        if (val < 0) { //negative numbers until 0
             if(custom_flag && val < custom_min)
                 return vec4(red, 1.0);
-            return vec4(interpolation(blue, green, val), 1.0);
+            // return vec4(interpolation(blue, green, val), 1.0);
+            return vec4(interpolation(red, green, val), 1.0);
+
         } else { //from 0 to positive
             if(custom_flag && val > custom_max)
                 return vec4(blue, 1.0);
-            return vec4(interpolation(green, red, val), 1.0);
+            // return vec4(interpolation(green, red, val), 1.0);
+            return vec4(interpolation(green, blue, val), 1.0);
+
         }
     }
 

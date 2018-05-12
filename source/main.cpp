@@ -94,7 +94,7 @@ int count_angle = 0;
 bool decrease_angle = false;
 
 // imgui shaders
-static int shader_set = 1; // default 0
+static int shader_set = 3; // default 0
 static int gc_set = 2;
 
 // imgui listbox models
@@ -114,11 +114,10 @@ const char *vertex_shader;
 const char *geometry_shader;
 const char *fragment_shader;
 int imgui_isGaussianCurvature;
-int imgui_isLinearInterpolation;
 int imgui_isExtendFlatShading;
 int imgui_isGouraudShading;
 int imgui_isMeanCurvatureShading;
-string name_file = "models/armadillo.off"; //default armadillo
+string name_file = "models/icosahedron_1.off"; //default armadillo
 
 float min_val, max_val;
 
@@ -615,7 +614,6 @@ void set_parameters_shader(int selected_shader)
         imgui_isExtendFlatShading = 1;
         imgui_isGaussianCurvature = 0;
         imgui_isGouraudShading = 0;
-        imgui_isLinearInterpolation = 0;
         break;
 
         // ---------
@@ -626,23 +624,11 @@ void set_parameters_shader(int selected_shader)
         geometry_shader = NULL;
 
         imgui_isGouraudShading = 1;
-        imgui_isLinearInterpolation = 0;
         imgui_isExtendFlatShading = 0;
         imgui_isGaussianCurvature = 0;
         break;
 
         // ---------
-
-    case 3: // gaussian curvature
-        vertex_shader = "vertexShaderGC.vs";
-        fragment_shader = "maxDiagramFragmentShader.fs";
-        geometry_shader = "geometryShader.gs";
-
-        imgui_isGaussianCurvature = 1;
-        imgui_isExtendFlatShading = 0;
-        imgui_isGouraudShading = 0;
-        imgui_isLinearInterpolation = 0;
-        break;
 
     case 4: // linear interpolation Gaussian Curvature
         vertex_shader = "vertexShaderGC.vs";
@@ -651,7 +637,6 @@ void set_parameters_shader(int selected_shader)
 
         imgui_isGaussianCurvature = 1;
         imgui_isGouraudShading = 0;
-        imgui_isLinearInterpolation = 0;
         imgui_isExtendFlatShading = 0;
         break;
 
@@ -662,20 +647,18 @@ void set_parameters_shader(int selected_shader)
 
         imgui_isGaussianCurvature = 0;
         imgui_isGouraudShading = 0;
-        imgui_isLinearInterpolation = 0;
         imgui_isExtendFlatShading = 0;
         imgui_isMeanCurvatureShading = 1;
         break;
 
-    default: // linear interpolation
-        vertex_shader = "vertexShaderLI.vs";
-        fragment_shader = "fragmentShader.fs";
-        geometry_shader = NULL;
+    default: // gaussian curvature (3)
+        vertex_shader = "vertexShaderGC.vs";
+        fragment_shader = "maxDiagramFragmentShader.fs";
+        geometry_shader = "geometryShader.gs";
 
-        imgui_isLinearInterpolation = 1;
+        imgui_isGaussianCurvature = 1;
         imgui_isExtendFlatShading = 0;
         imgui_isGouraudShading = 0;
-        imgui_isGaussianCurvature = 0;
         break;
     }
 }
