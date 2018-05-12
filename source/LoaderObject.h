@@ -66,6 +66,9 @@ struct edge
 // map for struct edge
 std::map<vector<int>, edge> map_edge; // key: [index_v1, index_v2]    val: struct edge
 
+// vector that contains a new surface area for each vertex x, denoted A_Mixed: for each non-obtuse triangle, we
+// use the circumcenter point, and for each obtuse triangle, we use the midpoint
+// of the edge opposite to the obtuse angle
 vector<float> area_mixed;
 // -------------------------
 
@@ -93,17 +96,17 @@ void insert_edge(int index_v1, int index_v2, vector<int> key, vector<int> key_2,
         if (index_v1 < index_v2)
             it->second.n1 = n;
         else
-            it->second.n2 = n;
+            it->second.n2 = n; // reverse
     }
     else if (it_reverse != map_edge.end())
     { // update information edge struct
         if (index_v1 < index_v2)
             it_reverse->second.n1 = n;
         else
-            it_reverse->second.n2 = n;
+            it_reverse->second.n2 = n; // reverse
     }
     else
-    {            // create new edge struct
+    {   // create new edge struct
         edge e1; // struct
         e1.length = get_distance_points(v[index_v1], v[index_v2]);
         if (index_v1 < index_v2)
@@ -146,7 +149,6 @@ int get_mean_curvature(int index_v1, int index_v2, vector<int> key, vector<int> 
         return it_reverse->second.value_mean_curvature;
     }
 
-    // cout << key[0] << " " <<  key[1] << endl;
     // no mean curvature value found
     cout << "ERROR MEAN CURVATURE" << endl;
     exit(-1);
@@ -159,12 +161,9 @@ void set_min_max(Point3d current)
 {
     if (first_min_max)
     {
-        cout << "min_coord " << min_coord << endl;
-
         min_coord = fmin(fmin(current.x(), current.y()), current.z());
         max_coord = fmax(fmax(current.x(), current.y()), current.z());
         first_min_max = false;
-        cout << "min_coord 2: " << min_coord << endl;
         return;
     }
     min_coord = fmin(fmin(current.x(), current.y()), fmin(current.z(), min_coord));
@@ -192,7 +191,7 @@ double get_min_coord()
 */
 Point3d get_rescaled_value(Point3d value)
 {
-    return value; // need to remove afer
+    return value; // TODO: need to remove afer
     return interval / (max_coord - min_coord) * (value - max_coord) + 1; //1 is the max of interval
 }
 
@@ -223,7 +222,8 @@ double get_cotangent(double angle){
 }
 
 /**
- * Function to get Voronoi region of vertex P in triangle [P, Q, R]
+ * Function to get Voronoi region of vertex P in triangle [P, Q, R].
+ * See paper http://www.geometry.caltech.edu/pubs/DMSB_III.pdf (section 3.3)
  */
 double get_voronoi_region_triangle(int index_triangle, int P_index, int Q_index, int R_index, float Q_angle, float R_angle){
     Point3d P = get_rescaled_value(v[t[index_triangle].v[P_index]]);
@@ -232,7 +232,6 @@ double get_voronoi_region_triangle(int index_triangle, int P_index, int Q_index,
     double first_part = pow(get_distance_points(P, R), 2) * get_cotangent(Q_angle);
     double second_part = pow(get_distance_points(P, Q), 2) * get_cotangent(R_angle);
     return 1/8 * (first_part + second_part);
-
 }
 
 /**
@@ -330,12 +329,14 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
     // find gaussian curvature
     vector<float> triangle_gc(num_triangles * 9);
 
-    color_li.resize(num_triangles * 9);
     vector<float> value_gc_summed(num_vertices);
     std::fill(value_gc_summed.begin(), value_gc_summed.end(), 0);
 
     area_mixed.resize(num_vertices);
     std::fill(area_mixed.begin(), area_mixed.end(), 0);
+    // ---
+
+    color_li.resize(num_triangles * 9);
 
     // mean curvature
     vector<float> triangle_mc(num_triangles * 9);
