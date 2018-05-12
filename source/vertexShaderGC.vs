@@ -9,6 +9,8 @@
     uniform mat4 view;
     uniform mat4 projection;
 
+    uniform float min_gc;
+    uniform float max_gc;
     uniform float custom_min;
     uniform float custom_max;
     uniform bool custom_flag;
@@ -23,14 +25,14 @@
        vec3 green = vec3(0.0, 1.0, 0.0);
        vec3 blue = vec3(0.0, 0.0, 1.0);
 
-       if (val < 0) { //negative numbers until 0 -> map from red to green
+       if (val < 0) { //negative numbers until 0
             if(custom_flag && val < custom_min)
                 return vec4(red, 1.0);
-            return vec4(interpolation(red, green, val), 1.0); //divide val by min_curvature
-        } else { //map from green to blue, from 0 to positive
+            return vec4(interpolation(blue, green, val), 1.0);
+        } else { //from 0 to positive
             if(custom_flag && val > custom_max)
                 return vec4(blue, 1.0);
-            return vec4(interpolation(green, blue, val), 1.0); //divide val by max_curvature
+            return vec4(interpolation(green, red, val), 1.0);
         }
     }
 

@@ -246,6 +246,8 @@ int main(int argc, char *argv[])
         }
         else if (imgui_isGaussianCurvature)
         {
+            ourShader.setFloat("min_gc", object.get_minimum_gaussian_curvature_value());
+            ourShader.setFloat("max_gc", object.get_maximum_gaussian_curvature_value());
             if (gc_set == 3)
             {
                 ourShader.setBool("custom_flag", true);
@@ -775,6 +777,7 @@ void analyse_gaussian_curvature(GLFWwindow *window)
     }
     else
     {
+
         if (!min_val || !max_val)
         {
             min_gc = object.get_minimum_gaussian_curvature_value();
@@ -786,6 +789,10 @@ void analyse_gaussian_curvature(GLFWwindow *window)
             max_gc = max_val;
         }
     }
+
+    //  cout << min_gc << endl;
+    //  cout << max_gc << endl;
+
     ImGui::TextWrapped("\n\nNegative values are mapped from red to green and positive values from green to blue.\n");
     ImGui::Text("min = %f, max = %f", min_gc, max_gc);
     min_val = (float)min_gc;

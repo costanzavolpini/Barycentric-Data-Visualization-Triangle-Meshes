@@ -159,9 +159,12 @@ void set_min_max(Point3d current)
 {
     if (first_min_max)
     {
+        cout << "min_coord " << min_coord << endl;
+
         min_coord = fmin(fmin(current.x(), current.y()), current.z());
         max_coord = fmax(fmax(current.x(), current.y()), current.z());
         first_min_max = false;
+        cout << "min_coord 2: " << min_coord << endl;
         return;
     }
     min_coord = fmin(fmin(current.x(), current.y()), fmin(current.z(), min_coord));
@@ -233,7 +236,8 @@ double get_voronoi_region_triangle(int index_triangle, int P_index, int Q_index,
 }
 
 /**
- * Calculate Area mixed, given the index of the triangle, index of the  vertex and 3 angles of the triangle
+ * Calculate Area mixed, given the index of the triangle, index of the  vertex and 3 angles of the triangle.
+ * This function will be called for each triangle T from the 1-ring neighborhood of x (current angle)
 */
 void calculate_A_mixed(int index_triangle, int index_vertex, int index_vertex_other, int index_vertex_other1, float current_angle, float other_angle, float other_angle_1){
     if(current_angle <= 90 && other_angle <= 90 && other_angle_1 <= 0) // Triangle is not obtuse -> Voronoi-safe
@@ -355,11 +359,6 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         Point3d v1 = get_rescaled_value(v[t[k].v[1]]);
         Point3d v2 = get_rescaled_value(v[t[k].v[2]]);
 
-        cout << "TRIANGLE " << endl;
-        cout << "v0 " << v0 << endl;
-        cout  << "v1 " <<  v1 << endl;
-        cout  << "v2 " <<  v2 << endl;
-
         //normals
         // for every triangle face compute face normal and normalize it
         Point3d n = (v1 - v0) ^ (v2 - v0);
@@ -406,22 +405,14 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         Point3d v0v2 = v2 - v0;
         double angle_1 = v0v1.getAngle(v0v2);
 
-        cout << "angle_1 with v0v2 " << angle_1 << endl;
-
         // VERTEX 2
         // v2 -> v1 -> v0
         Point3d v1v2 = v2 - v1;
         double angle_2 = v1v2.getAngle(-v0v1);
 
-        cout << "angle_2 with -v0v1 " << angle_2 << endl;
-
         // VERTEX 3
         // v0 -> v2 -> v1
         double angle_3 = v0v2.getAngle(v1v2);
-
-        cout << "angle_3 with v0v2 with v1v2 " << angle_3 << endl;
-
-        cout << "end!! --------- " << endl;
 
         // for each vertex of the triangle updated its value of gc (sum_(j=1)^(#faces around this vertex) vertex_j)
         value_gc_summed[t[k].v[0]] += angle_1;
@@ -447,15 +438,14 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
     // add everything to triangle gaussian curvature
     for (int k = 0; k < num_triangles; k++)
     {
-        triangle_gc[9 * k]  = (2 * M_PI - value_gc_summed[t[k].v[0]]) / area_mixed[t[k].v[0]]; //vertex 0
-        triangle_gc[9 * k + 3] = (2 * M_PI - value_gc_summed[t[k].v[1]]) / area_mixed[t[k].v[1]]; //vertex 1
-        triangle_gc[9 * k + 6] = (2 * M_PI - value_gc_summed[t[k].v[2]]) / area_mixed[t[k].v[2]]; //vertex 2
+        triangle_gc[9 * k]  = triangle_gc[9 * k + 1] = triangle_gc[9 * k + 2] = (2 * M_PI - value_gc_summed[t[k].v[0]]) / area_mixed[t[k].v[0]]; //vertex 0
+        triangle_gc[9 * k + 3] = triangle_gc[9 * k + 4] = triangle_gc[9 * k + 5] = (2 * M_PI - value_gc_summed[t[k].v[1]]) / area_mixed[t[k].v[1]]; //vertex 1
+        triangle_gc[9 * k + 6] = triangle_gc[9 * k + 7] = triangle_gc[9 * k + 8] = (2 * M_PI - value_gc_summed[t[k].v[2]]) / area_mixed[t[k].v[2]]; //vertex 2
 
-        cout << "1: " << 2 * M_PI - value_gc_summed[t[k].v[0]] << endl;
-        cout << "2: " << 2 * M_PI - value_gc_summed[t[k].v[1]] << endl;
-        cout << "3: " << 2 * M_PI - value_gc_summed[t[k].v[2]] << endl;
 
-        triangle_gc[9 * k + 1] = triangle_gc[9 * k + 2] = triangle_gc[9 * k + 4] = triangle_gc[9 * k + 5] = triangle_gc[9 * k + 7] = triangle_gc[9 * k + 8] = 0.0f;
+        cout << "1: " << (2 * M_PI - value_gc_summed[t[k].v[0]]) / area_mixed[t[k].v[0]] << endl;
+        cout << "2: " << (2 * M_PI - value_gc_summed[t[k].v[1]]) / area_mixed[t[k].v[1]] << endl;
+        cout << "3: " << (2 * M_PI - value_gc_summed[t[k].v[2]]) / area_mixed[t[k].v[2]] << endl;
     }
 
     // -------------- END GAUSSIAN CURVATURE -----------------
