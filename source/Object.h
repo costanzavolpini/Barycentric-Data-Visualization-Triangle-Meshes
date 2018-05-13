@@ -24,8 +24,14 @@ class Object
 
     vector<float> triangle_gc_modified_auto; //outliers gc
     vector<float> triangle_gc_selected;
+
+    vector<float> triangle_mc_modified_auto; //outliers mc
+    vector<float> triangle_mc_selected;
+
     int type_gc = 2;
+
     GCHelper gc_helper = GCHelper();
+    GCHelper mc_helper = GCHelper();
 
     /**
         Memory on the GPU where we store the vertex data
@@ -88,12 +94,45 @@ class Object
         triangle_gc_selected = triangle_gc_modified_auto;
     }
 
+    void auto_detect_outliers_mc() //mean curvature
+    {
+        // clean
+        triangle_mc_modified_auto.shrink_to_fit();
+        triangle_mc_selected.shrink_to_fit();
+        mc_helper.clean();
+
+        // autodetect gaussian curvature outliers, variance...etc.
+        int number_triangles = triangle_mc.size() / 9;
+
+        // add everything to triangle gaussian curvature
+        for (int k = 0; k < number_triangles; k++)
+        {
+            mc_helper.update_statistics_data(triangle_mc[9 * k]);
+            mc_helper.update_statistics_data(triangle_mc[9 * k + 3]);
+            mc_helper.update_statistics_data(triangle_mc[9 * k + 6]);
+        }
+
+        mc_helper.finalize_statistics_data();
+
+        triangle_mc_modified_auto.resize(triangle_mc.size());
+
+        for (int k = 0; k < number_triangles; k++)
+        { // update to remove noisy (smoothing)
+            triangle_mc_modified_auto[9 * k] = triangle_mc_modified_auto[9 * k + 1] = triangle_mc_modified_auto[9 * k + 2] = mc_helper.cut_data_gaussian_curvature(triangle_mc[9 * k]);
+            triangle_mc_modified_auto[9 * k + 3] = triangle_mc_modified_auto[9 * k + 4] = triangle_mc_modified_auto[9 * k + 5] = mc_helper.cut_data_gaussian_curvature(triangle_mc[9 * k + 3]);
+            triangle_mc_modified_auto[9 * k + 6] = triangle_mc_modified_auto[9 * k + 7] = triangle_mc_modified_auto[9 * k + 8] = mc_helper.cut_data_gaussian_curvature(triangle_mc[9 * k + 6]);
+        }
+        triangle_mc_selected = triangle_mc_modified_auto;
+    }
+
     // Function to initialize VBO and VAO
     // name file and the second it is the method gc
     void init()
     {
         auto_detect_outliers_gc(); // auto_detect_outliers_gc
         set_selected_gc();         // set_selected_gc
+
+        auto_detect_outliers_mc();
 
         // ------------- VBO -------------
         // Use VBO to avoid to send data vertex at a time (we send everything together)
@@ -127,7 +166,7 @@ class Object
 
         glBindBuffer(GL_ARRAY_BUFFER, VBO_MEANCURVATURE);
 
-        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_mc.size(), &triangle_mc[0], GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_mc_selected.size(), &triangle_mc_selected[0], GL_STATIC_DRAW);
 
         // ------------- VAO -------------
         glGenVertexArrays(1, &VAO);

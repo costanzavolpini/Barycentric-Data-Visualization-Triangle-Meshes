@@ -130,7 +130,7 @@ void insert_edge(int index_v1, int index_v2, vector<int> key, vector<int> key_2,
 /**
  * Function to get the value of mean curvature of an edge from the edge-map.
  */
-int get_mean_curvature(int index_v1, int index_v2, vector<int> key, vector<int> key_2)
+float get_mean_curvature(int index_v1, int index_v2, vector<int> key, vector<int> key_2)
 {
     std::map<vector<int>, edge>::iterator it;         // iterator
     std::map<vector<int>, edge>::iterator it_reverse; // iterator for reverse vertices index
@@ -437,7 +437,7 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         // v2 -> v1v3 {index_v3, index_v1};
         // v3 -> v2v1 {index_v1, index_v2};
 
-        int mc_1, mc_2, mc_3;
+        float mc_1, mc_2, mc_3;
 
         int index_v1 = t[k].v[0];
         int index_v2 = t[k].v[1];
