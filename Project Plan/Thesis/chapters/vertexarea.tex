@@ -1,11 +1,11 @@
 \label{section:vertex-area-chapter}
 Alternative data visualization techniques can be found using the power of barycentric coordinates and GPU programming.
-
 The usual way to visualize data for a triangle mesh is to associate data to vertices and then interpolating over the mesh triangles, that does not work in case of edges and triangles.
 
-\section{Region around a vertex}
-We can split the surface of triangle meshes into regions around vertex (Fig. \ref{fig:vertex-area}) and color them.
+%%%%%%%%%%%%%
 
+\subsection{Region around a vertex}
+We can split the surface of triangle meshes into regions around vertex (Fig. \ref{fig:vertex-area}) and color them.
 These regions can be determined using barycentric coordinates and GPU fragment program. Visualizing data given at the vertices or edges of the mesh in a piecewise constant simulates the classical triangle flat shading.
 An example of this vertex data is the discrete Gaussian curvature.
 \begin{figure}[h]
@@ -20,35 +20,38 @@ An example of this vertex data is the discrete Gaussian curvature.
     \endminipage
 \end{figure}
 
+%%%%%%%%%%%%%
 
-\subsection{Max diagram - Vertex based area} \label{section:max-diagram}
-Passing barycentric coordinates to the fragment shader will clearly demonstrate that we can get results different from the classic color interpolation.
-
+\subsubsection{Max diagram - Vertex based area} \label{section:max-diagram}
+Passing barycentric coordinates to the \textit{fragment shader} will clearly demonstrate that we can get results different from the classic color interpolation.
+%https://www.redblobgames.com/x/1730-terrain-shader-experiments/
+\cite{WEBSITE:1}
+%----------
 There are different approaches to color interpolation focusing on the distance from vertices. For each point in a triangle, we can easily determine its closest vertex, which we use as a cue for coloring.
-
 A different approach from interpolating, can be found coloring vertex areas based on the minimum barycentric coordinate.
 The color is given by the region farthest from a vertex (Fig. \ref{fig:max-diagram}, Pseudocode \ref{appendix:max-diagram}).
 
-\section{Flat shading extension} \label{section:extend-flat-shading-lighting}
-Suppose now that you want each vertex area to be in one constant color. This color can be taken from shading interpolation using the normal at the vertex and the vertex position. Then you can compute the color has it be done in \textit{Gouraud Shading}.
+%%%%%%%%%%%%%
 
+\subsection{Flat shading extension} \label{section:extend-flat-shading-lighting}
+An extension of \textit{flat shading} would be to have each vertex area to be in one constant color. This color can be taken from shading interpolation using the normal at the vertex and the vertex position.
+The color will then be computed as in \textit{Gouraud shading}.
 The idea is to compute the color per vertex but instead of linearly interpolated it in each triangle (as \textit{Gouraud shading} does) we color regions around a vertex with that constant color.
+To implement it, the barycentric coordinates, the vertex color, the normal at the vertex and the lighting calculations must be passed to the \textit{fragment shader}.
+We want to avoid an automatic interpolation of colors, in order to return the resulting color using the \textit{max diagram} we have used a \textit{Geometry shader} that have access to all three vertex colors in \textit{fragment shader}. (Pseudocodes: \ref{appendix:vs-flat-shading-lighting}, \ref{appendix:gs-flat-shading-lighting}, \ref{appendix:fs-flat-shading-lighting})
 
-To implement that we need to pass the barycentric coordinates, the vertex color, the normal at the vertex and the lighting calculations to the \textit{fragment shader}.
-
-We want to avoid an automatic interpolation of colors, in order to return the resulting color using the \textit{max diagram}, to do that we have used a \textit{Geometry shader} in order to access to all three vertex colors in fragment shader. (Pseudocodes: \ref{appendix:vs-flat-shading-lighting}, \ref{appendix:gs-flat-shading-lighting}, \ref{appendix:fs-flat-shading-lighting})
-
-\subsection{Comparison}
+\subsubsection{Comparison}
 Gouraud shading vs extension flat shading.
+TODO
 
 %%%
-\section{Discrete Gaussian Curvature}
+\subsection{Discrete Gaussian Curvature}
 \label{section:vertex-area-gaussian-curvature}
-We want to compute the \textit{Gaussian curvature} per vertex. We want to sum up, for each vertex, angles at this vertex with adjacent triangles and then we subtract this value to $2\pi$.
+Another interesting alternative data visualization technique is to compute the \textit{Gaussian curvature} per vertex. That can be done summing up, for each vertex, angles at this vertex with adjacent triangles and then subtracting this value to $2\pi$.
 After having obtain this value, called \textit{angle defect} (Fig. \ref{fig:gc-angle}), we map linearly this value to a color range.
-
-Then we can pass this color to the \textit{vertex shader} to see the color vertex flat shading visualisation of Gaussian curvature.
-$$G = 2\pi - \sum_j \theta_j$$
+The resulting color will be the vertex flat shading visualisation of \textit{Gaussian curvature}.
+$$K(V) = 2\pi - \sum_j \theta_j$$
+%%
 \begin{figure}[!h]
     \centering
     \begin{tikzpicture}
@@ -63,33 +66,36 @@ $$G = 2\pi - \sum_j \theta_j$$
     \end{tikzpicture}
     \caption{Angle defect}\label{fig:gc-angle}
 \end{figure}
-
-\textit{Gaussian curvature} should return a constant color around each vertex (Fig. \ref{fig:gc-icosahedron}, Pseudocode \ref{appendix:vs-gaussiancurvature}).
+%%
+\textit{Gaussian curvature} returns a constant color around each vertex (Fig. \ref{fig:gc-icosahedron}, Pseudocode \ref{appendix:vs-gaussiancurvature}).
 \begin{figure}[h]
     \centering
     \includegraphics[scale=0.2]{images/gaussian-ball.png}
     \caption{Gaussian curvature on icosahedron}\label{fig:gc-icosahedron}
 \end{figure}
+TODO: update image 3.4
+%%%%%%%%
 
+\subsection{Interpolated Gaussian Curvature}
+aka Gouraud Shading Gaussian Curvature
+TODO
 
-\subsection{Comparison}
-We want now to compare the classic linear interpolation visualisation (Fig. \ref{fig:interpolation-horse}) with two possible way to extend the flat shading. In Fig. \ref{fig:lighting-horse} and Fig. \ref{fig:gaussian-horse} we have color each vertex area applying the method \textit{max diagram} described in the above subsection \ref{section:max-diagram}.
-As we can see in Fig. \ref{fig:lighting-horse} and Fig. \ref{fig:gaussian-horse}, the horse get a more realistic shape thanks to the lighting calculation for Fig. \ref{fig:lighting-horse} and to the \textit{Gaussian curvature} for Fig. \ref{fig:gaussian-horse}.
+\subsubsection{Comparison}
+We want now to compare the \textit{Gaussian curvature} (Fig. \ref{fig:gaussian-interpolated-horse}) with the \textit{interpolated Gaussian curvature}. In Fig. \ref{fig:gaussian-horse} each vertex area is colored applying the method \textit{max diagram} described in the above subsection \ref{section:max-diagram}. Instead, in Fig. \ref{fig:gaussian-interpolated-horse} the color is obtained with a linear interpolation.
 \begin{figure}[!htb]
-  \minipage{0.32\textwidth}
-    \includegraphics[width=\linewidth]{images/linear-horse.png}
-    \caption{Interpolation}\label{fig:interpolation-horse}
+\centering
+  \minipage{0.4\textwidth}
+    % \includegraphics[width=\linewidth]{images/}
+    \caption{Interpolated Gaussian curvature} \label{fig:gaussian-interpolated-horse}
   \endminipage\hfill
-  \minipage{0.32\textwidth}
-%     \includegraphics[width=\linewidth]{flat.png}
-    \caption{Lighting calculation}\label{fig:lighting-horse}
-  \endminipage\hfill
-  \minipage{0.32\textwidth}%
+  \centering
+  \minipage{0.4\textwidth}%
     \includegraphics[width=\linewidth]{images/gaussian-horse.png}
-    \caption{Gaussian Curvature}\label{fig:gaussian-horse}
+    \caption{Gaussian curvature}\label{fig:gaussian-horse}
   \endminipage
   \end{figure}
 
-Visualization of the principal curvatures of the model as colors from blue (highest values of curvature) to red (lower values of curvature), Fig. \ref{fig:gaussian-horse}, better highlighs the geometry of the horse.
-These changes of curvature, positive (blue), flat (green) and negative regions (red), better emphasises the 3-dimensionality of the model. \textit{Gaussian curvature} better shows the muscle constrasts given a more realistic character to the horse than the model obtained using the lighting calculation.
-
+Visualization of the principal curvatures of the model as colors from blue (highest values of curvature) to red (lower values of curvature), in both Fig. \ref{fig:gaussian-horse} and Fig. \ref{fig:gaussian-interpolated-horse}, better highlighs the geometry of the horse.
+These changes of curvature, positive (blue), flat (green) and negative regions (red), better emphasises the 3-dimensionality of the model.
+TODO
+% \textit{Gaussian curvature} better shows the muscle constrasts given a more realistic character to the horse than the model obtained using the \textit{interpolated Gaussian curvature}.
