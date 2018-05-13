@@ -614,6 +614,7 @@ void set_parameters_shader(int selected_shader)
         imgui_isExtendFlatShading = 1;
         imgui_isGaussianCurvature = 0;
         imgui_isGouraudShading = 0;
+        imgui_isMeanCurvatureShading = 0;
         break;
 
         // ---------
@@ -626,6 +627,7 @@ void set_parameters_shader(int selected_shader)
         imgui_isGouraudShading = 1;
         imgui_isExtendFlatShading = 0;
         imgui_isGaussianCurvature = 0;
+        imgui_isMeanCurvatureShading = 0;
         break;
 
         // ---------
@@ -638,6 +640,7 @@ void set_parameters_shader(int selected_shader)
         imgui_isGaussianCurvature = 1;
         imgui_isGouraudShading = 0;
         imgui_isExtendFlatShading = 0;
+        imgui_isMeanCurvatureShading = 0;
         break;
 
     case 5: // mean curvature
@@ -659,6 +662,7 @@ void set_parameters_shader(int selected_shader)
         imgui_isGaussianCurvature = 1;
         imgui_isExtendFlatShading = 0;
         imgui_isGouraudShading = 0;
+        imgui_isMeanCurvatureShading = 0;
         break;
     }
 }
@@ -733,12 +737,12 @@ void analyse_gaussian_curvature(GLFWwindow *window)
     const char *names_auto[] = {"GC", "ZERO", "MEAN"};
     const ImColor colors_auto[3] = {green, white, red};
 
-    std::vector<float> mean(size, object.gc_helper.mean);
+    std::vector<float> mean_gc(size, object.gc_helper.mean);
 
     const float **datas_initialize_auto = new const float *[3];
     datas_initialize_auto[0] = &object.triangle_gc_modified_auto[0];
     datas_initialize_auto[1] = &zeros[0];
-    datas_initialize_auto[2] = &mean[0];
+    datas_initialize_auto[2] = &mean_gc[0];
 
     const float *const *datas_auto = datas_initialize_auto;
 
@@ -791,8 +795,8 @@ void analyse_gaussian_curvature(GLFWwindow *window)
         glDeleteTextures(1, &rendered_texture);
         glDeleteRenderbuffers(1, &depth_render_buffer);
 
-        mean.clear();
-        mean.shrink_to_fit();
+        mean_gc.clear();
+        mean_gc.shrink_to_fit();
 
         initialize_texture_object(window, false);
     }

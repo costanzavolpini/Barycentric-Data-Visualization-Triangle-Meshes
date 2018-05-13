@@ -2,7 +2,7 @@
 // Vertex Shader for mean curvature
 // IMPLEMENT
     layout (location = 0) in vec3 aPos;
-    layout (location = 2) in vec3 mean_curvature;
+    layout (location = 3) in vec3 mean_curvature;
 
     uniform mat4 model;
     uniform mat4 view;

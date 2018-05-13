@@ -31,7 +31,7 @@ class Object
         Memory on the GPU where we store the vertex data
         VBO: manage this memory via so called vertex buffer objects (VBO) that can store a large number of vertices in the GPU's memory
     */
-    unsigned int VBO, VAO, VBO_NORMAL, VBO_GAUSSIANCURVATURE;
+    unsigned int VBO, VAO, VBO_NORMAL, VBO_GAUSSIANCURVATURE, VBO_MEANCURVATURE;
 
     // Constructor
     void set_file(const std::string &_path)
@@ -122,6 +122,13 @@ class Object
 
         glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_gc_selected.size(), &triangle_gc_selected[0], GL_STATIC_DRAW);
 
+        // VBO_MEANCURVATURE
+        glGenBuffers(1, &VBO_MEANCURVATURE); //generate buffer, bufferID = 1
+
+        glBindBuffer(GL_ARRAY_BUFFER, VBO_MEANCURVATURE);
+
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_mc.size(), &triangle_mc[0], GL_STATIC_DRAW);
+
         // ------------- VAO -------------
         glGenVertexArrays(1, &VAO);
 
@@ -155,6 +162,11 @@ class Object
         glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)(0 * sizeof(float)));
         glEnableVertexAttribArray(2); //this 2 is referred to the layout on shader
 
+        // mean curvature
+        glBindBuffer(GL_ARRAY_BUFFER, VBO_MEANCURVATURE);
+        //normal attribute
+        glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)(0 * sizeof(float)));
+        glEnableVertexAttribArray(3); //this 2 is referred to the layout on shader
 
         /**
             Unbind the VAO so other VAO calls won't accidentally modify this VAO, but this rarely happens.
@@ -191,6 +203,7 @@ class Object
         glDeleteBuffers(1, &VBO);
         glDeleteBuffers(1, &VBO_NORMAL);
         glDeleteBuffers(1, &VBO_GAUSSIANCURVATURE);
+        glDeleteBuffers(1, &VBO_MEANCURVATURE);
     }
 
     // Point3d interpolation(Point3d v0, Point3d v1, float t) {
