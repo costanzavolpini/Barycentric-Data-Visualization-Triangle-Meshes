@@ -185,27 +185,11 @@ void set_max_min_mesh()
 }
 
 /**
- * Function to get the maximum value found in coords of an object.
-*/
-double get_max_coord()
-{
-    return max_coord;
-}
-
-/**
- * Function to get the minimum value found in coords of an object.
-*/
-double get_min_coord()
-{
-    return min_coord;
-}
-
-/**
  * Function to rescale a coord such that the coords is in a range between -1 and 1.
 */
 Point3d get_rescaled_value(Point3d value)
 {
-    return value;                                                        // TODO: need to remove afer
+    // return value;                                                        // TODO: need to remove afer
     return interval / (max_coord - min_coord) * (value - max_coord) + 1; //1 is the max of interval
 }
 
@@ -268,7 +252,6 @@ void calculate_A_mixed(int index_triangle, int index_vertex, int index_vertex_ot
         else // not-obtuse triangle
             area_mixed[index_vertex] += get_area_triangle(index_triangle) / 4;
     }
-    cout << "ej" << endl;
 }
 
 /**
@@ -431,6 +414,11 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         out_gc.push_back(((2 * M_PI) - value_angle_defeact_sum[t[k].v[0]]) / area_mixed[t[k].v[0]]);
         out_gc.push_back(((2 * M_PI) - value_angle_defeact_sum[t[k].v[0]]) / area_mixed[t[k].v[0]]);
         out_gc.push_back(((2 * M_PI) - value_angle_defeact_sum[t[k].v[0]]) / area_mixed[t[k].v[0]]);
+
+        // cout << "1: " << ((2 * M_PI) - value_angle_defeact_sum[t[k].v[0]]) / area_mixed[t[k].v[0]] << endl;
+        // cout << "2: " << ((2 * M_PI) - value_angle_defeact_sum[t[k].v[1]]) / area_mixed[t[k].v[1]] << endl;
+        // cout << "3: " << ((2 * M_PI) - value_angle_defeact_sum[t[k].v[2]]) / area_mixed[t[k].v[2]] << endl;
+
 
         // vertex 1
         out_gc.push_back(((2 * M_PI) - value_angle_defeact_sum[t[k].v[1]]) / area_mixed[t[k].v[1]]);
