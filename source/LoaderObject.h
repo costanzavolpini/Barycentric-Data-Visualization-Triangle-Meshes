@@ -81,34 +81,38 @@ double get_distance_points(Point3d v0, Point3d v1)
 /**
  * Function to insert a struct edge inside edge-map.
  */
-void insert_edge(int index_v1, int index_v2, vector<int> key, vector<int> key_2, Point3d n)
+void insert_edge(int index_v1, int index_v2, bool isCorrectOrder, Point3d n)
 {
-    std::map<vector<int>, edge>::iterator it;         // iterator
-    std::map<vector<int>, edge>::iterator it_reverse; // iterator for reverse vertices index
+    vector<int> key(2);
+    if(isCorrectOrder){
+        key[0] = index_v1;
+        key[1] = index_v2;
+    }
+    else{
+        key[0] = index_v2;
+        key[1] = index_v1;
+    }
+
+    std::map<vector<int>, edge>::iterator it;// iterator
 
     // convention: from smaller to higher index
     it = map_edge.find(key);
-    it_reverse = map_edge.find(key_2);
 
     if (it != map_edge.end()) // update information edge struct if exist
     {
-        if (index_v1 < index_v2)
+        cout << "i1: " << index_v1 << endl;
+        cout << "i2: " << index_v2 << endl;
+
+        if(isCorrectOrder)
             it->second.n1 = n;
         else
-            it->second.n2 = n; // reverse
-    }
-    else if (it_reverse != map_edge.end())
-    { // update information edge struct
-        if (index_v1 < index_v2)
-            it_reverse->second.n1 = n;
-        else
-            it_reverse->second.n2 = n; // reverse
+            it->second.n2 = n;
     }
     else
     {            // create new edge struct
         edge e1; // struct
         e1.length = get_distance_points(v[index_v1], v[index_v2]);
-        if (index_v1 < index_v2)
+        if (isCorrectOrder) // index_v1 < index_v2
         {
             // correct order
             e1.index_v1 = index_v1;
@@ -363,18 +367,26 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         int index_v2 = t[k].v[1];
         int index_v3 = t[k].v[2];
 
-        // index vertices for edges
-        vector<int> v2v1 = {index_v1, index_v2};
-        vector<int> v1v3 = {index_v3, index_v1};
-        vector<int> v3v2 = {index_v2, index_v3};
+        bool isCorrectedOrder = false;
 
-        vector<int> v2v1_reverse = {index_v2, index_v1};
-        vector<int> v1v3_reverse = {index_v1, index_v3};
-        vector<int> v3v2_reverse = {index_v3, index_v2};
+        if(index_v1 < index_v2)
+            isCorrectedOrder = true;
 
-        insert_edge(index_v1, index_v2, v2v1, v2v1_reverse, n);
-        insert_edge(index_v3, index_v1, v1v3, v1v3_reverse, n);
-        insert_edge(index_v2, index_v3, v3v2, v3v2_reverse, n);
+        insert_edge(index_v1, index_v2, isCorrectedOrder, n);
+
+        isCorrectedOrder = false;
+
+        if(index_v3 < index_v1)
+            isCorrectedOrder = true;
+
+        insert_edge(index_v3, index_v1, isCorrectedOrder, n);
+
+        isCorrectedOrder = false;
+
+        if(index_v2 < index_v3)
+            isCorrectedOrder = true;
+
+        insert_edge(index_v2, index_v3, isCorrectedOrder, n);
 
         // -------------- end mean curvature --------------
 
