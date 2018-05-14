@@ -194,8 +194,8 @@ void set_max_min_mesh()
 */
 Point3d get_rescaled_value(Point3d value)
 {
-    // return value;                                                        // TODO: need to remove afer
-    return interval / (max_coord - min_coord) * (value - max_coord) + 1; //1 is the max of interval
+    return value;                                                        // TODO: need to remove afer
+    // return interval / (max_coord - min_coord) * (value - max_coord) + 1; //1 is the max of interval
 }
 
 /**
@@ -259,7 +259,6 @@ void calculate_A_mixed(int index_triangle, int index_vertex, int index_vertex_ot
     }
     else // Voronoi inappropriate
     {
-        cout << "NOoooooo" << endl;
         if (is_obtuse_angle(current_angle)) //obtuse angle
             area_mixed[index_vertex] += get_area_triangle(index_triangle) / 2;
         else // not-obtuse triangle
@@ -405,14 +404,14 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         // v1 -> v0 -> v2
         Point3d v0v1 = v1 - v0;
         Point3d v0v2 = v2 - v0;
-        // v0v1.normalize();
-        // v0v2.normalize();
+        v0v1.normalize();
+        v0v2.normalize();
         double angle_v1v0v2 = v0v1.getAngle(v0v2);
 
         // vertex 2
         // v2 -> v1 -> v0
         Point3d v1v2 = v2 - v1;
-        // v1v2.normalize();
+        v1v2.normalize();
         double angle_v2v1v0 = v1v2.getAngle(-v0v1); // -v0v1 = v1v0
 
         // vertex 3
