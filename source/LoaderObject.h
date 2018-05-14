@@ -252,11 +252,7 @@ bool is_obtuse_angle(float angle){
 */
 void calculate_A_mixed(int index_triangle, int index_vertex, int index_vertex_other, int index_vertex_other1, float current_angle, float other_angle, float other_angle_1)
 {
-    // cout << "--------" << endl;
-    // cout << current_angle << endl;
-    // cout << is_obtuse_angle(current_angle) << endl;
-    // cout << "--------" << endl;
-    if (!is_obtuse_angle(current_angle) && !is_obtuse_angle(other_angle) && !is_obtuse_angle(other_angle_1 <= 90.0f)) // Triangle is not obtuse -> Voronoi-safe
+    if (!is_obtuse_angle(current_angle) && !is_obtuse_angle(other_angle) && !is_obtuse_angle(other_angle_1)) // Triangle is not obtuse -> Voronoi-safe
     {
         // Voronoi region of x in T
         area_mixed[index_vertex] += get_voronoi_region_triangle(index_vertex, index_vertex_other, index_vertex_other1, other_angle, other_angle_1);
@@ -409,19 +405,19 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         // v1 -> v0 -> v2
         Point3d v0v1 = v1 - v0;
         Point3d v0v2 = v2 - v0;
-        v0v1.normalize();
-        v0v2.normalize();
-        double angle_v1v0v2 = v0v1.getAngleRadians(v0v2);
+        // v0v1.normalize();
+        // v0v2.normalize();
+        double angle_v1v0v2 = v0v1.getAngle(v0v2);
 
         // vertex 2
         // v2 -> v1 -> v0
         Point3d v1v2 = v2 - v1;
-        v1v2.normalize();
-        double angle_v2v1v0 = v1v2.getAngleRadians(-v0v1); // -v0v1 = v1v0
+        // v1v2.normalize();
+        double angle_v2v1v0 = v1v2.getAngle(-v0v1); // -v0v1 = v1v0
 
         // vertex 3
         // v0 -> v2 -> v1
-        double angle_v0v2v1 = (-v0v2).getAngleRadians(-v1v2); // same as v0v2.getAngle(v1v2)
+        double angle_v0v2v1 = (-v0v2).getAngle(-v1v2); // same as v0v2.getAngle(v1v2)
 
         // for each vertex of the triangle updated its value of gc (sum_(j=1)^(#faces around this vertex) vertex_j)
         value_angle_defeact_sum[t[k].v[0]] += angle_v1v0v2;
