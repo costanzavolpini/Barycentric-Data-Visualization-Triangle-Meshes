@@ -358,7 +358,7 @@ public:
   * @param p - another vector
   * @return the \b angle between the vectors
   */
-    double getAngleRadians( const Point3d& p ) const {
+    double getAngle2( const Point3d& p ) const {
         double dot = *this * p;
 
         // Force the dot product of the two input vectors to
