@@ -5,6 +5,9 @@
 #include <math.h>
 #include <iostream>
 
+#ifndef M_PI
+#define M_PI (3.14159265358979323846)
+#endif
 
 /***************************************************************************
 Point.h
@@ -349,6 +352,27 @@ public:
     double getAngle( const Point3d& p ) const {
         return ( atan2( ( *this ^ p ).norm(), ( *this * p ) ) );
     }
+
+  /**
+  * Get the angle between this vector and another vector using acos formula.
+  * @param p - another vector
+  * @return the \b angle between the vectors
+  */
+    double getAngleRadians( const Point3d& p ) const {
+        double dot = *this * p;
+
+        // Force the dot product of the two input vectors to
+        // fall within the domain for inverse cosine, which
+        // is -1 <= x <= 1. This will prevent runtime
+        // "domain error" math exceptions.
+        dot = ( dot < -1.0 ? -1.0 : ( dot > 1.0 ? 1.0 : dot ) );
+
+        double angle = acos(dot);
+
+        return (M_PI * 2) - angle;
+    }
+
+
 
   /**
   * Write a point to the given stream.

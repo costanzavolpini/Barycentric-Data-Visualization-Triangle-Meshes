@@ -82,6 +82,7 @@ double get_distance_points(Point3d v0, Point3d v1)
  * Function to insert a struct edge inside edge-map.
  */
 void insert_edge(int index_v1, int index_v2, bool isCorrectOrder, Point3d n)
+// FIXME: fix mean curvature, TODO: check if it is true that in case that isCorrect order the normal is n2 and also check if I am passing order correct
 {
     vector<int> key(2);
     if(isCorrectOrder){
@@ -100,8 +101,8 @@ void insert_edge(int index_v1, int index_v2, bool isCorrectOrder, Point3d n)
 
     if (it != map_edge.end()) // update information edge struct if exist
     {
-        cout << "i1: " << index_v1 << endl;
-        cout << "i2: " << index_v2 << endl;
+        // cout << "i1: " << index_v1 << endl;
+        // cout << "i2: " << index_v2 << endl;
 
         if(isCorrectOrder)
             it->second.n1 = n;
@@ -239,19 +240,31 @@ double get_voronoi_region_triangle(int P_index, int Q_index, int R_index, float 
 }
 
 /**
+ * Check if an angle is obtuse (radians)
+ */
+bool is_obtuse_angle(float angle){
+    return angle > M_PI/2 && angle < M_PI;
+}
+
+/**
  * Calculate Area mixed, given the index of the triangle, index of the  vertex and 3 angles of the triangle.
  * This function will be called for each triangle T from the 1-ring neighborhood of x (current angle)
 */
 void calculate_A_mixed(int index_triangle, int index_vertex, int index_vertex_other, int index_vertex_other1, float current_angle, float other_angle, float other_angle_1)
 {
-    if (current_angle <= 90.0f && other_angle <= 90.0f && other_angle_1 <= 90.0f) // Triangle is not obtuse -> Voronoi-safe
+    // cout << "--------" << endl;
+    // cout << current_angle << endl;
+    // cout << is_obtuse_angle(current_angle) << endl;
+    // cout << "--------" << endl;
+    if (!is_obtuse_angle(current_angle) && !is_obtuse_angle(other_angle) && !is_obtuse_angle(other_angle_1 <= 90.0f)) // Triangle is not obtuse -> Voronoi-safe
     {
         // Voronoi region of x in T
         area_mixed[index_vertex] += get_voronoi_region_triangle(index_vertex, index_vertex_other, index_vertex_other1, other_angle, other_angle_1);
     }
     else // Voronoi inappropriate
     {
-        if (current_angle > 90) //obtuse angle
+        cout << "NOoooooo" << endl;
+        if (is_obtuse_angle(current_angle)) //obtuse angle
             area_mixed[index_vertex] += get_area_triangle(index_triangle) / 2;
         else // not-obtuse triangle
             area_mixed[index_vertex] += get_area_triangle(index_triangle) / 4;
@@ -396,11 +409,14 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         // v1 -> v0 -> v2
         Point3d v0v1 = v1 - v0;
         Point3d v0v2 = v2 - v0;
+        // v0v1.normalize();
+        // v0v2.normalize();
         double angle_v1v0v2 = v0v1.getAngle(v0v2);
 
         // vertex 2
         // v2 -> v1 -> v0
         Point3d v1v2 = v2 - v1;
+        // v1v2.normalize();
         double angle_v2v1v0 = v1v2.getAngle(-v0v1); // -v0v1 = v1v0
 
         // vertex 3
