@@ -68,6 +68,11 @@ std::map<vector<int>, edge> map_edge; // key: [index_v1, index_v2]    val: struc
 // use the circumcenter point, and for each obtuse triangle, we use the midpoint
 // of the edge opposite to the obtuse angle
 vector<float> area_mixed;
+
+
+// counter obtuse triangle and not-obtuse triangle
+int number_obtuse_triangle;
+int number_non_obtuse_triangle;
 // -------------------------
 
 /**
@@ -194,8 +199,8 @@ void set_max_min_mesh()
 */
 Point3d get_rescaled_value(Point3d value)
 {
-    return value;                                                        // TODO: need to remove afer
-    // return interval / (max_coord - min_coord) * (value - max_coord) + 1; //1 is the max of interval
+    // return value;                                                        // TODO: need to remove afer
+    return interval / (max_coord - min_coord) * (value - max_coord) + 1; //1 is the max of interval
 }
 
 /**
@@ -326,6 +331,9 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
 
     // size out_vertices, out_normals, out_gc, out_mc = num_triangles * 9
 
+    number_obtuse_triangle = 0;
+    number_non_obtuse_triangle = 0;
+
     // ------- VECTOR INITIALIZATION -------
     // vector that contains Point3d normal
     vector<Point3d> normals(num_vertices);
@@ -427,6 +435,11 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         calculate_A_mixed(k, index_v1, index_v2, index_v3, angle_v1v0v2, angle_v2v1v0, angle_v0v2v1);
         calculate_A_mixed(k, index_v2, index_v1, index_v3, angle_v2v1v0, angle_v1v0v2, angle_v0v2v1);
         calculate_A_mixed(k, index_v3, index_v1, index_v2, angle_v0v2v1, angle_v1v0v2, angle_v2v1v0);
+
+        if (!is_obtuse_angle(angle_v1v0v2) && !is_obtuse_angle(angle_v2v1v0) && !is_obtuse_angle(angle_v0v2v1)) // Triangle is not obtuse
+            number_non_obtuse_triangle++;
+        else // triangle obtuse
+            number_obtuse_triangle++;
     }
 
     // fill out_gc vector
@@ -536,6 +549,7 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         out_normals.push_back(normals[t[k].v[2]].z());
     }
 
+    cout << path << " "<< number_obtuse_triangle << ", " << number_non_obtuse_triangle << endl;
     cout << "Object loaded" << endl;
 
     // ------- clear vectors -------
