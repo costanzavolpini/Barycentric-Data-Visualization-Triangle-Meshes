@@ -199,8 +199,8 @@ void set_max_min_mesh()
 */
 Point3d get_rescaled_value(Point3d value)
 {
-    // return value;                                                        // TODO: need to remove afer
-    return interval / (max_coord - min_coord) * (value - max_coord) + 1; //1 is the max of interval
+    return value;                                                        // TODO: need to remove afer
+    // return interval / (max_coord - min_coord) * (value - max_coord) + 1; //1 is the max of interval
 }
 
 /**
@@ -442,6 +442,10 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
             number_obtuse_triangle++;
     }
 
+    ofstream file_output;
+    string path_name = path;
+    file_output.open (path_name + ".txt");
+
     // fill out_gc vector
     // k_G = (2PI - sum_angle_defeact)/A_mixed
     for (int k = 0; k < num_triangles; k++)
@@ -465,6 +469,10 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         out_gc.push_back(((2 * M_PI) - value_angle_defeact_sum[t[k].v[2]]) / area_mixed[t[k].v[2]]);
         out_gc.push_back(((2 * M_PI) - value_angle_defeact_sum[t[k].v[2]]) / area_mixed[t[k].v[2]]);
         out_gc.push_back(((2 * M_PI) - value_angle_defeact_sum[t[k].v[2]]) / area_mixed[t[k].v[2]]);
+
+        // write in a file all values of Gaussian curvature
+
+        file_output << ((2 * M_PI) - value_angle_defeact_sum[t[k].v[0]]) / area_mixed[t[k].v[0]] << "\n" << ((2 * M_PI) - value_angle_defeact_sum[t[k].v[1]]) / area_mixed[t[k].v[1]] << "\n" << ((2 * M_PI) - value_angle_defeact_sum[t[k].v[2]]) / area_mixed[t[k].v[2]] << "\n";
 
         // -------------- end Gaussian curvature --------------
 
@@ -505,6 +513,7 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         out_mc.push_back(mc_3);
         // -------------- end mean curvature --------------
     }
+    file_output.close();
 
     // normals
     // normalize every vertex normal

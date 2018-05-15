@@ -6,6 +6,7 @@
 #include <math.h>
 #include "LoaderObject.h"
 #include "GaussianCurvatureHelper.h"
+#include "kPercentileHelper.h"
 
 using namespace std;
 
@@ -32,6 +33,8 @@ class Object
 
     GCHelper gc_helper = GCHelper();
     GCHelper mc_helper = GCHelper();
+
+    KPercentile k_percentile = KPercentile();
 
     /**
         Memory on the GPU where we store the vertex data
@@ -133,6 +136,13 @@ class Object
         set_selected_gc();         // set_selected_gc
 
         auto_detect_outliers_mc();
+
+        // vector<float> gaussian_curvature_90percentile;
+
+        // double max_percentile = k_percentile.init(triangle_gc, gaussian_curvature_90percentile);
+        // cout << max_percentile << endl;
+
+        // triangle_gc_selected = gaussian_curvature_90percentile;
 
         // ------------- VBO -------------
         // Use VBO to avoid to send data vertex at a time (we send everything together)
