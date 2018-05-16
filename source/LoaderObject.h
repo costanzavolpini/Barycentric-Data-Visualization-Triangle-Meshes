@@ -507,7 +507,6 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
 
         // gc_vertex_size lenght = vertices
         gc_vertex_size.push_back(((2 * M_PI) - value_angle_defeact_sum[k]) / area_mixed[k]);
-        cout << "size " << gc_vertex_size.size() << endl;
 
          // write in a file all values of Gaussian curvature
         // file_output << ((2 * M_PI) - value_angle_defeact_sum[k]) / area_mixed[k] << "\n";

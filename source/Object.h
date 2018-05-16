@@ -5,7 +5,6 @@
 #include "Base.h"
 #include <math.h>
 #include "LoaderObject.h"
-#include "GaussianCurvatureHelper.h"
 #include "kPercentileHelper.h"
 
 using namespace std;
@@ -25,15 +24,15 @@ class Object
 
     vector<float> triangle_gc_modified_auto; //outliers gc
     vector<float> triangle_gc_selected;
-     vector<float> triangle_gc_vertex; // vector of gaussian curvature of length vertex
+    vector<float> triangle_gc_vertex; // vector of gaussian curvature of length vertex
 
     vector<float> triangle_mc_modified_auto; //outliers mc
     vector<float> triangle_mc_selected;
 
-    int type_gc = 2;
+    double best_min_gc;
+    double best_max_gc;
 
-    GCHelper gc_helper = GCHelper();
-    GCHelper mc_helper = GCHelper();
+    int type_gc = 2;
 
     KPercentile k_percentile = KPercentile();
 
@@ -51,12 +50,14 @@ class Object
         triangle_gc.clear();
         triangle_mc.clear();
         triangle_gc_vertex.clear();
+        triangle_gc_modified_auto.clear();
 
         triangle_vertices.shrink_to_fit();
         triangle_normals.shrink_to_fit();
         triangle_gc.shrink_to_fit();
         triangle_mc.shrink_to_fit();
         triangle_gc_vertex.shrink_to_fit();
+        triangle_gc_modified_auto.shrink_to_fit();
 
 
         if (!load(_path.c_str(), triangle_vertices, triangle_normals, triangle_gc, triangle_mc, triangle_gc_vertex))
@@ -66,84 +67,16 @@ class Object
         }
     }
 
-    void auto_detect_outliers_gc()
-    {
-        // clean
-        triangle_gc_modified_auto.clear();
-        triangle_gc_selected.clear();
-
-        triangle_gc_modified_auto.shrink_to_fit();
-        triangle_gc_selected.shrink_to_fit();
-        gc_helper.clean();
-
-        // autodetect gaussian curvature outliers, variance...etc.
-        int number_triangles = triangle_gc.size() / 9;
-
-        // add everything to triangle gaussian curvature
-        for (int k = 0; k < number_triangles; k++)
-        {
-            gc_helper.update_statistics_data(triangle_gc[9 * k]);
-            gc_helper.update_statistics_data(triangle_gc[9 * k + 3]);
-            gc_helper.update_statistics_data(triangle_gc[9 * k + 6]);
-        }
-
-        gc_helper.finalize_statistics_data();
-
-        triangle_gc_modified_auto.resize(triangle_gc.size());
-
-        for (int k = 0; k < number_triangles; k++)
-        { // update to remove noisy (smoothing)
-            triangle_gc_modified_auto[9 * k] = triangle_gc_modified_auto[9 * k + 1] = triangle_gc_modified_auto[9 * k + 2] = gc_helper.cut_data_gaussian_curvature(triangle_gc[9 * k]);
-            triangle_gc_modified_auto[9 * k + 3] = triangle_gc_modified_auto[9 * k + 4] = triangle_gc_modified_auto[9 * k + 5] = gc_helper.cut_data_gaussian_curvature(triangle_gc[9 * k + 3]);
-            triangle_gc_modified_auto[9 * k + 6] = triangle_gc_modified_auto[9 * k + 7] = triangle_gc_modified_auto[9 * k + 8] = gc_helper.cut_data_gaussian_curvature(triangle_gc[9 * k + 6]);
-        }
-        triangle_gc_selected = triangle_gc_modified_auto;
-    }
-
-    void auto_detect_outliers_mc() //mean curvature
-    {
-        // clean
-        triangle_mc_modified_auto.shrink_to_fit();
-        triangle_mc_selected.shrink_to_fit();
-        mc_helper.clean();
-
-        // autodetect gaussian curvature outliers, variance...etc.
-        int number_triangles = triangle_mc.size() / 9;
-
-        // add everything to triangle gaussian curvature
-        for (int k = 0; k < number_triangles; k++)
-        {
-            mc_helper.update_statistics_data(triangle_mc[9 * k]);
-            mc_helper.update_statistics_data(triangle_mc[9 * k + 3]);
-            mc_helper.update_statistics_data(triangle_mc[9 * k + 6]);
-        }
-
-        mc_helper.finalize_statistics_data();
-
-        triangle_mc_modified_auto.resize(triangle_mc.size());
-
-        for (int k = 0; k < number_triangles; k++)
-        { // update to remove noisy (smoothing)
-            triangle_mc_modified_auto[9 * k] = triangle_mc_modified_auto[9 * k + 1] = triangle_mc_modified_auto[9 * k + 2] = mc_helper.cut_data_gaussian_curvature(triangle_mc[9 * k]);
-            triangle_mc_modified_auto[9 * k + 3] = triangle_mc_modified_auto[9 * k + 4] = triangle_mc_modified_auto[9 * k + 5] = mc_helper.cut_data_gaussian_curvature(triangle_mc[9 * k + 3]);
-            triangle_mc_modified_auto[9 * k + 6] = triangle_mc_modified_auto[9 * k + 7] = triangle_mc_modified_auto[9 * k + 8] = mc_helper.cut_data_gaussian_curvature(triangle_mc[9 * k + 6]);
-        }
-        triangle_mc_selected = triangle_mc_modified_auto;
-    }
 
     // Function to initialize VBO and VAO
     // name file and the second it is the method gc
     void init()
     {
-        auto_detect_outliers_gc(); // auto_detect_outliers_gc
-        set_selected_gc();         // set_selected_gc
-
-        auto_detect_outliers_mc();
-
         vector<double> percentiles = k_percentile.init(triangle_gc_vertex);
-        // cout << max_percentile << endl;
+        best_min_gc = percentiles[0];
+        best_max_gc = percentiles[1];
 
-        // triangle_gc_selected = gaussian_curvature_90percentile;
+        triangle_gc_selected = triangle_gc;
 
         // ------------- VBO -------------
         // Use VBO to avoid to send data vertex at a time (we send everything together)
@@ -172,12 +105,12 @@ class Object
 
         glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_gc_selected.size(), &triangle_gc_selected[0], GL_STATIC_DRAW);
 
-        // VBO_MEANCURVATURE
-        glGenBuffers(1, &VBO_MEANCURVATURE); //generate buffer, bufferID = 1
+        // // VBO_MEANCURVATURE
+        // glGenBuffers(1, &VBO_MEANCURVATURE); //generate buffer, bufferID = 1
 
-        glBindBuffer(GL_ARRAY_BUFFER, VBO_MEANCURVATURE);
+        // glBindBuffer(GL_ARRAY_BUFFER, VBO_MEANCURVATURE);
 
-        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_mc_selected.size(), &triangle_mc_selected[0], GL_STATIC_DRAW);
+        // glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_mc_selected.size(), &triangle_mc_selected[0], GL_STATIC_DRAW);
 
         // ------------- VAO -------------
         glGenVertexArrays(1, &VAO);
@@ -212,11 +145,11 @@ class Object
         glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)(0 * sizeof(float)));
         glEnableVertexAttribArray(2); //this 2 is referred to the layout on shader
 
-        // mean curvature
-        glBindBuffer(GL_ARRAY_BUFFER, VBO_MEANCURVATURE);
-        //normal attribute
-        glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)(0 * sizeof(float)));
-        glEnableVertexAttribArray(3); //this 2 is referred to the layout on shader
+        // // mean curvature
+        // glBindBuffer(GL_ARRAY_BUFFER, VBO_MEANCURVATURE);
+        // //normal attribute
+        // glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)(0 * sizeof(float)));
+        // glEnableVertexAttribArray(3); //this 2 is referred to the layout on shader
 
         /**
             Unbind the VAO so other VAO calls won't accidentally modify this VAO, but this rarely happens.
@@ -253,7 +186,7 @@ class Object
         glDeleteBuffers(1, &VBO);
         glDeleteBuffers(1, &VBO_NORMAL);
         glDeleteBuffers(1, &VBO_GAUSSIANCURVATURE);
-        glDeleteBuffers(1, &VBO_MEANCURVATURE);
+        // glDeleteBuffers(1, &VBO_MEANCURVATURE);
     }
 
     // Point3d interpolation(Point3d v0, Point3d v1, float t) {
@@ -321,25 +254,10 @@ class Object
         return VAO;
     }
 
-    // function to select the current gc
-    void set_selected_gc()
-    {
-        switch (type_gc)
-        {
-        case 2: //automatic
-            triangle_gc_selected = triangle_gc_modified_auto;
-            break;
-
-        default: //automatic
-            triangle_gc_selected = triangle_gc;
-            break;
-        }
+    vector<double> get_best_values_gc(){
+        return vector<double>{best_min_gc, best_max_gc};
     }
 
-    void set_value_gc(int val)
-    {
-        type_gc = val;
-    }
 };
 
 #endif

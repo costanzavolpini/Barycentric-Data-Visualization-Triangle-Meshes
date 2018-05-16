@@ -709,7 +709,7 @@ void analyse_gaussian_curvature(GLFWwindow *window)
 
     // Gaussian curvature
     const char *names[] = {"GC", "ZERO"};
-    const ImColor colors[2] = {green, white};
+    const ImColor colors[2] = {green, red};
 
     struct Funcs
     {
@@ -730,76 +730,82 @@ void analyse_gaussian_curvature(GLFWwindow *window)
     datas_initialize[1] = &zeros[0];
 
     const float *const *datas = datas_initialize;
-    ImGui::RadioButton("Untouched GC", &gc_set, 1);
     ImGui::PlotMultiLines("##Gaussian Curvature", 2, names, colors, func, datas, display_count, minimum_gc, maximum_gc, ImVec2(0, 80));
 
     // automatic Gaussian Curvature
-    const char *names_auto[] = {"GC", "ZERO", "MEAN"};
-    const ImColor colors_auto[3] = {green, white, red};
+    const char *names_auto[] = {"GC", "ZERO"};
+    const ImColor colors_auto[2] = {green, red};
 
-    std::vector<float> mean_gc(size, object.gc_helper.mean);
+    const float **datas_initialize_auto = new const float *[2];
 
-    const float **datas_initialize_auto = new const float *[3];
-    datas_initialize_auto[0] = &object.triangle_gc_modified_auto[0];
+    double minimum_gc_selected = object.get_best_values_gc()[0];
+    double maximum_gc_selected = object.get_best_values_gc()[1];
+
+    vector<float> modified_triangle_gc = object.triangle_gc;
+
+    for_each (modified_triangle_gc.begin(), modified_triangle_gc.end(), [&minimum_gc_selected, &maximum_gc_selected](int i){
+        if(i < 0)
+            i/minimum_gc_selected;
+        else
+            i/maximum_gc_selected;
+    });
+    datas_initialize_auto[0] = &modified_triangle_gc[0];
     datas_initialize_auto[1] = &zeros[0];
-    datas_initialize_auto[2] = &mean_gc[0];
 
     const float *const *datas_auto = datas_initialize_auto;
 
-    ImGui::RadioButton("Automatic best GC", &gc_set, 2);
-    ImGui::PlotMultiLines("##Gaussian Curvature automatic", 3, names_auto, colors_auto, func, datas_auto, display_count, minimum_gc, maximum_gc, ImVec2(0, 80));
+    // ImGui::RadioButton("Used 90 Percentile", &gc_set, 2);
+    ImGui::PlotMultiLines("##Used 90 Percentile", 2, names_auto, colors_auto, func, datas_auto, display_count, minimum_gc_selected, maximum_gc_selected, ImVec2(0, 80));
 
     // section where the user can set its own minimum and maximum value for gaussian curvature
-    ImGui::RadioButton("Manual GC", &gc_set, 3);
-    double min_gc, max_gc;
-    if (gc_set == 2)
-    { // automatic best GC
-        min_gc = object.gc_helper.lower_outlier;
-        max_gc = object.gc_helper.upper_outlier;
-    }
-    else if (gc_set == 1)
-    { // classic
-        min_gc = object.get_minimum_gaussian_curvature_value();
-        max_gc = object.get_maximum_gaussian_curvature_value();
-    }
-    else
-    {
+    // ImGui::RadioButton("Manual GC", &gc_set, 3);
+    // double min_gc, max_gc;
+    // if (gc_set == 2)
+    // { // automatic best GC
+    //     // min_gc = object.gc_helper.lower_outlier;
+    //     // max_gc = object.gc_helper.upper_outlier;
+    // }
+    // else if (gc_set == 1)
+    // { // classic
+    //     min_gc = object.get_minimum_gaussian_curvature_value();
+    //     max_gc = object.get_maximum_gaussian_curvature_value();
+    // }
+    // else
+    // {
 
-        if (!min_val || !max_val)
-        {
-            min_gc = object.get_minimum_gaussian_curvature_value();
-            max_gc = object.get_maximum_gaussian_curvature_value();
-        }
-        else
-        {
-            min_gc = min_val;
-            max_gc = max_val;
-        }
-    }
+    //     if (!min_val || !max_val)
+    //     {
+    //         min_gc = object.get_minimum_gaussian_curvature_value();
+    //         max_gc = object.get_maximum_gaussian_curvature_value();
+    //     }
+    //     else
+    //     {
+    //         min_gc = min_val;
+    //         max_gc = max_val;
+    //     }
+    // }
 
-    //  cout << min_gc << endl;
-    //  cout << max_gc << endl;
 
-    ImGui::TextWrapped("\n\nNegative values are mapped from red to green and positive values from green to blue.\n");
-    ImGui::Text("min = %f, max = %f", min_gc, max_gc);
-    min_val = (float)min_gc;
-    max_val = (float)max_gc;
-    float min_val_bound = (float)object.get_minimum_gaussian_curvature_value() * 10;
-    float max_val_bound = (float)object.get_maximum_gaussian_curvature_value() * 10;
-    ImGui::DragFloatRange2("range", &min_val, &max_val, 0.25f, min_val_bound, max_val_bound, "Min: %.1f", "Max: %.1f");
+    // ImGui::TextWrapped("\n\nNegative values are mapped from red to green and positive values from green to blue.\n");
+    // ImGui::Text("min = %f, max = %f", min_gc, max_gc);
+    // min_val = (float)min_gc;
+    // max_val = (float)max_gc;
+    // float min_val_bound = (float)object.get_minimum_gaussian_curvature_value() * 10;
+    // float max_val_bound = (float)object.get_maximum_gaussian_curvature_value() * 10;
+    // ImGui::DragFloatRange2("range", &min_val, &max_val, 0.25f, min_val_bound, max_val_bound, "Min: %.1f", "Max: %.1f");
 
-    if (prev_gc != gc_set)
-    {
-        object.clear();
-        glDeleteFramebuffers(1, &frame_buffer);
-        glDeleteTextures(1, &rendered_texture);
-        glDeleteRenderbuffers(1, &depth_render_buffer);
+    // if (prev_gc != gc_set)
+    // {
+    //     object.clear();
+    //     glDeleteFramebuffers(1, &frame_buffer);
+    //     glDeleteTextures(1, &rendered_texture);
+    //     glDeleteRenderbuffers(1, &depth_render_buffer);
 
-        mean_gc.clear();
-        mean_gc.shrink_to_fit();
+    //     // mean_gc.clear();
+    //     // mean_gc.shrink_to_fit();
 
-        initialize_texture_object(window, false);
-    }
+    //     initialize_texture_object(window, false);
+    // }
 }
 
 void initialize_texture_object(GLFWwindow *window, bool reload_mesh)
@@ -823,7 +829,6 @@ void initialize_texture_object(GLFWwindow *window, bool reload_mesh)
 
         Send vertex data to vertex shader (load .off file).
      */
-    object.set_value_gc(gc_set);
     // object.set_file(name_file, std::bind(&Object::auto_detect_outliers_gc, Object()), std::bind(&Object::set_selected_gc, Object()), std::bind(&Object::init, Object())); //load mesh
     if (reload_mesh)
         object.set_file(name_file); //load mesh
