@@ -323,7 +323,7 @@ bool read_off_file(const char *path)
 /**
  * Function to load the mesh, find Gaussian Curvature, Mean Curvature...etc.
 */
-bool load(const char *path, vector<float> &out_vertices, vector<float> &out_normals, vector<float> &out_gc, vector<float> &out_mc)
+bool load(const char *path, vector<float> &out_vertices, vector<float> &out_normals, vector<float> &out_gc, vector<float> &out_mc, vector<float> &gc_vertex_size)
 {
     // --------------------- Read file -----------------------------
     if (!read_off_file(path))
@@ -442,10 +442,6 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
             number_obtuse_triangle++;
     }
 
-    ofstream file_output;
-    string path_name = path;
-    file_output.open (path_name + ".txt");
-
     // fill out_gc vector
     // k_G = (2PI - sum_angle_defeact)/A_mixed
     for (int k = 0; k < num_triangles; k++)
@@ -454,11 +450,6 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         out_gc.push_back(((2 * M_PI) - value_angle_defeact_sum[t[k].v[0]]) / area_mixed[t[k].v[0]]);
         out_gc.push_back(((2 * M_PI) - value_angle_defeact_sum[t[k].v[0]]) / area_mixed[t[k].v[0]]);
         out_gc.push_back(((2 * M_PI) - value_angle_defeact_sum[t[k].v[0]]) / area_mixed[t[k].v[0]]);
-
-        // cout << "1: " << ((2 * M_PI) - value_angle_defeact_sum[t[k].v[0]]) / area_mixed[t[k].v[0]] << endl;
-        // cout << "2: " << ((2 * M_PI) - value_angle_defeact_sum[t[k].v[1]]) / area_mixed[t[k].v[1]] << endl;
-        // cout << "3: " << ((2 * M_PI) - value_angle_defeact_sum[t[k].v[2]]) / area_mixed[t[k].v[2]] << endl;
-
 
         // vertex 1
         out_gc.push_back(((2 * M_PI) - value_angle_defeact_sum[t[k].v[1]]) / area_mixed[t[k].v[1]]);
@@ -469,10 +460,6 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         out_gc.push_back(((2 * M_PI) - value_angle_defeact_sum[t[k].v[2]]) / area_mixed[t[k].v[2]]);
         out_gc.push_back(((2 * M_PI) - value_angle_defeact_sum[t[k].v[2]]) / area_mixed[t[k].v[2]]);
         out_gc.push_back(((2 * M_PI) - value_angle_defeact_sum[t[k].v[2]]) / area_mixed[t[k].v[2]]);
-
-        // write in a file all values of Gaussian curvature
-
-        file_output << ((2 * M_PI) - value_angle_defeact_sum[t[k].v[0]]) / area_mixed[t[k].v[0]] << "\n" << ((2 * M_PI) - value_angle_defeact_sum[t[k].v[1]]) / area_mixed[t[k].v[1]] << "\n" << ((2 * M_PI) - value_angle_defeact_sum[t[k].v[2]]) / area_mixed[t[k].v[2]] << "\n";
 
         // -------------- end Gaussian curvature --------------
 
@@ -513,7 +500,19 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         out_mc.push_back(mc_3);
         // -------------- end mean curvature --------------
     }
-    file_output.close();
+    // ofstream file_output;
+    // string path_name = path;
+    // file_output.open (path_name + ".txt");
+    for (int k = 0; k < num_vertices; k++){
+
+        // gc_vertex_size lenght = vertices
+        gc_vertex_size.push_back(((2 * M_PI) - value_angle_defeact_sum[k]) / area_mixed[k]);
+        cout << "size " << gc_vertex_size.size() << endl;
+
+         // write in a file all values of Gaussian curvature
+        // file_output << ((2 * M_PI) - value_angle_defeact_sum[k]) / area_mixed[k] << "\n";
+    }
+    // file_output.close();
 
     // normals
     // normalize every vertex normal

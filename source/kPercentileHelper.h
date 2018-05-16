@@ -15,36 +15,41 @@ Comment:  This file contains all Statistics definitions to recalcuate the correc
 class KPercentile
 {
   public:
-    float k_percentile = 0.90f;
+    float k_percentile_max = 0.90f;
+    float k_percentile_min = 0.10f;
 
     /**
      * Function to apply k_percentile on a vector
     */
-    double init(vector<float> &in_vector, vector<float> &out_vector){
+    vector<double> init(vector<float> &in_vector){
+        // to find best values
+
+        float index_max = in_vector.size() * k_percentile_max;
+        float index_min = in_vector.size() * k_percentile_min;
+
+        // max value
         sort(in_vector.begin(), in_vector.end());
-        float index = in_vector.size() * k_percentile;
 
-        double max_value;
+        double max_value = 0;
+        double min_value = 0;
 
-        if(!(floor(index) == index)){ //not whole number
-            index = round(index); // round it
-            max_value = in_vector[index];
+        if(!(floor(index_max) == index_max)){ //not whole number
+            index_max = round(index_max); // round it
+            max_value = in_vector[index_max];
         } else {
-            max_value = (in_vector[index] + in_vector[index + 1])/2;
+            max_value = (in_vector[index_max] + in_vector[index_max + 1])/2;
         }
 
-        for(int k = 0; k < index; k++){
-            out_vector.push_back(in_vector[k]);
+
+        if(!(floor(index_min) == index_min)){ //not whole number
+            index_min = round(index_min); // round it
+            min_value = in_vector[index_min];
+        } else {
+            min_value = (in_vector[index_min] + in_vector[index_min - 1])/2;
         }
 
-        return max_value;
+        return vector<double>{max_value, min_value};
     }
 
-    /**
-     * Function to set the k percentile
-    */
-    void set_k_percentile(float k){
-        k_percentile = k;
-    }
 };
 #endif

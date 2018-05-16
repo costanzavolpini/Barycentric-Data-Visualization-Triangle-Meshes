@@ -25,6 +25,7 @@ class Object
 
     vector<float> triangle_gc_modified_auto; //outliers gc
     vector<float> triangle_gc_selected;
+     vector<float> triangle_gc_vertex; // vector of gaussian curvature of length vertex
 
     vector<float> triangle_mc_modified_auto; //outliers mc
     vector<float> triangle_mc_selected;
@@ -49,14 +50,16 @@ class Object
         triangle_normals.clear();
         triangle_gc.clear();
         triangle_mc.clear();
+        triangle_gc_vertex.clear();
 
         triangle_vertices.shrink_to_fit();
         triangle_normals.shrink_to_fit();
         triangle_gc.shrink_to_fit();
         triangle_mc.shrink_to_fit();
+        triangle_gc_vertex.shrink_to_fit();
 
 
-        if (!load(_path.c_str(), triangle_vertices, triangle_normals, triangle_gc, triangle_mc))
+        if (!load(_path.c_str(), triangle_vertices, triangle_normals, triangle_gc, triangle_mc, triangle_gc_vertex))
         {
             cout << "error loading file" << endl;
             return;
@@ -137,9 +140,7 @@ class Object
 
         auto_detect_outliers_mc();
 
-        // vector<float> gaussian_curvature_90percentile;
-
-        // double max_percentile = k_percentile.init(triangle_gc, gaussian_curvature_90percentile);
+        vector<double> percentiles = k_percentile.init(triangle_gc_vertex);
         // cout << max_percentile << endl;
 
         // triangle_gc_selected = gaussian_curvature_90percentile;
