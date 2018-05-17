@@ -18,6 +18,7 @@
 #include <cstdlib>
 #include "glm/ext.hpp" //to test
 #include <glm/gtc/type_ptr.hpp>
+#include <algorithm>
 
 #include "imgui_plot_custom.h"
 
@@ -80,6 +81,7 @@ void select_model(GLFWwindow *window);
 void analyse_gaussian_curvature(GLFWwindow *window);
 void initialize_texture_object(GLFWwindow *window, bool reload_mesh);
 
+
 // set-up parameter imgui
 static float angle = 180.0f;                // angle of rotation - must be the same of transform_shader
 static float axis_x = 0.0f;                 // axis of rotation - must be the same of transform_shader
@@ -106,6 +108,9 @@ void analyse_gaussian_curvature();
 void set_parameters_shader(int selected_shader);
 
 void swap_gaussian_curvature();
+static double global_min_gc;
+static double global_max_gc;
+double user_minimum_gc, user_maximum_gc;
 
 // ------- END IMGUI -------------
 
@@ -120,6 +125,11 @@ int imgui_isMeanCurvatureShading;
 string name_file = "models/icosahedron_1.off"; //default armadillo
 
 float min_val, max_val;
+
+// gc user
+char buf1[sizeof(double)] = "";
+char buf2[sizeof(double)] = "";
+
 
 // ----------- END SETTINGS SHADERS ----------
 
@@ -167,6 +177,7 @@ int main(int argc, char *argv[])
     glfwSetMouseButtonCallback(window, mouse_button_callback);         // call the callback when the user press a button. It corresponds to glutMouseFunc
     glfwSetCursorPosCallback(window, cursor_position_callback);        // call the callback when the user move the cursor. It corresponds to glutMotionFunc
     glfwSetScrollCallback(window, scroll_callback);                    //zoom
+    glfwSetCharCallback(window, ImGui_ImplGlfw_CharCallback);
 
     /**
         ------------- GLAD -------------
@@ -199,6 +210,8 @@ int main(int argc, char *argv[])
     normalShader.initialize_shader("normal.vs", "normal.fs", "normal.gs");
 
     initialize_texture_object(window, true);
+    global_min_gc = object.get_best_values_gc()[0];
+    global_max_gc = object.get_best_values_gc()[1];
 
     /**
         application to keep drawing images and handling user input until the program has been explicitly told to stop
@@ -245,18 +258,10 @@ int main(int argc, char *argv[])
         }
         else if (imgui_isGaussianCurvature)
         {
-            ourShader.setFloat("min_gc", object.get_minimum_gaussian_curvature_value());
-            ourShader.setFloat("max_gc", object.get_maximum_gaussian_curvature_value());
-            if (gc_set == 3)
-            {
-                ourShader.setBool("custom_flag", true);
-                ourShader.setFloat("custom_min", min_val);
-                ourShader.setFloat("custom_max", max_val);
-            }
-            else
-            {
-                ourShader.setBool("custom_flag", false);
-            }
+            // cout << "min"<< global_min_gc << endl;
+            // cout <<"max"<< global_max_gc << endl;
+            ourShader.setFloat("min_gc", global_min_gc);
+            ourShader.setFloat("max_gc", global_max_gc);
         }
         // --- end settings shaders ---
 
@@ -725,11 +730,23 @@ void analyse_gaussian_curvature(GLFWwindow *window)
 
     std::vector<float> zeros(size, 0.0f);
 
+    vector<float> normalized_triangle_gc;
+
+    copy(object.triangle_gc.begin(), object.triangle_gc.end(), back_inserter(normalized_triangle_gc));
+    for_each (normalized_triangle_gc.begin(), normalized_triangle_gc.end(), [&minimum_gc, &maximum_gc](int i){
+        if(i < 0)
+            i = i/minimum_gc;
+        else
+            i = i/maximum_gc;
+    });
+
     const float **datas_initialize = new const float *[2];
-    datas_initialize[0] = &object.triangle_gc[0];
+    datas_initialize[0] = &normalized_triangle_gc[0];
     datas_initialize[1] = &zeros[0];
 
     const float *const *datas = datas_initialize;
+    ImGui::TextWrapped("\n");
+    ImGui::RadioButton("Gaussian Curvature untouched", &gc_set, 1);
     ImGui::PlotMultiLines("##Gaussian Curvature", 2, names, colors, func, datas, display_count, minimum_gc, maximum_gc, ImVec2(0, 80));
 
     // automatic Gaussian Curvature
@@ -738,74 +755,62 @@ void analyse_gaussian_curvature(GLFWwindow *window)
 
     const float **datas_initialize_auto = new const float *[2];
 
-    double minimum_gc_selected = object.get_best_values_gc()[0];
-    double maximum_gc_selected = object.get_best_values_gc()[1];
+    double percentile_minimum_gc = object.get_best_values_gc()[0];
+    double percentile_maximum_gc = object.get_best_values_gc()[1];
 
-    vector<float> modified_triangle_gc = object.triangle_gc;
+    vector<float> modified_triangle_gc;
 
-    for_each (modified_triangle_gc.begin(), modified_triangle_gc.end(), [&minimum_gc_selected, &maximum_gc_selected](int i){
+    copy(object.triangle_gc.begin(), object.triangle_gc.end(), back_inserter(modified_triangle_gc));
+    for_each (modified_triangle_gc.begin(), modified_triangle_gc.end(), [&percentile_minimum_gc, &percentile_maximum_gc](int i){
         if(i < 0)
-            i/minimum_gc_selected;
+            i = i/percentile_minimum_gc;
         else
-            i/maximum_gc_selected;
+            i = i/percentile_maximum_gc;
     });
     datas_initialize_auto[0] = &modified_triangle_gc[0];
     datas_initialize_auto[1] = &zeros[0];
 
     const float *const *datas_auto = datas_initialize_auto;
 
-    // ImGui::RadioButton("Used 90 Percentile", &gc_set, 2);
-    ImGui::PlotMultiLines("##Used 90 Percentile", 2, names_auto, colors_auto, func, datas_auto, display_count, minimum_gc_selected, maximum_gc_selected, ImVec2(0, 80));
+    ImGui::TextWrapped("\n");
+    ImGui::RadioButton("Used 90 Percentile", &gc_set, 2);
+    ImGui::PlotMultiLines("##Used 90 Percentile", 2, names_auto, colors_auto, func, datas_auto, display_count, percentile_minimum_gc, percentile_maximum_gc, ImVec2(0, 80));
 
     // section where the user can set its own minimum and maximum value for gaussian curvature
-    // ImGui::RadioButton("Manual GC", &gc_set, 3);
-    // double min_gc, max_gc;
-    // if (gc_set == 2)
-    // { // automatic best GC
-    //     // min_gc = object.gc_helper.lower_outlier;
-    //     // max_gc = object.gc_helper.upper_outlier;
-    // }
-    // else if (gc_set == 1)
-    // { // classic
-    //     min_gc = object.get_minimum_gaussian_curvature_value();
-    //     max_gc = object.get_maximum_gaussian_curvature_value();
-    // }
-    // else
-    // {
+    ImGui::TextWrapped("\n");
+    ImGui::RadioButton("Manual bounds", &gc_set, 3);
 
-    //     if (!min_val || !max_val)
-    //     {
-    //         min_gc = object.get_minimum_gaussian_curvature_value();
-    //         max_gc = object.get_maximum_gaussian_curvature_value();
-    //     }
-    //     else
-    //     {
-    //         min_gc = min_val;
-    //         max_gc = max_val;
-    //     }
-    // }
+    ImGui::InputText("minimum value", buf1, sizeof(double), ImGuiInputTextFlags_CharsDecimal);
+    ImGui::InputText("maximum value", buf2, sizeof(double), ImGuiInputTextFlags_CharsDecimal);
 
+    user_minimum_gc = strtod(buf1, NULL);
+    user_maximum_gc = strtod(buf2, NULL);
 
-    // ImGui::TextWrapped("\n\nNegative values are mapped from red to green and positive values from green to blue.\n");
-    // ImGui::Text("min = %f, max = %f", min_gc, max_gc);
-    // min_val = (float)min_gc;
-    // max_val = (float)max_gc;
-    // float min_val_bound = (float)object.get_minimum_gaussian_curvature_value() * 10;
-    // float max_val_bound = (float)object.get_maximum_gaussian_curvature_value() * 10;
-    // ImGui::DragFloatRange2("range", &min_val, &max_val, 0.25f, min_val_bound, max_val_bound, "Min: %.1f", "Max: %.1f");
+    // cout << minimum_gc << endl;
+    // cout << user_minimum_gc << endl;
+    // cout << percentile_minimum_gc << endl;
 
-    // if (prev_gc != gc_set)
-    // {
-    //     object.clear();
-    //     glDeleteFramebuffers(1, &frame_buffer);
-    //     glDeleteTextures(1, &rendered_texture);
-    //     glDeleteRenderbuffers(1, &depth_render_buffer);
+    if (prev_gc != gc_set)
+    {
+        switch(gc_set){
+            case 1:
+                global_min_gc = minimum_gc;
+                global_max_gc = maximum_gc;
+                break;
 
-    //     // mean_gc.clear();
-    //     // mean_gc.shrink_to_fit();
+            case 3:
+                global_min_gc = user_minimum_gc;
+                global_max_gc = user_maximum_gc;
+                break;
 
-    //     initialize_texture_object(window, false);
-    // }
+            default:
+                global_min_gc = percentile_minimum_gc;
+                global_max_gc = percentile_maximum_gc;
+                break;
+        }
+
+        cout << "changed " << global_min_gc << endl;
+    }
 }
 
 void initialize_texture_object(GLFWwindow *window, bool reload_mesh)
@@ -833,6 +838,19 @@ void initialize_texture_object(GLFWwindow *window, bool reload_mesh)
     if (reload_mesh)
         object.set_file(name_file); //load mesh
     object.init();
+
+    switch(gc_set){
+            case 1:
+                global_min_gc = object.get_minimum_gaussian_curvature_value();
+                global_max_gc = object.get_maximum_gaussian_curvature_value();
+            case 3:
+                global_min_gc = user_minimum_gc;
+                global_max_gc = user_maximum_gc;
+            default:
+                global_min_gc = object.get_best_values_gc()[0];
+                global_max_gc = object.get_best_values_gc()[1];
+    }
+
 
     /**
         IMPORTANT FOR TRANSFORMATION:
