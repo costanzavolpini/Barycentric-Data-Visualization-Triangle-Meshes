@@ -126,10 +126,6 @@ string name_file = "models/icosahedron_1.off"; //default armadillo
 
 float min_val, max_val;
 
-// gc user
-char buf1[sizeof(double)] = "";
-char buf2[sizeof(double)] = "";
-
 
 // ----------- END SETTINGS SHADERS ----------
 
@@ -780,15 +776,28 @@ void analyse_gaussian_curvature(GLFWwindow *window)
     ImGui::TextWrapped("\n");
     ImGui::RadioButton("Manual bounds", &gc_set, 3);
 
-    ImGui::InputText("minimum value", buf1, sizeof(double), ImGuiInputTextFlags_CharsDecimal);
-    ImGui::InputText("maximum value", buf2, sizeof(double), ImGuiInputTextFlags_CharsDecimal);
+    //TODO: insert all best values obtained with matlab
+    // TODO: solve possibility to rewrite value after first time
+    static char buf1[sizeof(double)] = "-5000";
+    static char buf2[sizeof(double)] = "5000";
 
-    user_minimum_gc = strtod(buf1, NULL);
-    user_maximum_gc = strtod(buf2, NULL);
+    ImGui::InputText("min value", buf1, sizeof(double), ImGuiInputTextFlags_CharsDecimal);
 
-    // cout << minimum_gc << endl;
-    // cout << user_minimum_gc << endl;
-    // cout << percentile_minimum_gc << endl;
+    // if (gc_set == 3) ImGui::SetKeyboardFocusHere();
+    ImGui::InputText("max value", buf2, sizeof(double), ImGuiInputTextFlags_CharsDecimal);
+
+    bool saved = false;
+
+    ImGui::TextWrapped("\n");
+    saved = ImGui::SmallButton("Render");
+
+    if(saved){
+        user_minimum_gc = strtod(buf1, NULL);
+        user_maximum_gc = strtod(buf2, NULL);
+
+        global_min_gc = user_minimum_gc;
+        global_max_gc = user_maximum_gc;
+    }
 
     if (prev_gc != gc_set)
     {
