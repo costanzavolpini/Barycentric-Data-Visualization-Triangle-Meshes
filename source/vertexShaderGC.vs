@@ -103,22 +103,17 @@
 
 
     vec4 get_result_color_gc(){
-        // TODO: RGB -> HSV -> RGB
        float val = gaussian_curvature[0]; // gaussian_curvature is a vec3 composed by same value
 
        // colors in HSV
-       vec3 red = vec3(0.0, 100.0, 100.0); //h s v
-       vec3 green = vec3(120.0, 100.0, 100.0);
-       vec3 blue = vec3(240.0, 100.0, 100.0);
-
-       red = vec3(1, 0, 0);
-       green = vec3(0, 1, 0);
-       blue = vec3(0, 0, 1);
+       vec3 red = vec3(0.0, 1.0, 1.0); //h s v
+       vec3 green = vec3(0.333, 1.0, 1.0);
+       vec3 blue = vec3(0.6667, 1.0, 1.0);
 
        if (val < 0) { //negative numbers until 0
-            return vec4(interpolation(green, red, min(val/min_gc, 1.0)), 1.0);
+            return vec4(hsv2rgb(interpolation(green, red, min(val/min_gc, 1.0))), 1.0);
         } else { //from 0 to positive
-            return vec4(interpolation(green, blue, min(val/max_gc, 1.0)), 1.0);
+            return vec4(hsv2rgb(interpolation(green, blue, min(val/max_gc, 1.0))), 1.0);
         }
     }
 

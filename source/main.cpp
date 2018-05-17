@@ -778,8 +778,8 @@ void analyse_gaussian_curvature(GLFWwindow *window)
 
     //TODO: insert all best values obtained with matlab
     // TODO: solve possibility to rewrite value after first time
-    static char buf1[sizeof(double)] = "-5000";
-    static char buf2[sizeof(double)] = "5000";
+    static char buf1[sizeof(double)] = "";
+    static char buf2[sizeof(double)] = "";
 
     ImGui::InputText("min value", buf1, sizeof(double), ImGuiInputTextFlags_CharsDecimal);
 
