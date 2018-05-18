@@ -79,6 +79,11 @@ class Object
         best_min_gc = percentiles_gc[0];
         best_max_gc = percentiles_gc[1];
 
+        if(best_min_gc > best_max_gc)
+            cout << "hhhhhh!!!!!!!!!!!"<< endl;
+
+        cout << "percentile "<< best_min_gc << " " << best_max_gc << endl;
+
         vector<double> percentiles_mc = k_percentile_mc.init(triangle_gc_vertex);
         best_min_gc = percentiles_mc[0];
         best_max_gc = percentiles_mc[1];

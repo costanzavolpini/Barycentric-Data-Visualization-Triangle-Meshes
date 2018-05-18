@@ -48,7 +48,7 @@ class KPercentile
             min_value = (in_vector[index_min] + in_vector[index_min - 1])/2;
         }
 
-        return vector<double>{max_value, min_value};
+        return vector<double>{min_value, max_value};
     }
 
 };

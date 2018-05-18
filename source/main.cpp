@@ -200,7 +200,6 @@ int main(int argc, char *argv[])
         (GLSL version 420 corresponds to OpenGL version 4.2 for example).
     */
     Shader ourShader = Shader();
-    ourShader.setBool("custom_flag", false);
 
     Shader normalShader = Shader();
     normalShader.initialize_shader("normal.vs", "normal.fs", "normal.gs");
@@ -254,10 +253,13 @@ int main(int argc, char *argv[])
         }
         else if (imgui_isGaussianCurvature)
         {
-            // cout << "min"<< global_min_gc << endl;
-            // cout <<"max"<< global_max_gc << endl;
             ourShader.setFloat("min_gc", global_min_gc);
             ourShader.setFloat("max_gc", global_max_gc);
+
+        } else if (imgui_isGaussianCurvature){
+
+            ourShader.setFloat("min_mc", object.get_minimum_mean_curvature_value());
+            ourShader.setFloat("max_mc", object.get_maximum_mean_curvature_value());
         }
         // --- end settings shaders ---
 
@@ -776,7 +778,7 @@ void analyse_gaussian_curvature(GLFWwindow *window)
     ImGui::TextWrapped("\n");
     ImGui::RadioButton("Manual bounds", &gc_set, 3);
 
-    //TODO: insert all best values obtained with matlab
+    //TODO: insert all best values obtained with meshlab
     // TODO: solve possibility to rewrite value after first time
     static char buf1[sizeof(double)] = "";
     static char buf2[sizeof(double)] = "";

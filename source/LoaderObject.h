@@ -87,7 +87,7 @@ double get_distance_points(Point3d v0, Point3d v1)
  * Function to insert a struct edge inside edge-map.
  */
 void insert_edge(int index_v1, int index_v2, bool isCorrectOrder, Point3d n)
-// FIXME: fix mean curvature, TODO: check if it is true that in case that isCorrect order the normal is n2 and also check if I am passing order correct
+// FIXME: fix mean curvature
 {
     vector<int> key(2);
     if(isCorrectOrder){
@@ -106,10 +106,7 @@ void insert_edge(int index_v1, int index_v2, bool isCorrectOrder, Point3d n)
 
     if (it != map_edge.end()) // update information edge struct if exist
     {
-        // cout << "i1: " << index_v1 << endl;
-        // cout << "i2: " << index_v2 << endl;
-
-        if(isCorrectOrder)
+        if(isCorrectOrder) // means index_1 < index_2
             it->second.n1 = n;
         else
             it->second.n2 = n;
@@ -132,7 +129,8 @@ void insert_edge(int index_v1, int index_v2, bool isCorrectOrder, Point3d n)
             e1.n2 = n;
         }
 
-        e1.value_mean_curvature = e1.length * (v[e1.index_v1]).getAngle(v[e1.index_v2]) / 2;
+        e1.value_mean_curvature = e1.length * (v[e1.index_v2]).getAngle(v[e1.index_v1]) / 2;
+        // e1.value_mean_curvature = e1.length * (v[e1.index_v1]).getAngle(v[e1.index_v2]) / 2;
         map_edge[key] = e1;
     }
 }
