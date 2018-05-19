@@ -1,21 +1,18 @@
 \label{section:vertex-area-chapter}
-The first goal is to extend the idea of flat shading from triangles to vertices and edges. The idea of flat shading is to draw all the pixels of a triangle with the same colour, and as such it is a natural way to visualize data given at the triangles (for example, the colour of an object, resulting from the lighting calculation using the triangle normal). The extension of this approach is to split the surface of the triangle mesh likewise into regions around vertices and edges and draw all pixels in these regions with the same colour, thus visualizing data given at the vertices or edges of the mesh in a piecewise constant, not necessarily continuous way, resembling the classical triangle flat shading. The aforementioned regions can easily be defined using barycentric coordinates and a simple GPU fragment program can be used to find out for each pixel to which region is belongs and which colour it should be painted with. Examples of vertex and edge data include discrete Gaussian and discrete mean value curvature. The results of this new technique should then be compared to the standard approach mentioned in the beginning.
-
-
+This section shows alternative methods to extend the idea of flat shading from triangles to vertices and edges. The idea of flat shading is to draw all the pixels of a triangle with the same colour. The extension of this approach is to split the surface of the triangle mesh likewise into regions around vertices and edges and draw all pixels in these regions with the same colour (Fig. \ref{fig:vertex-area}), thus visualizing data given at the vertices or edges of the mesh in a piecewise constant, not necessarily continuous way, resembling the classical triangle flat shading. The aforementioned regions can easily be defined using barycentric coordinates and a simple GPU fragment program (Fig. \ref{fig:max-diagram}) can be used to find out for each pixel to which region is belongs and which colour it should be painted with.
 
 %%%%%%%%%%%%%
 
-\subsection{Region around a vertex}
-We can split the surface of triangle meshes into regions around vertex (Fig. \ref{fig:vertex-area}) and color them.
-These regions can be determined using barycentric coordinates and GPU fragment program. Visualizing data given at the vertices or edges of the mesh in a piecewise constant simulates the classical triangle flat shading.
-An example of this vertex data is the discrete Gaussian curvature.
+
 \begin{figure}[h]
     \centering
-    \minipage[b]{.4\linewidth}
+    \minipage[b]{.5\linewidth}
+    \centering
     \includegraphics[scale=0.15]{images/max.png}
-    \caption{Vertex based area}\label{fig:max-diagram}
+    \caption{Max diagram}\label{fig:max-diagram}
     \endminipage\hfill
-    \minipage[b]{.4\linewidth}
+    \minipage[b]{.5\linewidth}
+    \centering
     \includegraphics[scale=0.15]{images/vertex-area.png}
     \caption{Region around a vertex}\label{fig:vertex-area}
     \endminipage
@@ -23,10 +20,9 @@ An example of this vertex data is the discrete Gaussian curvature.
 
 %%%%%%%%%%%%%
 
-\subsubsection{Max diagram - Vertex based area} \label{section:max-diagram}
+\subsection{Max diagram - Vertex based area} \label{section:max-diagram}
 Passing barycentric coordinates to the \textit{fragment shader} will clearly demonstrate that we can get results different from the classic color interpolation.
-%https://www.redblobgames.com/x/1730-terrain-shader-experiments/
-\cite{WEBSITE:1}
+\cite{WEBSITE:redbloggames}
 %----------
 There are different approaches to color interpolation focusing on the distance from vertices. For each point in a triangle, we can easily determine its closest vertex, which we use as a cue for coloring.
 A different approach from interpolating, can be found coloring vertex areas based on the minimum barycentric coordinate.
