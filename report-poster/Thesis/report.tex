@@ -1,0 +1,344 @@
+\documentclass[12pt]{article}
+
+%------------------------------------------------------------------------------%
+% PACKAGES
+%------------------------------------------------------------------------------%
+
+% Margins
+\usepackage[a4paper, lmargin=2.5cm, rmargin=2.5cm, top=3cm]{geometry}
+% Custom items
+\usepackage{enumitem}
+% Header
+\usepackage{fancyhdr}
+% Math
+\usepackage{amsmath} %[fleqn] to align equations to left
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{xfrac}
+\usepackage[mathscr]{eucal} %letter maths
+\usepackage{gensymb} %degree angles
+% URL
+% \usepackage[hyphens]{url}
+% Images
+\usepackage{graphicx}
+\usepackage{subfigure, wrapfig, url, array, caption}
+% Finite automata
+\usepackage{tikz}
+\usetikzlibrary{automata,positioning}
+% Graphs
+\usepackage{tikz}
+% Plots
+\usepackage{pgfplots}
+% Tables
+% \usepackage{tabularx}
+% Pseudocode
+\usepackage{listings}
+% Other
+\usepackage{import}
+\usepackage{pbox}
+\usepackage[numbib,nottoc]{tocbibind}
+\usepackage{lipsum}
+
+
+%------------------------------------------------------------------------------%
+% COMMANDS AND ENUMERATORS
+%------------------------------------------------------------------------------%
+
+% Global
+\newcommand{\DS}{\displaystyle}
+\newcommand{\bb}[1]{\mathbb{#1}}
+\newcommand{\call}[1]{\mathcal{#1}}
+
+% Absolute value
+\newcommand{\abs}[1]{\left|#1\right|}
+\newcommand{\dabs}[1]{\left|\left|#1\right|\right|}
+
+% Arrows
+\newcommand{\Al}{\Leftarrow}
+\newcommand{\Ar}{\Rightarrow}
+\newcommand{\al}{\leftarrow}
+\newcommand{\ar}{\rightarrow}
+
+% Ceil / Floor
+\newcommand{\floor}[1]{\lfloor#1\rfloor}
+\newcommand{\ceil}[1]{\lceil#1\rceil}
+
+% Code
+\newcommand{\CD}[1]{\texttt{#1}}
+
+% Enumerators
+\newenvironment{enumalph}{\begin{enumerate}[label=\alph*)]}{\end{enumerate}}
+\newenvironment{enumrom}{\begin{enumerate}[label=\roman*)]}{\end{enumerate}}
+
+% Fractions
+\newcommand{\fr}[2]{\frac{#1}{#2}}
+\newcommand{\fx}[2]{\sfrac{#1}{#2}}
+
+% Functions
+\newcommand{\f}[3]{#1 : #2 \rightarrow #3}
+\newcommand{\fToR}[2]{#1 : #2 \rightarrow \mathbb{R}}
+\newcommand{\fToN}[2]{#1 : #2 \rightarrow \mathbb{N}}
+\newcommand{\fOnR}[1]{#1 : \mathbb{R} \rightarrow \mathbb{R}}
+
+% Intervals
+\newcommand{\intcc}[1]{\lbrack#1\rbrack}
+\newcommand{\intco}[1]{\lbrack#1)}
+\newcommand{\intoc}[1]{(#1\rbrack}
+\newcommand{\intoo}[1]{(#1)}
+
+% Limits
+\newcommand{\limn}{\lim_{n \to \infty}}
+\newcommand{\lime}{\lim_{\varepsilon \to 0}}
+\newcommand{\limsupn}{\limsup_{n \to \infty}}
+\newcommand{\liminfn}{\liminf_{n \to \infty}}
+\newcommand{\limx}[1]{\lim_{x \to #1}}
+\newcommand{\tounif}{\xrightarrow{unif.}}
+
+% Sets
+\newcommand{\set}[2][]{\left\{ #2 \ifthenelse{\equal{#1}{}}{}{ : #1 }\right\}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathcal{C}}
+\newcommand{\PS}{\mathbb{P}}
+
+% Summations
+\newcommand{\sumn}{\sum_{k=1}^n}
+\newcommand{\series}{\sum_{n=1}^\infty}
+\newcommand{\seriec}{\sum_{k=m}^n}
+\newcommand{\seriex}[1]{\sum_{#1=1}^\infty}
+\newcommand{\pseries}[1]{\sum_{n=0}^\infty #1}
+
+% Symbols
+\newcommand{\T}[1]{\tilde{#1}}
+
+% Syntax
+\newcommand{\ForAll}{\ \forall \ }
+\newcommand{\Exists}{\ \exists \ }
+\newcommand{\ExistsI}{\ \exists! \ }
+\newcommand{\Ie}{\textit{I.e.}, }
+\newcommand{\ie}{\textit{i.e.}, }
+\newcommand{\Eg}{\textit{E.g.}, }
+\newcommand{\eg}{\textit{e.g.}, }
+\newcommand{\etc}{\textit{etc.}}
+
+% Theorems
+\makeatletter
+\def\th@plain{\thm@notefont{}\itshape}
+\def\th@definition{\thm@notefont{}\normalfont}
+\def\th@remark{\thm@headfont{\itshape}\thm@notefont{\bfseries}\normalfont}
+\def\thm@space@setup{\thm@preskip=0.5cm\thm@postskip=0.5cm}
+\makeatother
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\theoremstyle{definition}
+\newtheorem{recap}{Recap}[section]
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\theoremstyle{plain}
+\newtheorem{corollary}{Corollary}[theorem]
+\theoremstyle{plain}
+\newtheorem{lemma}[theorem]{Lemma}
+\theoremstyle{plain}
+\newtheorem{proposition}[theorem]{Proposition}
+\theoremstyle{definition}
+\newtheorem*{example}{Example}
+\theoremstyle{remark}
+\newtheorem{exampled}{Example}[definition]
+\theoremstyle{remark}
+\newtheorem{exampler}{Example}[recap]
+\theoremstyle{remark}
+\newtheorem{examplet}{Example}[theorem]
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+
+% Variables
+\newcommand{\E}{\varepsilon}
+
+% Vectors and linear algebra
+\newcommand{\vecTwo}[2]{\begin{pmatrix}#1\\#2\end{pmatrix}}
+\newcommand{\vecThree}[3]{\begin{pmatrix}#1\\#2\\#3\end{pmatrix}}
+\newcommand{\Span}[1]{\text{span}\left\{#1\right\}}
+\newcommand{\dotproduct}[2]{\langle#1,#2\rangle}
+
+
+% Plots
+\pgfplotsset{compat=newest}
+\usepgfplotslibrary{patchplots}
+\usetikzlibrary{calc,intersections,trees,positioning,arrows,chains,shapes.geometric,%
+    decorations.pathreplacing,decorations.pathmorphing,shapes,%
+    matrix,shapes.symbols, 3d}
+
+% Graphs
+\tikzset{
+>=stealth',
+  punktchain/.style={
+    rectangle,
+    rounded corners,
+    % fill=black!10,
+    draw=black, very thick,
+    text width=10em,
+    minimum height=3em,
+    text centered,
+    on chain},
+  line/.style={draw, thick, <-},
+  element/.style={
+    tape,
+    top color=white,
+    bottom color=blue!50!black!60!,
+    minimum width=8em,
+    draw=blue!40!black!90, very thick,
+    text width=10em,
+    minimum height=3.5em,
+    text centered,
+    on chain},
+  every join/.style={->, thick,shorten >=1pt},
+  decoration={brace},
+  tuborg/.style={decorate},
+  tubnode/.style={midway, right=2pt},
+  pics/carc/.style args={#1:#2:#3}{
+    code={
+      \draw[pic actions] (#1:#3) arc(#1:#2:#3);
+    }
+  }
+}
+
+% Pseudocode
+\lstset{
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=left, % display line numbers on the left
+    basicstyle=\ttfamily,
+    language=C++,
+    breaklines=true,
+    commentstyle=\color{gray}\ttfamily,, % comment color
+    keywordstyle=\color{blue}\ttfamily,, % keyword color
+    stringstyle=\color{red}\ttfamily, % string color
+}
+
+% Colors
+\definecolor{lightorange}{RGB}{251,211,168}
+\definecolor{darkred}{RGB}{153,0,0}
+\definecolor{darkgreen}{RGB}{0,51,25}
+
+%------------------------------------------------------------------------------%
+% HEADER / FOOTER
+%------------------------------------------------------------------------------%
+
+% Constants
+\newcommand{\SUPERTITLE}{Bachelor Project}
+\newcommand{\TITLE}{Barycentric Data Visualization for Triangle Meshes}
+\newcommand{\SUBTITLE}{Something}
+\newcommand{\INSTITUTION}{Universit\`a della Svizzera italiana}
+\newcommand{\PERIOD}{Year 2017--2018}
+\newcommand{\AUTHOR}{Costanza Volpini}
+\newcommand{\ADVISOR}{Prof.Dr. Kai Hormann}
+\newcommand{\ASSISTANT}{Ph.D. Jan Svoboda}
+
+% Indentation
+%\setlength{\mathindent}{0cm}
+\setlength\parindent{0pt}
+\setlength{\parskip}{1.2ex}
+
+\begin{document}
+
+%------------------------------------------------------------------------------%
+% HEAD
+%------------------------------------------------------------------------------%
+
+\thispagestyle{empty}
+
+\includegraphics[height=2.5cm]{usi-logo.png} \vspace{-1.42cm}
+
+% Header with logo
+%------------------------------------------------------------------------------%
+\begin{flushright}
+  {\large \SUPERTITLE}\vspace{-.5cm}
+
+  \rule{0.925\textwidth}{0.4pt}\vspace{-.2cm}
+
+  {\small \today}
+\end{flushright}
+
+% Title
+%------------------------------------------------------------------------------%
+\vspace{2cm} {\fontsize{20pt}{20pt}\selectfont \TITLE }
+
+{\SUBTITLE}
+
+\vspace{1cm} {\Large \AUTHOR}
+
+\vspace{-.2cm}\rule{\textwidth}{0.4pt}
+
+% Abstract
+%------------------------------------------------------------------------------%
+\textit{Abstract}
+
+\lipsum[1]
+
+% Advisors
+%------------------------------------------------------------------------------%
+\vspace{\fill}
+\rule{\textwidth}{0.4pt}
+
+\begin{small}
+  \begin{tabular}{@{}ll@{}}
+    Advisor   & \ADVISOR   \\
+    Assistant & \ASSISTANT
+  \end{tabular}
+\end{small}
+
+\vspace{-.1cm}\rule{\textwidth}{0.4pt}
+
+\begin{small}
+  \begin{tabular}{@{} p{0.7\textwidth} l @{}}
+    Advisor's approval (\ADVISOR): & Date:
+  \end{tabular}
+\end{small}
+%\pagebreak
+
+% The power of barycentric coordinates will grant the exploration of alternative data visualization techniques.
+
+%------------------------------------------------------------------------------%
+% BODY
+%------------------------------------------------------------------------------%
+
+\newpage \tableofcontents
+
+\newpage \section{Introduction}
+\import{sections/}{introduction}
+
+\newpage \section{GPU program}
+\import{sections/}{gpuprogram}
+
+\newpage \section{Vertex area based}
+\import{sections/}{vertexarea}
+
+% % \subsection{Min diagram - Edge based area}
+% % A different approach from interpolating, can be found coloring edge areas based on the minimum barycentric coordinate.
+% % The color is given by the region closest to the vertex.
+
+
+\newpage \section{Results and possible improvements}
+% \import{sections/}{results}
+
+\newpage \section{Conclusions}
+% \import{sections/}{conclusions}
+
+\newpage
+\bibliographystyle{plain}
+\bibliography{biblio}
+
+
+\appendix
+\newpage \section{Pseudocodes}
+\import{sections/}{pseudocodes}
+
+
+%------------------------------------------------------------------------------%
+% END
+%------------------------------------------------------------------------------%
+
+\end{document}
