@@ -92,14 +92,16 @@ The standard linear interpolated visualisation is made passing three attributes 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{Flat Shading}
-todo
-TODO:
-
+\textit{Flat shading} is a way to compute the colour at each pixel (at a corner or the barycentre) using the triangle normal.
+Given a triangle $[p_1, p_2, p_3]$, the lighting is computed using the normal $n$\footnote{$ \widehat{n} = (p_2 - p_1) \times (p_3 - p_1)$ and then normalize it} at $p= (p_1 + p_2 + p_3)/3$. This colour is used then for all pixels. Flat shading gives objects with flat facets.
+\cite{SLIDE:ICORSI}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{Gouraud Shading}
-\textit{Gouraud Shading} can be calculated in the \textit{vertex shader}. The main idea is to compute a normal at the vertex and an intensity for each vertex.
-todo (?)
+\textit{Gouraud Shading} is a way to compute the colour at each pixel assigning a normal to each corner and after having computed the color for each corner it linearly interpolates these colour values.
+Given a triangle $[p_1, p_2, p_3]$ and the normal at each corner $n_1, n_2, n_3$.
+The lighting is computed at $p_i$ using normal $n_i$ this applied to each corner return the colour values $c_1, c_2, c_3$.
+These colors are then linearly interpolate $c = {\mu}_1 c_1 + {\mu}_2 c_2 + {\mu}_3 c_3$. Gouraud shading gives objects that appear more curved. \cite{SLIDE:ICORSI}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
