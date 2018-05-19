@@ -272,17 +272,6 @@ int main(int argc, char *argv[])
 
                 angle = count_angle;
 
-                // if(count_angle > 360){
-                //     decrease_angle = true;
-                // } else if(count_angle < 0){
-                //     decrease_angle = false;
-                // }
-
-                // if(decrease_angle)
-                //     count_angle--;
-                // else
-                //     count_angle++;
-
                 if (count_angle > 360)
                     count_angle = 0;
                 count_angle++;

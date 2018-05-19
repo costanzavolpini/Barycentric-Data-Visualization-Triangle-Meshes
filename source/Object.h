@@ -7,6 +7,8 @@
 #include "LoaderObject.h"
 #include "kPercentileHelper.h"
 
+#include <numeric> // remove after
+
 using namespace std;
 
 /***************************************************************************
@@ -243,6 +245,14 @@ class Object
 
     vector<double> get_best_values_gc(){
         return vector<double>{best_min_gc, best_max_gc};
+    }
+
+    void modify_mc_temp(){
+        double sum = std::accumulate(triangle_mc_modified_auto.begin(), triangle_mc_modified_auto.end(), 0.0);
+        double mean = sum / triangle_mc_modified_auto.size();
+
+        double sq_sum = std::inner_product(triangle_mc_modified_auto.begin(), triangle_mc_modified_auto.end(), triangle_mc_modified_auto.begin(), 0.0);
+        double stdev = std::sqrt(sq_sum / triangle_mc_modified_auto.size() - mean * mean);
     }
 
 };
