@@ -1,6 +1,7 @@
 \label{section:vertex-area-chapter}
-Alternative data visualization techniques can be found using the power of barycentric coordinates and GPU programming.
-The usual way to visualize data for a triangle mesh is to associate data to vertices and then interpolating over the mesh triangles, that does not work in case of edges and triangles.
+The first goal is to extend the idea of flat shading from triangles to vertices and edges. The idea of flat shading is to draw all the pixels of a triangle with the same colour, and as such it is a natural way to visualize data given at the triangles (for example, the colour of an object, resulting from the lighting calculation using the triangle normal). The extension of this approach is to split the surface of the triangle mesh likewise into regions around vertices and edges and draw all pixels in these regions with the same colour, thus visualizing data given at the vertices or edges of the mesh in a piecewise constant, not necessarily continuous way, resembling the classical triangle flat shading. The aforementioned regions can easily be defined using barycentric coordinates and a simple GPU fragment program can be used to find out for each pixel to which region is belongs and which colour it should be painted with. Examples of vertex and edge data include discrete Gaussian and discrete mean value curvature. The results of this new technique should then be compared to the standard approach mentioned in the beginning.
+
+
 
 %%%%%%%%%%%%%
 
