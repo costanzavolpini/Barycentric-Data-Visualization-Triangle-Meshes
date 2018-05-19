@@ -30,16 +30,36 @@ The color is given by the region farthest from a vertex (Fig. \ref{fig:max-diagr
 
 %%%%%%%%%%%%%
 
-\subsection{Flat shading extension} \label{section:extend-flat-shading-lighting}
-An extension of \textit{flat shading} would be to have each vertex area to be in one constant color. This color can be taken from shading interpolation using the normal at the vertex and the vertex position.
+\subsection{Flat shading per vertex} \label{section:extend-flat-shading-lighting}
+An extension of \textit{flat shading} would be to have each vertex area to be in one constant color. This color can be taken using the normal at the vertex and the vertex position.
 The color will then be computed as in \textit{Gouraud shading}.
-The idea is to compute the color per vertex but instead of linearly interpolated it in each triangle (as \textit{Gouraud shading} does) we color regions around a vertex with that constant color.
+The idea is to compute the color per vertex but instead of linearly interpolated it in each triangle (as \textit{Gouraud shading} does) we color regions around a vertex with that constant color (using the GPU fragment program: max diagram \ref{section:max-diagram}).
 To implement it, the barycentric coordinates, the vertex color, the normal at the vertex and the lighting calculations must be passed to the \textit{fragment shader}.
-We want to avoid an automatic interpolation of colors, in order to return the resulting color using the \textit{max diagram} we have used a \textit{Geometry shader} that have access to all three vertex colors in \textit{fragment shader}. (Pseudocodes: \ref{appendix:vs-flat-shading-lighting}, \ref{appendix:gs-flat-shading-lighting}, \ref{appendix:fs-flat-shading-lighting})
+We want to avoid an automatic interpolation of colors, in order to return the resulting color using the \textit{max diagram}, we have used a \textit{Geometry shader} that have access to all three vertex colors in \textit{fragment shader}. (Pseudocodes: \ref{appendix:vs-flat-shading-lighting}, \ref{appendix:gs-flat-shading-lighting}, \ref{appendix:fs-flat-shading-lighting})
+
+\begin{figure}[h]
+    \centering
+    \minipage[b]{.3\linewidth}
+    \centering
+    % \includegraphics[scale=0.15]{images/.png}
+    \caption{Flat shading per triangle}\label{fig:flat-shading-triangle}
+    \endminipage\hfill
+    \minipage[b]{.3\linewidth}
+    \centering
+    \includegraphics[scale=0.5]{images/gouraudshading.png}
+    \caption{Gouraud shading per triangle}\label{fig:gouraud-shading}
+    \endminipage\hfill
+    \minipage[b]{.3\linewidth}
+    \centering
+    \includegraphics[scale=0.5]{images/extentflatshading.png}
+    \caption{Flat shading per vertex}\label{fig:flat-shading-vertex}
+    \endminipage
+\end{figure}
+
 
 \subsubsection{Comparison}
-Gouraud shading vs extension flat shading.
-TODO
+\color{red}{TODO: add armadillo, horse, etc. images with these 3 effects (flat shading 1 and 2, gouraud shading)}
+\color{black} %to remove after
 
 %%%
 \subsection{Discrete Gaussian Curvature}
@@ -87,7 +107,7 @@ We want now to compare the \textit{Gaussian curvature} (Fig. \ref{fig:gaussian-i
   \endminipage\hfill
   \centering
   \minipage{0.4\textwidth}%
-    \includegraphics[width=\linewidth]{images/gaussian-horse.png}
+    % \includegraphics[width=\linewidth]{images/gaussian-horse.png}
     \caption{Gaussian curvature}\label{fig:gaussian-horse}
   \endminipage
   \end{figure}
