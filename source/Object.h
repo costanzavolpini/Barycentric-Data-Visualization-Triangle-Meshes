@@ -7,7 +7,7 @@
 #include "LoaderObject.h"
 #include "kPercentileHelper.h"
 
-#include <numeric> // remove after
+#include <numeric> // TODO: remove after having debugged the mean curvature
 
 using namespace std;
 
@@ -16,6 +16,7 @@ Object.h
 Comment:  This file contains all Object definitions to construct and draw an object.
 ***************************************************************************/
 
+//TODO: fix mean curvature when change model -> not work (maybe)
 class Object
 {
   public:
@@ -28,7 +29,7 @@ class Object
     vector<float> triangle_gc_vertex; // vector of gaussian curvature of length vertex
 
     vector<float> triangle_mc_modified_auto; //outliers mc
-    vector<float> triangle_mc_vertex;
+    vector<float> triangle_mc_edge; // vector of gaussian curvature of length edge
 
     double best_min_gc;
     double best_max_gc;
@@ -65,7 +66,7 @@ class Object
         triangle_gc_modified_auto.shrink_to_fit();
 
 
-        if (!load(_path.c_str(), triangle_vertices, triangle_normals, triangle_gc, triangle_mc, triangle_gc_vertex, triangle_mc_vertex))
+        if (!load(_path.c_str(), triangle_vertices, triangle_normals, triangle_gc, triangle_mc, triangle_gc_vertex, triangle_mc_edge))
         {
             cout << "error loading file" << endl;
             return;
@@ -81,14 +82,11 @@ class Object
         best_min_gc = percentiles_gc[0];
         best_max_gc = percentiles_gc[1];
 
-        if(best_min_gc > best_max_gc)
-            cout << "hhhhhh!!!!!!!!!!!"<< endl;
-
-        cout << "percentile "<< best_min_gc << " " << best_max_gc << endl;
-
-        vector<double> percentiles_mc = k_percentile_mc.init(triangle_gc_vertex);
-        best_min_gc = percentiles_mc[0];
-        best_max_gc = percentiles_mc[1];
+        vector<double> percentiles_mc = k_percentile_mc.init(triangle_mc_edge);
+        best_min_mc = percentiles_mc[0];
+        best_max_mc = percentiles_mc[1];
+        modify_mc_temp();
+        // triangle_mc = triangle_mc_modified_auto;
 
         // ------------- VBO -------------
         // Use VBO to avoid to send data vertex at a time (we send everything together)
@@ -247,14 +245,27 @@ class Object
         return vector<double>{best_min_gc, best_max_gc};
     }
 
-    void modify_mc_temp(){
-        double sum = std::accumulate(triangle_mc_modified_auto.begin(), triangle_mc_modified_auto.end(), 0.0);
-        double mean = sum / triangle_mc_modified_auto.size();
-
-        double sq_sum = std::inner_product(triangle_mc_modified_auto.begin(), triangle_mc_modified_auto.end(), triangle_mc_modified_auto.begin(), 0.0);
-        double stdev = std::sqrt(sq_sum / triangle_mc_modified_auto.size() - mean * mean);
+    vector<double> get_best_values_mc(){
+        return vector<double>{best_min_mc, best_max_mc};
     }
 
+    // TODO: check current mean curvature. This is used to sed the mean at the real mean instead of zero in order to debug and find the problem.
+    void modify_mc_temp(){
+        double sum = std::accumulate(triangle_mc.begin(), triangle_mc.end(), 0.0);
+        double mean = sum / triangle_mc.size();
+
+        double sq_sum = std::inner_product(triangle_mc.begin(), triangle_mc.end(), triangle_mc.begin(), 0.0);
+        double stdev = std::sqrt(sq_sum / triangle_mc.size() - mean * mean);
+
+        // remap value triangle_mc
+        for(int i = 0; i < triangle_mc.size(); i++){
+            if(triangle_mc[i] > mean){
+                triangle_mc_modified_auto.push_back(triangle_mc[i]/best_max_mc);
+            }else{
+                triangle_mc_modified_auto.push_back(triangle_mc[i]/best_min_mc);
+            }
+        }
+    }
 };
 
 #endif

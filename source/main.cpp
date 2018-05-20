@@ -122,7 +122,7 @@ int imgui_isGaussianCurvature;
 int imgui_isExtendFlatShading;
 int imgui_isGouraudShading;
 int imgui_isMeanCurvatureShading;
-string name_file = "models/icosahedron_1.off"; //default armadillo
+string name_file = "models/armadillo.off"; //default armadillo
 
 float min_val, max_val;
 
@@ -256,10 +256,10 @@ int main(int argc, char *argv[])
             ourShader.setFloat("min_gc", global_min_gc);
             ourShader.setFloat("max_gc", global_max_gc);
 
-        } else if (imgui_isGaussianCurvature){
-
-            ourShader.setFloat("min_mc", object.get_minimum_mean_curvature_value());
-            ourShader.setFloat("max_mc", object.get_maximum_mean_curvature_value());
+        } else if (imgui_isMeanCurvatureShading){
+            // TODO: mean curvature not working!
+            ourShader.setFloat("min_mc", object.get_best_values_mc()[0]);
+            ourShader.setFloat("max_mc", object.get_best_values_mc()[1]);
         }
         // --- end settings shaders ---
 
@@ -292,6 +292,7 @@ int main(int argc, char *argv[])
 
             default: // mouse
                 // arcball
+                // TODO: enable movement mouse when the user is moving into the second column of imgui
                 rotated_view = view * arcball.rotation_matrix_view();
                 rotated_model = model * arcball.rotation_matrix_model(rotated_view);
 
@@ -581,12 +582,13 @@ void zoom_settings()
 
 void set_shader()
 {
+    // TODO: add implementation flat shading per triangle
     ImGui::TextWrapped("Set a shader experiment to see how the model looks like:\n\n");
-    ImGui::RadioButton("Linear Interpolation", &shader_set, 0);
-    ImGui::RadioButton("Extend Flat Shading", &shader_set, 1);
-    ImGui::RadioButton("Gouraud Shading", &shader_set, 2);
-    ImGui::RadioButton("Gaussian Curvature", &shader_set, 3);
-    ImGui::RadioButton("Linear Interpolation GC", &shader_set, 4);
+    // ImGui::RadioButton("Flat Shading per triangle", &shader_set, 0);
+    ImGui::RadioButton("Flat Shading per vertex", &shader_set, 1);
+    ImGui::RadioButton("Gouraud Shading per triangle", &shader_set, 2);
+    ImGui::RadioButton("Constant Gaussian curvature per vertex", &shader_set, 3);
+    ImGui::RadioButton("Gouraud Gaussian curvature", &shader_set, 4);
     ImGui::RadioButton("Mean Curvature", &shader_set, 5);
 
     set_parameters_shader(shader_set);
@@ -767,7 +769,6 @@ void analyse_gaussian_curvature(GLFWwindow *window)
     ImGui::TextWrapped("\n");
     ImGui::RadioButton("Manual bounds", &gc_set, 3);
 
-    //TODO: insert all best values obtained with meshlab
     // TODO: solve possibility to rewrite value after first time
     static char buf1[sizeof(double)] = "";
     static char buf2[sizeof(double)] = "";
