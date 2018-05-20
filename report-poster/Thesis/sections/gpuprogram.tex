@@ -1,3 +1,4 @@
+%TODO: from there!
 A program that runs on GPU is called \textit{shader}. Shaders are principally used to modify the representation and the behaviour of 3D objects. They are also used to create lighting effects. Shaders can perform tasks efficiently thanks to the GPU. That guarantee faster results than CPU since GPU is designed to work in parallel.
 These shader programs are written in \textit{GLSL}.
 
@@ -88,7 +89,7 @@ A program will allow us to control the rendering pipeline since by default there
 \end{figure}
 
 \subsection{Vertex Shader}
-The program that perform vertex operations is called \textit{vertex shader}. It receives one vertex at a time and then it passes the output to a \textit{fragment shader} or to a \textit{geometry shader}, if any.
+The program that performs vertex operations is called \textit{vertex shader}. It receives one vertex at a time and then it passes the output to a \textit{fragment shader} or to a \textit{geometry shader}, if any.
 
 \subsection{Fragment Shader}
 \textit{Fragment shader} performs color computation for every visible pixel of the rasterized object. It works on a fragment at a time, but thanks to the power of GPU it can work in parallel for all vertices (\textit{vertex shader}) and fragments (\textit{fragment shader}).

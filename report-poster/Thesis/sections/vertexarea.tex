@@ -21,8 +21,7 @@ This section shows alternative methods to extend the idea of flat shading from t
 %%%%%%%%%%%%%
 
 \subsection{Max diagram - Vertex based area} \label{section:max-diagram}
-Passing barycentric coordinates to the \textit{fragment shader} will clearly demonstrate that we can get results different from the classic color interpolation.
-\cite{WEBSITE:redbloggames}
+Passing barycentric coordinates to the \textit{fragment shader} will clearly demonstrate that we can get different results from the classic color interpolation.\cite{WEBSITE:redbloggames}
 %----------
 There are different approaches to color interpolation focusing on the distance from vertices. For each point in a triangle, we can easily determine its closest vertex, which we use as a cue for coloring.
 A different approach from interpolating, can be found coloring vertex areas based on the minimum barycentric coordinate.
@@ -81,7 +80,7 @@ We want to avoid an automatic interpolation of colors, in order to return the re
 \subsection{Gaussian curvature}
 \label{section:vertex-area-gaussian-curvature}
 Another interesting alternative data visualization technique is to compute the \textit{Gaussian curvature} per vertex. That can be done summing up, for each vertex, angles at this vertex with adjacent triangles and then subtracting this value to $2\pi$.
-After having obtain this value, called \textit{angle defect} (Fig. \ref{fig:gc-angle}), we map linearly this value to a color range.
+After having obtained this value, called \textit{angle defect} (Fig. \ref{fig:gc-angle}), we map linearly this value to a color range.
 The resulting color will be the vertex flat shading visualisation of \textit{Gaussian curvature}.
 $$K(V) = (2\pi - \sum_j \theta_j)/\mathcal{A}_{Mixed}$$
 %%
@@ -112,16 +111,16 @@ $$K(V) = (2\pi - \sum_j \theta_j)/\mathcal{A}_{Mixed}$$
 
 \subsubsection{Local averaging regions} \label{section:localaveraging}
 A mesh can be constructed either as the limit of a family of smooth surfaces or as a linear approximation of an arbitrary surface. To derive a spatial average of geometric properties we mix finite elements (a linear interpolation between three vertices of a triangle) and finite volumes (finite-volume region on a triangulated surface using Voronoi cells or Barycentric cells, Fig. \ref{fig:localregions}). Restricting the average to the neighboring triangles (\textit{1-ring}) we can choose for each vertex an associated surface patch over which the average will be computed.
-Let's $\mathcal{A}_{Barycenter}$ be the area formed using barycenters and $\mathcal{A}_{Voronoi}$ the one formed using \textit{Voronoi} cell. The general case is represented by a point that can be anywhere, let's denote this surface area $\mathcal{A}_M$.
+Let $\mathcal{A}_{Barycenter}$ be the area formed using barycenters and $\mathcal{A}_{Voronoi}$ the one formed using \textit{Voronoi} cell. The general case is represented by a point that can be anywhere, let's denote this surface area $\mathcal{A}_M$.
 
 \begin{figure}[!h]
     \centering
     \includegraphics[scale=0.35]{images/localregions.png}
     \label{fig:localregions}
-    \caption{Local averaging regions used for computing discrete differential operators associated with the center vertex of the one-ring neighborhood. \cite{polygonmeshprocessing}}
+    \caption{Local averaging regions used for computing discrete differential operators associated with the center vertex of the one-ring neighborhood.\cite{polygonmeshprocessing}}
 \end{figure}
 \textit{Voronoi} cell of each vertex is an appropriate local region that provide a stable error bounds.
-The \textit{Voronoi} region for a point $P$ of a triangle non-obtuse $[P, Q, R]$ is expressed as $\frac{1}{8}(| PR|^2 cot \angle Q + |PQ |^2 cot \angle R)$. The sum of these areas for the whole \textit{1-ring neighborhood} gives the non-obtuse \textit{Voronoi} area for a vertex. The above expression for the \textit{Voronoi} finite-volume area does not hold in case of obtuse angles. Let's define a new surface area for each vertex denoted $\mathcal{A}_{Mixed}$. Essentially the idea is yo use the circumcenter point for each non-obtuse triangle and to use the midpoint of the edge opposite to the obtuse angle in case of an obtuse triangle. (See Pseudocode \ref{appendix:localaveraging}). \cite{meshlab}
+The \textit{Voronoi} region for a point $P$ of a triangle non-obtuse $[P, Q, R]$ is expressed as $\frac{1}{8}(| PR|^2 cot \angle Q + |PQ |^2 cot \angle R)$. The sum of these areas for the whole \textit{1-ring neighborhood} gives the non-obtuse \textit{Voronoi} area for a vertex. The above expression for the \textit{Voronoi} finite-volume area does not hold in case of obtuse angles. Let's define a new surface area for each vertex denoted $\mathcal{A}_{Mixed}$. Essentially the idea is to use the circumcenter point for each non-obtuse triangle and to use the midpoint of the edge opposite to the obtuse angle in case of an obtuse triangle. (See Pseudocode \ref{appendix:localaveraging}).\cite{meshlab}
 %%%%%%%%
 
 \subsection{Constant Gaussian curvature per vertex}
@@ -141,7 +140,7 @@ The \textit{Voronoi} region for a point $P$ of a triangle non-obtuse $[P, Q, R]$
 
 
 \subsection{Gouraud Gaussian curvature}
-\textit{Gouraud Gaussian curvature} returns an interpolated color per vertex. The idea is to calculate the \textit{Gaussian curvature} as explained above (mapping the color into a color range to get the corresponding color per vertex) but instead of returning the constant color using a max-diagram approach, we just return the interpolation of the values obtained for each triangle.
+\textit{Gouraud Gaussian curvature} returns an interpolated color per vertex. The idea is to calculate the \textit{Gaussian curvature} as explained above (mapping the color into a color range to get the corresponding color per vertex) but instead of returning the constant color using a max-diagram approach, we just return the interpolation of values obtained for each triangle.
 
 \begin{figure}[!h]
     \centering
