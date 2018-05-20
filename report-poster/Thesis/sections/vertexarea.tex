@@ -108,17 +108,18 @@ Let's $\mathcal{A}_{Barycenter}$ be the area formed using barycenters and $\math
 The \textit{Voronoi} region for a point $P$ of a triangle non-obtuse $[P, Q, R]$ is expressed as $\frac{1}{8}(| PR|^2 cot \angle Q + |PQ |^2 cot \angle R)$. The sum of these areas for the whole \textit{1-ring neighborhood} gives the non-obtuse \textit{Voronoi} area for a vertex. The above expression for the \textit{Voronoi} finite-volume area does not hold in case of obtuse angles. Let's define a new surface area for each vertex denoted $\mathcal{A}_{Mixed}$. Essentially the idea is yo use the circumcenter point for each non-obtuse triangle and to use the midpoint of the edge opposite to the obtuse angle in case of an obtuse triangle. (See Pseudocode \ref{appendix:localaveraging}). \cite{meshlab}
 %%%%%%%%
 
-TODO: from there!!!!!!!! READ!!!!!!!!!!
-
 \subsection{Constant Gaussian curvature per vertex}
-\textit{Constant Gaussian curvature per vertex} returns a constant color around each vertex (Fig. \ref{fig:gc-icosahedron}, Pseudocode \ref{appendix:vs-gaussiancurvature}). After having calculated the \textit{Gaussian curvature} per vertex, this value is mapped in a color range to get the curvature color (for example: green for flat surfaces). This process is made separately for each vertex of the triangle and after using the technique explained above of max-diagram \ref{section:max-diagram} the resulting constant color is returned.
+\textit{Constant Gaussian curvature per vertex} returns a constant color around each vertex (Fig. \ref{fig:gc-icosahedron}, Pseudocode \ref{appendix:vs-gaussiancurvature}). After having calculated the \textit{Gaussian curvature} per vertex, this value is mapped into a color range to get the curvature color (for example: green for flat surfaces). This process is made separately for each vertex of the triangle and after, using the technique explained above of max-diagram (See section \ref{section:max-diagram}) the final resulting constant color is returned.
 
 \subsection{Gouraud Gaussian curvature}
-\textit{Gouraud Gaussian curvature} returns an interpolated color per vertex. The idea is to calculate the \textit{Gaussian curvature} as explained above (mapping the color in a color range to get the corresponding color per vertex) but instead of returning the constant color using a max-diagram approach, we just return the interpolation of the values obtained at each vertex of the triangle.
+\textit{Gouraud Gaussian curvature} returns an interpolated color per vertex. The idea is to calculate the \textit{Gaussian curvature} as explained above (mapping the color into a color range to get the corresponding color per vertex) but instead of returning the constant color using a max-diagram approach, we just return the interpolation of the values obtained for each triangle.
 
 
 \subsubsection{Comparison}
-We want now to compare the \textit{Gaussian curvature} (Fig. \ref{fig:gaussian-interpolated-horse}) with the \textit{interpolated Gaussian curvature}. In Fig. \ref{fig:gaussian-horse} each vertex area is colored applying the method \textit{max diagram} described in the above subsection \ref{section:max-diagram}. Instead, in Fig. \ref{fig:gaussian-interpolated-horse} the color is obtained with a linear interpolation.
+
+\color{red}{TODO: add images and comparison between Constant Gaussian curvature per vertex and Gouraud Gaussian curvature}
+\color{black}
+% We want now to compare the \textit{Gaussian curvature} (Fig. \ref{fig:gaussian-interpolated-horse}) with the \textit{interpolated Gaussian curvature}. In Fig. \ref{fig:gaussian-horse} each vertex area is colored applying the method \textit{max diagram} described in the above subsection \ref{section:max-diagram}. Instead, in Fig. \ref{fig:gaussian-interpolated-horse} the color is obtained with a linear interpolation.
 % \begin{figure}[!htb]
 % \centering
 %   \minipage{0.4\textwidth}
@@ -132,7 +133,6 @@ We want now to compare the \textit{Gaussian curvature} (Fig. \ref{fig:gaussian-i
 %   \endminipage
 %   \end{figure}
 
-Visualization of the principal curvatures of the model as colors from blue (highest values of curvature) to red (lower values of curvature), in both Fig. \ref{fig:gaussian-horse} and Fig. \ref{fig:gaussian-interpolated-horse}, better highlighs the geometry of the horse.
-These changes of curvature, positive (blue), flat (green) and negative regions (red), better emphasises the 3-dimensionality of the model.
-TODO
+% Visualization of the principal curvatures of the model as colors from blue (highest values of curvature) to red (lower values of curvature), in both Fig. \ref{fig:gaussian-horse} and Fig. \ref{fig:gaussian-interpolated-horse}, better highlighs the geometry of the horse.
+% These changes of curvature, positive (blue), flat (green) and negative regions (red), better emphasises the 3-dimensionality of the model.
 % \textit{Gaussian curvature} better shows the muscle constrasts given a more realistic character to the horse than the model obtained using the \textit{interpolated Gaussian curvature}.

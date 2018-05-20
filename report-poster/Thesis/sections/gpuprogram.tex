@@ -5,13 +5,14 @@ These shader programs are written in \textit{GLSL}.
 A program will allow us to control the rendering pipeline since by default there is no pipeline set in OpenGL. It takes a set of vertices as input, then the \textit{vertex shader} transforms them (translation, rotation, projection...) and passes the transformed vertices to the \textit{geometry shader}. This shader takes vertices to create primitive shapes and then it rasterizes them. These rasterized flat images are then passed as input to the \textit{fragment shader} that adds the lighting, apply textures and color these images (Fig. \ref{fig:gpu-pipeline}).
 
 \begin{figure}
+    \centering
     \scalebox{0.85}{\begin{tikzpicture}
         [node distance=.8cm,
         start chain=going right,]
         \node[punktchain, join] (vs) {Vertex Shader};
         \node[punktchain, join] (gs)  {Geometry Shader};
         \node[punktchain, join] (fs)  {Fragment Shader};
-    \end{tikzpicture}} \\ \\
+    \end{tikzpicture}}
     \scalebox{0.9}{\begin{tikzpicture}
         \coordinate (L1) at (6,0);
         \coordinate (L2) at (8,0);
