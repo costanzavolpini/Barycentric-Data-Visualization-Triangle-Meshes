@@ -60,6 +60,23 @@ We want to avoid an automatic interpolation of colors, in order to return the re
 \subsubsection{Comparison}
 \color{red}{TODO: add armadillo, horse, etc. images with these 3 effects (flat shading 1 and 2, gouraud shading)}
 \color{black} %to remove after
+Analysis \textit{Flat shading per vertex}
+\begin{figure}[h]
+    \centering
+    \minipage[b]{.3\linewidth}
+    \centering
+    \includegraphics[scale=0.3]{images/armadillo-extendfs.png}
+    \endminipage\hfill
+    \minipage[b]{.3\linewidth}
+    \centering
+    \includegraphics[scale=0.3]{images/armadillo-extendfs-1.png}
+    \endminipage\hfill
+    \minipage[b]{.3\linewidth}
+    \centering
+    \includegraphics[scale=0.3]{images/armadillo-extendfs-2.png}
+    \endminipage
+    \caption{Flat shading per vertex}
+\end{figure}
 
 %%%
 \subsection{Gaussian curvature}
@@ -110,29 +127,79 @@ The \textit{Voronoi} region for a point $P$ of a triangle non-obtuse $[P, Q, R]$
 
 \subsection{Constant Gaussian curvature per vertex}
 \textit{Constant Gaussian curvature per vertex} returns a constant color around each vertex (Fig. \ref{fig:gc-icosahedron}, Pseudocode \ref{appendix:vs-gaussiancurvature}). After having calculated the \textit{Gaussian curvature} per vertex, this value is mapped into a color range to get the curvature color (for example: green for flat surfaces). This process is made separately for each vertex of the triangle and after, using the technique explained above of max-diagram (See section \ref{section:max-diagram}) the final resulting constant color is returned.
+\begin{figure}[!h]
+    \centering
+    \minipage[b]{.5\linewidth}
+    \centering
+    \includegraphics[scale=1.0]{images/gc-armadillo-top.png}
+    \endminipage\hfill
+    \minipage[b]{.5\linewidth}
+    \centering
+    \includegraphics[scale=0.4]{images/gc-detail-armadillo-top.png}
+    \endminipage
+    \caption{Constant Gaussian curvature per vertex} \label{fig:gc-detail}
+\end{figure}
+
 
 \subsection{Gouraud Gaussian curvature}
 \textit{Gouraud Gaussian curvature} returns an interpolated color per vertex. The idea is to calculate the \textit{Gaussian curvature} as explained above (mapping the color into a color range to get the corresponding color per vertex) but instead of returning the constant color using a max-diagram approach, we just return the interpolation of the values obtained for each triangle.
 
+\begin{figure}[!h]
+    \centering
+    \minipage[b]{.5\linewidth}
+    \centering
+    \includegraphics[scale=1.0]{images/gci-armadillo-top.png}
+    \endminipage\hfill
+    \minipage[b]{.5\linewidth}
+    \centering
+    \includegraphics[scale=0.4]{images/gci-detail-armadillo-top.png}
+    \endminipage
+    \caption{Gouraud Gaussian curvature} \label{fig:gci-detail}
+\end{figure}
 
-\subsubsection{Comparison}
 
-\color{red}{TODO: add images and comparison between Constant Gaussian curvature per vertex and Gouraud Gaussian curvature}
-\color{black}
-% We want now to compare the \textit{Gaussian curvature} (Fig. \ref{fig:gaussian-interpolated-horse}) with the \textit{interpolated Gaussian curvature}. In Fig. \ref{fig:gaussian-horse} each vertex area is colored applying the method \textit{max diagram} described in the above subsection \ref{section:max-diagram}. Instead, in Fig. \ref{fig:gaussian-interpolated-horse} the color is obtained with a linear interpolation.
-% \begin{figure}[!htb]
-% \centering
-%   \minipage{0.4\textwidth}
-%     % \includegraphics[width=\linewidth]{images/}
-%     \caption{Interpolated Gaussian curvature} \label{fig:gaussian-interpolated-horse}
-%   \endminipage\hfill
-%   \centering
-%   \minipage{0.4\textwidth}%
-%     % \includegraphics[width=\linewidth]{images/gaussian-horse.png}
-%     \caption{Gaussian curvature}\label{fig:gaussian-horse}
-%   \endminipage
-%   \end{figure}
-
-% Visualization of the principal curvatures of the model as colors from blue (highest values of curvature) to red (lower values of curvature), in both Fig. \ref{fig:gaussian-horse} and Fig. \ref{fig:gaussian-interpolated-horse}, better highlighs the geometry of the horse.
-% These changes of curvature, positive (blue), flat (green) and negative regions (red), better emphasises the 3-dimensionality of the model.
+\subsection{Evaluation and Comparison between constant Gaussian curvature per vertex and Gouraud Gaussian curvature}
+We want now to compare the \textit{constant Gaussian curvature per vertex } (Fig. \ref{fig:gc-detail}) with the \textit{Gouraud Gaussian curvature} (Fig. \ref{fig:gci-detail}).
+In Fig. \ref{fig:gc-detail} each vertex area is colored applying the method \textit{max diagram} described in the above section \ref{section:max-diagram}. Instead, in Fig. \ref{fig:gci-detail} the color is obtained with a linear interpolation.
+Visualization of the principal curvatures of the model as colors from blue (highest values of curvature) to red (lower values of curvature) in Fig. \ref{fig:comparison-gc-gci} highlighs the geometry of meshes.
+These changes of curvature, positive (blue), flat (green) and negative regions (red), better emphasises the 3-dimensionality of the model.
 % \textit{Gaussian curvature} better shows the muscle constrasts given a more realistic character to the horse than the model obtained using the \textit{interpolated Gaussian curvature}.
+
+\begin{figure}[!h]
+    \centering
+    \minipage[b]{.5\linewidth}
+    \centering
+    \includegraphics[scale=0.7]{images/gc-genus.png}
+    \endminipage\hfill
+    \minipage[b]{.5\linewidth}
+    \centering
+    \includegraphics[scale=0.7]{images/gci-genus.png}
+    \endminipage\hfill
+    \minipage[b]{.5\linewidth}
+    \centering
+    \includegraphics[scale=0.7]{images/gc-eight.png}
+    \endminipage\hfill
+    \minipage[b]{.5\linewidth}
+    \centering
+    \includegraphics[scale=0.7]{images/gci-eight.png}
+    \endminipage\hfill
+    \minipage[b]{.5\linewidth}
+    \centering
+    \includegraphics[scale=0.7]{images/gc-armadillo.png}
+    \endminipage\hfill
+    \minipage[b]{.5\linewidth}
+    \centering
+    \includegraphics[scale=0.7]{images/gci-armadillo.png}
+    \endminipage\hfill
+    \minipage[b]{.5\linewidth}
+    \centering
+    \includegraphics[scale=0.7]{images/gc-horse.png}
+    \endminipage\hfill
+    \minipage[b]{.5\linewidth}
+    \centering
+    \includegraphics[scale=0.7]{images/gci-horse.png}
+    \endminipage
+    \caption{On the left: Constant Gaussian curvature per vertex. On the right: Gouraud Gaussian curvature.}
+    \label{fig:comparison-gc-gci}
+\end{figure}
+
