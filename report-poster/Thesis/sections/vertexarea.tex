@@ -159,11 +159,12 @@ The \textit{Voronoi} region for a point $P$ of a triangle non-obtuse $[P, Q, R]$
 
 
 \subsection{Evaluation and Comparison between constant Gaussian curvature per vertex and Gouraud Gaussian curvature}
-We want now to compare the \textit{constant Gaussian curvature per vertex } (Fig. \ref{fig:gc-detail}) with the \textit{Gouraud Gaussian curvature} (Fig. \ref{fig:gci-detail}).
+We want now to compare the \textit{constant Gaussian curvature per vertex} (Fig. \ref{fig:gc-detail}) with the \textit{Gouraud Gaussian curvature} (Fig. \ref{fig:gci-detail}).
 In Fig. \ref{fig:gc-detail} each vertex area is colored applying the method \textit{max diagram} described in the above section \ref{section:max-diagram}. Instead, in Fig. \ref{fig:gci-detail} the color is obtained with a linear interpolation.
 Visualization of the principal curvatures of the model as colors from blue (highest values of curvature) to red (lower values of curvature) in Fig. \ref{fig:comparison-gc-gci} highlighs the geometry of meshes.
-These changes of curvature, positive (blue), flat (green) and negative regions (red), better emphasises the 3-dimensionality of the model.
-% \textit{Gaussian curvature} better shows the muscle constrasts given a more realistic character to the horse than the model obtained using the \textit{interpolated Gaussian curvature}.
+These changes of curvature, positive (blue), flat (green) and negative regions (red), better emphasizes the 3-dimensionality of the model.
+\textit{Gouraud Gaussian curvature} is more smoothed that causes a loss of small details, this is particularly evident in armadillo's legs mesh. Instead, \textit{constant Gaussian curvature per vertex} generates sharped edges that less emphasizes the general lines of the model causing a small loss of 3-dimensionality.
+\textit{Constant Gaussian curvature per vertex} better shows the muscle constrasts given a more detailed character to models.
 
 \begin{figure}[!h]
     \centering
