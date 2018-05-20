@@ -36,11 +36,11 @@
        vec3 blue = vec3(0.6667, 1.0, 1.0);
 
        if (val < 0) { //negative numbers until 0
-            // return vec4(hsv2rgb(interpolation(green, red, min(val/min_mc, 1.0))), 1.0);
-            return vec4(hsv2rgb(interpolation(green, red, val)), 1.0);
+            return vec4(hsv2rgb(interpolation(green, red, min(val/min_mc, 1.0))), 1.0);
+            // return vec4(hsv2rgb(interpolation(green, red, val)), 1.0);
         } else { //from 0 to positive
-            // return vec4(hsv2rgb(interpolation(green, blue, min(val/max_mc, 1.0))), 1.0);
-            return vec4(hsv2rgb(interpolation(green, blue, val)), 1.0);
+            return vec4(hsv2rgb(interpolation(green, blue, min(val/max_mc, 1.0))), 1.0);
+            // return vec4(hsv2rgb(interpolation(green, blue, val)), 1.0);
         }
     }
 
