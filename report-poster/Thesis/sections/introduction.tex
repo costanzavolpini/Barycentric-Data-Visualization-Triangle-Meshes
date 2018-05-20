@@ -1,12 +1,12 @@
 \subsection{Barycentric coordinates}
 Barycentric coordinates, discovered by Möbius in 1827, consist of one of the most progessive area of research in computer graphics and mathematics thanks to the numerous applications in image and geometry processing.
-% cite : http://lgg.epfl.ch/publications/2014/LBC/LBC.pdf
+\cite{REPORT:localbarycentricoordsepfl} %http://lgg.epfl.ch/publications/2014/LBC/LBC.pdf
 % ------
 The position of any point in a triangle can be expressed using a linear combination with three scalars using barycentric coordinates:
 $$ p = \lambda_1 p_1 + \lambda_2 p_2 + \lambda_3 p_3$$
 where $p_1$, $p_2$ and $p_3$ are the vertices of a triangle and $\lambda_1$, $\lambda_2$ and $\lambda_3$ (the barycentric coordinates) are three scalars such that
 respect the following barycentric coordinates properties.
-% cite : https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/barycentric-coordinates
+\cite{WEBSITE:scratchapixel}
 % -------
 \begin{itemize}
   \item partition of unity: $\sum_{i=1}^3 \lambda_{i}(p) = 1$
@@ -15,13 +15,12 @@ respect the following barycentric coordinates properties.
   \item linearity: $\lambda_i \in \prod_1$
   \item non-negativity: $\lambda_i(p)\geq 0$ for $p \in [p_1, p_2, p_3]$
 \end{itemize}
-%cite : https://www.icorsi.ch/pluginfile.php/406215/mod_resource/content/7/Graphics.2017.10.05.pdf
+\cite{SLIDE:ICORSI}
 % -------
 The point is inside the triangle if $0 \leq \lambda_1, \lambda_2, \lambda_3 \leq 1$. If a barycentric coordinates is less than zero or greater than one, the point is outside the triangle.
-% cite : https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/barycentric-coordinates
 % -------
 Barycentric coordinates allow to interpolate values from a set of control points over the interior of a domain, using weighted combinations of values associated with the control points (Fig. \ref{fig:barycentric-coord}).
-% cite : http://lgg.epfl.ch/publications/2014/LBC/LBC.pdf
+\cite{REPORT:localbarycentricoordsepfl}
 % ------
 \begin{figure}
   \centering
@@ -50,13 +49,13 @@ Barycentric coordinates allow to interpolate values from a set of control points
 
 \subsection{Triangle meshes}
 A collection of triangles without any particular mathematical structure are called \textit{triangle meshes} in many geometry processing algorithms. To derive a global parameterization for an entire triangle mesh we can define a 2D position for each vertex. Let be $\mathcal{M}$ a triangle mesh that consists of a geometric and topological component represented by a graph structure with a set of vertices $\mathcal{V} = \{ v_1, ..., v_V \}$ and a set of triangular faces connecting them $\mathcal{F} = \{ f_1, ... , f_F \}$ with $f_i \in \mathcal{V} \times \mathcal{V} \times \mathcal{V}$. The connectivity of a triangle mesh can be expressed in termes of the edges of the respective graph $\mathcal{E} = \{ e_1, ..., e_E \}$ where $e_i \in \mathcal{V} \times \mathcal{V}$.
-% cite: Botsch 2010 Polygon Mesh Processing
+\cite{polygonmeshprocessing}
 \begin{figure}[h!]
   \centering
-  \minipage[b]{.4\linewidth}
+  \minipage[b]{.5\linewidth}
   \includegraphics[scale=0.2]{images/armadillo-white04}
   \endminipage
-  \minipage[b]{.4\linewidth}
+  \minipage[b]{.5\linewidth}
   \includegraphics[scale=0.2]{images/armadillo-white205}
   \endminipage
 \caption{3D triangle meshes.}
@@ -65,26 +64,44 @@ A collection of triangles without any particular mathematical structure are call
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\subsection{Lighting}
+\subsection{Lighting - Phong lighting model}
 
-formula + draw and explanation of angle (like at 90 degree some light..e.tc.)
-todo
+\begin{figure}[h!]
+  \centering
+  \includegraphics[scale=0.6]{images/lighting}
+\caption{Lighting}
+\end{figure}
+Given a light source at position $l$ with intensity $I_l$ and a surface point at position $p$ with normal $n$,
+we can define the angle between the incident light ($l-p$) and the normal $n$ as $\varphi$.
+Let's bee our reflected light vector $r$ defined as $r = 2 n \cdot <n, l - p> - (l-p)$ and $\alpha$ the angle between that vector and the view direction $(v - p)$.
+
+The \textit{Phong lighting model} is defined as the sum of the self-emitting intensity, ambient term, diffuse reflection and specular reflection.
+$$ I = I_e + {\rho}_a \cdot I_A + \sum_{j=1}^n ({\rho}_d \cdot cos {\varphi}_j + {\rho}_s \cdot cos_{\alpha_j}^k) \cdot I_j$$ where $I_e$ is the self-emitting intensity, ${\rho}_a, {\rho}_d, {\rho}_s$ are the reflection constants (surface properties), $n$ is the number of lights sources with intensities $I_j$ and $k$ is the shininess.
+\cite{SLIDE:ICORSI}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\subsection{Linear Interpolation}
+\subsection{Linear interpolation}
+Linear interpolation is an interpolation method where a linear interpolation is applied to get an equal spacing between the interpolated values. Given two numbers $n_1$ and $n_2$ (the start and final values of the interpolant), a linear interpolation can be made using a parameter $t$ ($t \in [0,1]$). \cite{WEBSITE:interpolation}
+
+$$ n = n_1 + t (n_2 - n_1)$$
+
+
 The standard linear interpolated visualisation is made passing three attributes (colors) for each vertex of a triangle. OpenGL will interpolate linearly the colors. That is possible thanks to the barycentric coordinates that will tell how much of each color is being mixed at any position.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{Flat Shading}
-todo
-
+\textit{Flat shading} is a way to compute the colour at each pixel (at a corner or the barycentre) using the triangle normal.
+Given a triangle $[p_1, p_2, p_3]$, the lighting is computed using the normal $n$\footnote{$ \widehat{n} = (p_2 - p_1) \times (p_3 - p_1)$ and then normalize it} at $p= (p_1 + p_2 + p_3)/3$. This colour is used then for all pixels. Flat shading gives objects with flat facets.
+\cite{SLIDE:ICORSI}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{Gouraud Shading}
-\textit{Gouraud Shading} can be calculated in the \textit{vertex shader}. The main idea is to compute a normal at the vertex and an intensity for each vertex.
-todo (?)
+\textit{Gouraud Shading} is a way to compute the colour at each pixel assigning a normal to each corner and after having computed the color for each corner it linearly interpolates these colour values.
+Given a triangle $[p_1, p_2, p_3]$ and the normal at each corner $n_1, n_2, n_3$.
+The lighting is computed at $p_i$ using normal $n_i$ this applied to each corner return the colour values $c_1, c_2, c_3$.
+These colors are then linearly interpolate $c = {\mu}_1 c_1 + {\mu}_2 c_2 + {\mu}_3 c_3$. Gouraud shading gives objects that appear more curved. \cite{SLIDE:ICORSI}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -93,54 +110,13 @@ The \textit{Gaussian curvature} $K$ is defined as the product of the principal c
 $$K=k_1k_2$$
 where $k_1$ and $k_2$ are the principal directions. A basic interpretation should be to imagine the \textit{Gaussian curvature} like a logical \texttt{AND} since it will check if there is a curvature along both directions.
 The curvature of a surface is characterized by the principal curvatures, the \textit{Gaussian curvature} and the \textit{mean curvature} are simply averages of them.
-%cite: A quick and dirty introduction to the curvature of surfaces (brickisland.net/cs177/?p=144)
+\cite{WEBSITE:gaussiancurvaturedirty}
 %---------
 \begin{figure}[h]
   \centering
 \includegraphics[scale=0.5]{images/gaussian_curvature_examples.png}
 \caption{Negative curvature, zero curvature and positive curvature.}\label{fig:curvature-gaussian}
 \end{figure}
-% \begin{figure}[h]
-%   \minipage[b]{.5\linewidth}
-%   \centering
-%   \scalebox{0.7}{\begin{tikzpicture}
-%   \begin{axis}[view={60}{30}]
-%       \addplot3[surf,shader=flat,
-%           samples=20,
-%           domain=1:0,y domain=0:2*pi,
-%           z buffer=sort]
-%           ({sqrt(1-x^2) * cos(deg(y))},
-%        {sqrt( 1-x^2 ) * sin(deg(y))},
-%        x);
-%   \end{axis}
-%   \end{tikzpicture}}
-%   \caption{Positive GC}\label{fig:positive-gaussian}
-%   \endminipage
-%   \minipage[b]{.5\linewidth}
-%   \centering
-%   \begin{tikzpicture}[scale=0.7]
-%     \begin{axis}[view={60}{30}]
-%     \addplot3[patch,patch refines=3,
-%     shader=faceted interp,
-%     patch type=biquadratic]
-%     table[z expr=x^2-y^2]
-%     {
-%         x  y
-%         -2 -2
-%         2  -2
-%         2  2
-%         -2 2
-%         0  -2
-%         2  0
-%         0  2
-%         -2 0
-%         0  0
-%     };
-%   \end{axis}
-%   \end{tikzpicture}
-%   \caption{Negative GC}\label{fig:negative-gaussian}
-%   \endminipage
-% \end{figure}
 Surfaces that have a zero gaussian curvature are called \textit{developable surfaces} because they can be flattened out into the plane without any stretching. \textit{Gaussian curvature} should be zero inside each mesh triangle and the same along edges since it can be flattened symmetrically into the plane by simply rotating one triangle about the common edge into the plane defined by the other. Consequently the \textit{Gaussian curvature} is concentrated at the vertices of a triangle and defined as the \textit{angle defect}
 $$K(V) = 2 \pi - \sum_{i=1}^n \theta_i$$
 where $\theta_i$ are the angles of the triangle $T_i$ adjacent to the vertex $V$ at $V$. This should be seen as the integral of the Gaussian curvature over a certain region $S(V)$ around $V$, where these $S(V)$ form a partition of the surface of the entire mesh.
@@ -148,13 +124,23 @@ $$ K(V) = \int_{S(V)} KdA  $$
 \textit{Negative curvature} can be recognized by the fact that external directions curve in opposite directions, \textit{zero curvature} has one external direction that has zero curvature, \textit{positive curvature} has external directions that curve in the same direction (Fig. \ref{fig:curvature-gaussian}).
 The \textit{Theorema Egregium}, discovered by C.F. Gauss in 1827, states that the \textit{Gaussian curvature} is an intrinsic property of the surface that does not depend on the space, despite by the fact that is define as the product of the principal curvatures (whose value depends on how the surface is immersed in the space). Technically, the \textit{Gaussian curvature} is invariant under isometries.
 We can then notice that triangle angles add up to less than $180 \degree$ in negative curature, exactly $180 \degree$ in zero curature, and more than $180 \degree$ in positive curature.
-
-%cite: Geometry Processing Kai Hormann (paper)
-
-
+\cite{geometryprocessing}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{Mean Curvature}
-TODO
+The \textit{mean curvature} H is defined as the arithmetic mean of principal curvatures : $$H = \frac{k_1 + k_2}{2}$$ where $k_1$ and $k_2$ are the principal directions. A basic interpretation should be to imagine the \textit{mean curvature} like a logical \texttt{OR} since it will check if there is a curvature along at least one direction.
+\cite{WEBSITE:gaussiancurvaturedirty}
+The \textit{mean curvature} inside each mesh triangle is zero, but it does not vanish at edges. The \textit{mean curvature} associated with an edge is defined as $H(E) = \parallel E \parallel {\theta}_E/2$ where ${\theta}_E/2$ is the signed
+angle between the normals of adjacent triangles (see Fig. \ref{fig:mean-curvature}).
+
+\begin{figure}[h]
+  \centering
+\includegraphics[scale=0.4]{images/mean_curvature_paper.png}
+\caption{A vertex $V$ with its neighbouring vertices $V_i$ and adjacent triangles $T_i$. Angles opposite the edge $E_i$ are denoted by $\alpha_i$ and $\beta_i$. The
+angle between the normals of adjacent triangles $T_1$ and $T_2$ with positive or negative sign is denoted as ${\theta}_E$.}\label{fig:mean-curvature}
+\end{figure}
+The \textit{mean curvature} at a vertex $V$ is defined as:
+$$ H(V) = \frac{1}{2} \sum_{i=1}^n H(E_i)$$ Averaging the mean curvatures of its adjacent edges guarantee that \textit{mean curvature} of an edge is divide uniformly to both end points.
+\cite{geometryprocessing}
 
 

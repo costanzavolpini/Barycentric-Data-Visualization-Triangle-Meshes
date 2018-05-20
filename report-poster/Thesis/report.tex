@@ -230,7 +230,7 @@
 % Constants
 \newcommand{\SUPERTITLE}{Bachelor Project}
 \newcommand{\TITLE}{Barycentric Data Visualization for Triangle Meshes}
-\newcommand{\SUBTITLE}{Something}
+\newcommand{\SUBTITLE}{\color{red}{Something}\color{black}}
 \newcommand{\INSTITUTION}{Universit\`a della Svizzera italiana}
 \newcommand{\PERIOD}{Year 2017--2018}
 \newcommand{\AUTHOR}{Costanza Volpini}
@@ -279,7 +279,6 @@
 The usual way to visualize data for a triangle mesh is to associate the data with the vertices and then use linear interpolation over the mesh triangles. While this is the obvious way to go for data given at the mesh vertices, it is less natural for data given at the edges or triangles, since it requires to first aggregate the data neighbouring each vertex, thus introducing an additional averaging step.
 In this project we want to explore alternative data visualization techniques, using the power of barycentric coordinates and GPU programming.
 
-\lipsum[1]
 
 % Advisors
 %------------------------------------------------------------------------------%
@@ -319,16 +318,21 @@ In this project we want to explore alternative data visualization techniques, us
 \newpage \section{Vertex area based}
 \import{sections/}{vertexarea}
 
+\newpage \section{Edge area based}
+\color{red}{TODO: mean curvature! Fix bug and implement new version}
+\color{black}
+% \import{sections/}{edgearea}
+
 % % \subsection{Min diagram - Edge based area}
 % % A different approach from interpolating, can be found coloring edge areas based on the minimum barycentric coordinate.
 % % The color is given by the region closest to the vertex.
 
 
-\newpage \section{Results and possible improvements}
-% \import{sections/}{results}
-
 \newpage \section{Conclusions}
-% \import{sections/}{conclusions}
+\lipsum[1]
+\color{red}{TODO: insert tables comparison with meshlab for gc and mc}
+\color{black}
+% \import{sections/}{results-conclusions}
 
 \newpage
 \bibliographystyle{plain}

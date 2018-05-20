@@ -150,3 +150,18 @@ void main() {
     gl_Position = projection * view * model * vec4(aPos, 1.0);
 }
 \end{lstlisting}
+
+\vspace{10pt}
+
+\begin{lstlisting}[caption={Region $\mathcal{A}_{Mixed}$ on an arbitrary mesh. \cite{meshlab} (Section: \ref{section:localaveraging})\label{appendix:localaveraging}}]
+    A_Mixed = 0
+    For each triangle T from the 1-ring neighborhood of x
+    If T is non-obtuse (Voronoi safe)
+        A_Mixed += Voronoi region of x in T
+    Else
+        If x is obtuse
+            A_Mixed += area(T)/2
+        Else
+            A_Mixed += area(T)/4
+    \end{lstlisting}
+
