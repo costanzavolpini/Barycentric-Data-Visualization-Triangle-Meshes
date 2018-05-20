@@ -86,7 +86,7 @@ class Object
         best_min_mc = percentiles_mc[0];
         best_max_mc = percentiles_mc[1];
         modify_mc_temp();
-        // triangle_mc = triangle_mc_modified_auto;
+        triangle_mc = triangle_mc_modified_auto; //FIXME: if this is removed then use: vec4(hsv2rgb(interpolation(green, blue, min(val/max_mc, 1.0))), 1.0); into the vertexShaderMC
 
         // ------------- VBO -------------
         // Use VBO to avoid to send data vertex at a time (we send everything together)
