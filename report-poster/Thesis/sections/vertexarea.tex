@@ -37,7 +37,28 @@ The idea is to compute the color per vertex but instead of linearly interpolated
 To implement it, the barycentric coordinates, the vertex color, the normal at the vertex and the lighting calculations must be passed to the \textit{fragment shader}.
 We want to avoid an automatic interpolation of colors, in order to return the resulting color using the \textit{max diagram}, we have used a \textit{Geometry shader} that have access to all three vertex colors in \textit{fragment shader}. (Pseudocodes: \ref{appendix:vs-flat-shading-lighting}, \ref{appendix:gs-flat-shading-lighting}, \ref{appendix:fs-flat-shading-lighting})
 
-\begin{figure}[h]
+\begin{figure}[!h]
+    \centering
+    \minipage[b]{.3\linewidth}
+    \centering
+    \includegraphics[scale=0.3]{images/armadillo-extendfs.png}
+    \endminipage\hfill
+    \minipage[b]{.3\linewidth}
+    \centering
+    \includegraphics[scale=0.3]{images/armadillo-extendfs-1.png}
+    \endminipage\hfill
+    \minipage[b]{.3\linewidth}
+    \centering
+    \includegraphics[scale=0.3]{images/armadillo-extendfs-2.png}
+    \endminipage
+    \caption{Flat shading per vertex}
+\end{figure}
+
+
+\subsubsection{Comparison}
+\color{red}{TODO: add armadillo, horse, etc. images with these 3 effects (flat shading 1 and 2, gouraud shading)}
+\color{black} %to remove after
+\begin{figure}[!h]
     \centering
     \minipage[b]{.3\linewidth}
     \centering
@@ -54,28 +75,6 @@ We want to avoid an automatic interpolation of colors, in order to return the re
     \includegraphics[scale=0.5]{images/extentflatshading.png}
     \caption{Flat shading per vertex}\label{fig:flat-shading-vertex}
     \endminipage
-\end{figure}
-
-
-\subsubsection{Comparison}
-\color{red}{TODO: add armadillo, horse, etc. images with these 3 effects (flat shading 1 and 2, gouraud shading)}
-\color{black} %to remove after
-Analysis \textit{Flat shading per vertex}
-\begin{figure}[h]
-    \centering
-    \minipage[b]{.3\linewidth}
-    \centering
-    \includegraphics[scale=0.3]{images/armadillo-extendfs.png}
-    \endminipage\hfill
-    \minipage[b]{.3\linewidth}
-    \centering
-    \includegraphics[scale=0.3]{images/armadillo-extendfs-1.png}
-    \endminipage\hfill
-    \minipage[b]{.3\linewidth}
-    \centering
-    \includegraphics[scale=0.3]{images/armadillo-extendfs-2.png}
-    \endminipage
-    \caption{Flat shading per vertex}
 \end{figure}
 
 %%%
