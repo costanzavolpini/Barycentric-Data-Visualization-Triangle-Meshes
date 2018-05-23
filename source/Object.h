@@ -24,6 +24,7 @@ class Object
     vector<float> triangle_normals;
     vector<float> triangle_gc; //untouched gc
     vector<float> triangle_mc; //mean curvature per edges
+    vector<float> triangle_mc_vertex; // mean curvature per vertex
 
     vector<float> triangle_gc_modified_auto; //outliers gc
     vector<float> triangle_gc_vertex; // vector of gaussian curvature of length vertex
@@ -55,6 +56,7 @@ class Object
         triangle_normals.clear();
         triangle_gc.clear();
         triangle_mc.clear();
+        triangle_mc_vertex.clear();
         triangle_gc_vertex.clear();
         triangle_gc_modified_auto.clear();
 
@@ -62,11 +64,12 @@ class Object
         triangle_normals.shrink_to_fit();
         triangle_gc.shrink_to_fit();
         triangle_mc.shrink_to_fit();
+        triangle_mc_vertex.shrink_to_fit();
         triangle_gc_vertex.shrink_to_fit();
         triangle_gc_modified_auto.shrink_to_fit();
 
 
-        if (!load(_path.c_str(), triangle_vertices, triangle_normals, triangle_gc, triangle_mc, triangle_gc_vertex, triangle_mc_edge))
+        if (!load(_path.c_str(), triangle_vertices, triangle_normals, triangle_gc, triangle_mc, triangle_mc_vertex, triangle_gc_vertex, triangle_mc_edge))
         {
             cout << "error loading file" << endl;
             return;
@@ -78,6 +81,8 @@ class Object
     // name file and the second it is the method gc
     void init()
     {
+        cout << "MAX " << *max_element(triangle_mc_vertex.begin(), triangle_mc_vertex.end()) << endl;
+
         vector<double> percentiles_gc = k_percentile_gc.init(triangle_gc_vertex);
         best_min_gc = percentiles_gc[0];
         best_max_gc = percentiles_gc[1];

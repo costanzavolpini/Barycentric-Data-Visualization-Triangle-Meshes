@@ -121,7 +121,9 @@ const char *fragment_shader;
 int imgui_isGaussianCurvature;
 int imgui_isExtendFlatShading;
 int imgui_isGouraudShading;
-int imgui_isMeanCurvatureShading;
+int imgui_isFlatShading;
+int imgui_isMeanCurvatureEdgeShading;
+int imgui_isMeanCurvatureVertexShading;
 string name_file = "models/armadillo.off"; //default armadillo
 
 float min_val, max_val;
@@ -239,8 +241,10 @@ int main(int argc, char *argv[])
         ourShader.use();
 
         // --- setting shaders ---
-        if (imgui_isExtendFlatShading || imgui_isGouraudShading)
+        if (imgui_isExtendFlatShading || imgui_isGouraudShading || imgui_isFlatShading)
         {
+            ourShader.setBool("isFlat", false);
+
             // get matrix's uniform location and set matrix
             ourShader.setVec3("light.position", 0.5f, 0.5f, 0.5f);
             ourShader.setVec3("viewPos", glm::vec3(0.0f, 0.0f, 3.0f));
@@ -250,16 +254,23 @@ int main(int argc, char *argv[])
             ourShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
             ourShader.setVec3("light.specular", 0.2f, 0.2f, 0.2f);
             ourShader.setFloat("shininess", 12.0f);
+
+            if(imgui_isFlatShading)
+                ourShader.setBool("isFlat", true);
         }
         else if (imgui_isGaussianCurvature)
         {
             ourShader.setFloat("min_gc", global_min_gc);
             ourShader.setFloat("max_gc", global_max_gc);
 
-        } else if (imgui_isMeanCurvatureShading){
+        } else if (imgui_isMeanCurvatureEdgeShading){
+
             // TODO: mean curvature not working!
             ourShader.setFloat("min_mc", object.get_best_values_mc()[0]);
             ourShader.setFloat("max_mc", object.get_best_values_mc()[1]);
+
+        } else if(imgui_isMeanCurvatureVertexShading){
+
         }
         // --- end settings shaders ---
 
@@ -475,7 +486,7 @@ void show_window(bool *p_open, GLFWwindow *window)
     }
     ImGui::NextColumn();
 
-    ImGui::Text("ImGui"); // opengl
+    ImGui::Text(""); // opengl
 
     ImGui::SetColumnOffset(1, size_x * 2);
 
@@ -491,6 +502,7 @@ void show_window(bool *p_open, GLFWwindow *window)
     //the third parameter is the lower right corner
     //the last two parameters are the UVs
     //they have to be flipped (normally they would be (0,0);(1,1)
+    // TODO: image imgui full size not just a small square
     double width_image = ImGui::GetCursorScreenPos().x + io.DisplaySize.x / 2;
     double height_image = ImGui::GetCursorScreenPos().y + io.DisplaySize.y / 2;
 
@@ -583,13 +595,15 @@ void zoom_settings()
 void set_shader()
 {
     // TODO: add implementation flat shading per triangle
+    // TODO: rename shading
     ImGui::TextWrapped("Set a shader experiment to see how the model looks like:\n\n");
-    // ImGui::RadioButton("Flat Shading per triangle", &shader_set, 0);
+    ImGui::RadioButton("Flat Shading", &shader_set, 0);
     ImGui::RadioButton("Flat Shading per vertex", &shader_set, 1);
-    ImGui::RadioButton("Gouraud Shading per triangle", &shader_set, 2);
+    ImGui::RadioButton("Gouraud Shading", &shader_set, 2);
     ImGui::RadioButton("Constant Gaussian curvature per vertex", &shader_set, 3);
     ImGui::RadioButton("Gouraud Gaussian curvature", &shader_set, 4);
-    ImGui::RadioButton("Mean Curvature", &shader_set, 5);
+    ImGui::RadioButton("Mean Curvature per edge", &shader_set, 5);
+    ImGui::RadioButton("Mean Curvature per vertex", &shader_set, 6);
 
     set_parameters_shader(shader_set);
 }
@@ -600,6 +614,19 @@ void set_parameters_shader(int selected_shader)
     switch (selected_shader)
     {
 
+    case 0: // flat shading
+        vertex_shader = "vertexShader.vs";
+        fragment_shader = "flatFragmentShader.fs";
+        geometry_shader = NULL;
+
+        imgui_isFlatShading = 1;
+        imgui_isExtendFlatShading = 0;
+        imgui_isGaussianCurvature = 0;
+        imgui_isGouraudShading = 0;
+        imgui_isMeanCurvatureEdgeShading = 0;
+        imgui_isMeanCurvatureVertexShading = 0;
+        break;
+
     case 1: // extend flat shading
         vertex_shader = "vertexShader.vs";
         fragment_shader = "maxDiagramFragmentShader.fs";
@@ -608,7 +635,9 @@ void set_parameters_shader(int selected_shader)
         imgui_isExtendFlatShading = 1;
         imgui_isGaussianCurvature = 0;
         imgui_isGouraudShading = 0;
-        imgui_isMeanCurvatureShading = 0;
+        imgui_isMeanCurvatureEdgeShading = 0;
+        imgui_isMeanCurvatureVertexShading = 0;
+        imgui_isFlatShading = 0;
         break;
 
         // ---------
@@ -621,7 +650,9 @@ void set_parameters_shader(int selected_shader)
         imgui_isGouraudShading = 1;
         imgui_isExtendFlatShading = 0;
         imgui_isGaussianCurvature = 0;
-        imgui_isMeanCurvatureShading = 0;
+        imgui_isMeanCurvatureEdgeShading = 0;
+        imgui_isMeanCurvatureVertexShading = 0;
+        imgui_isFlatShading = 0;
         break;
 
         // ---------
@@ -634,10 +665,12 @@ void set_parameters_shader(int selected_shader)
         imgui_isGaussianCurvature = 1;
         imgui_isGouraudShading = 0;
         imgui_isExtendFlatShading = 0;
-        imgui_isMeanCurvatureShading = 0;
+        imgui_isMeanCurvatureEdgeShading = 0;
+        imgui_isMeanCurvatureVertexShading = 0;
+        imgui_isFlatShading = 0;
         break;
 
-    case 5: // mean curvature
+    case 5: // mean curvature edge
         vertex_shader = "vertexShaderMC.vs";
         fragment_shader = "minDiagramFragmentShader.fs";
         geometry_shader = "geometryShaderMC.gs";
@@ -645,7 +678,23 @@ void set_parameters_shader(int selected_shader)
         imgui_isGaussianCurvature = 0;
         imgui_isGouraudShading = 0;
         imgui_isExtendFlatShading = 0;
-        imgui_isMeanCurvatureShading = 1;
+        imgui_isMeanCurvatureEdgeShading = 1;
+        imgui_isMeanCurvatureVertexShading = 0;
+        imgui_isFlatShading = 0;
+        break;
+
+
+    case 6: // mean curvature vertex
+        // vertex_shader = "vertexShaderMC.vs";
+        // fragment_shader = "minDiagramFragmentShader.fs";
+        // geometry_shader = "geometryShaderMC.gs";
+
+        // imgui_isGaussianCurvature = 0;
+        // imgui_isGouraudShading = 0;
+        // imgui_isExtendFlatShading = 0;
+        // imgui_isMeanCurvatureEdgeShading = 0;
+        imgui_isMeanCurvatureVertexShading = 1;
+        imgui_isFlatShading = 0;
         break;
 
     default: // gaussian curvature (3)
@@ -656,7 +705,9 @@ void set_parameters_shader(int selected_shader)
         imgui_isGaussianCurvature = 1;
         imgui_isExtendFlatShading = 0;
         imgui_isGouraudShading = 0;
-        imgui_isMeanCurvatureShading = 0;
+        imgui_isMeanCurvatureEdgeShading = 0;
+        imgui_isMeanCurvatureVertexShading = 0;
+        imgui_isFlatShading = 0;
         break;
     }
 }

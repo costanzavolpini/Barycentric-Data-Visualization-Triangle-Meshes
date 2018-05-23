@@ -69,6 +69,9 @@ std::map<vector<int>, edge> map_edge; // key: [index_v1, index_v2]    val: struc
 // of the edge opposite to the obtuse angle
 vector<float> area_mixed;
 
+vector<float> voronoi_region;
+vector<float> normal_curvature_estimation;
+
 
 // counter obtuse triangle and not-obtuse triangle
 int number_obtuse_triangle;
@@ -321,7 +324,7 @@ bool read_off_file(const char *path)
 /**
  * Function to load the mesh, find Gaussian Curvature, Mean Curvature...etc.
 */
-bool load(const char *path, vector<float> &out_vertices, vector<float> &out_normals, vector<float> &out_gc, vector<float> &out_mc, vector<float> &gc_vertex_size, vector<float> &mc_edge_size)
+bool load(const char *path, vector<float> &out_vertices, vector<float> &out_normals, vector<float> &out_gc, vector<float> &out_mc, vector<float> &out_mc_vertex, vector<float> &gc_vertex_size, vector<float> &mc_edge_size)
 {
     // --------------------- Read file -----------------------------
     if (!read_off_file(path))
@@ -353,6 +356,14 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
 
     set_max_min_mesh(); // find min value and max value of a mesh (in order to rescale values correctly)
 
+    // -- initialize mean curvature per vertex vectors --
+    voronoi_region.resize(num_vertices);
+    std::fill(voronoi_region.begin(), voronoi_region.end(), 0);
+
+    normal_curvature_estimation.resize(num_vertices);
+    std::fill(normal_curvature_estimation.begin(), normal_curvature_estimation.end(), 0);
+    // ---- end mean curvature vectors per vertex initialization ----
+
     // iterate inside triangles and calculates angle_defeact
     for (int k = 0; k < num_triangles; k++)
     {
@@ -374,7 +385,7 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         v_counter[t[k].v[1]]++; // update counter for normals
         v_counter[t[k].v[2]]++; // update counter for normals
 
-        // -------------- MEAN CURVATURE -------------- TODO: check the code
+        // -------------- MEAN CURVATURE EDGE -------------- TODO: check the code
 
         // fill map edges
         int index_v1 = t[k].v[0];
@@ -434,10 +445,31 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         calculate_A_mixed(k, index_v2, index_v1, index_v3, angle_v2v1v0, angle_v1v0v2, angle_v0v2v1);
         calculate_A_mixed(k, index_v3, index_v1, index_v2, angle_v0v2v1, angle_v1v0v2, angle_v2v1v0);
 
-        if (!is_obtuse_angle(angle_v1v0v2) && !is_obtuse_angle(angle_v2v1v0) && !is_obtuse_angle(angle_v0v2v1)) // Triangle is not obtuse
-            number_non_obtuse_triangle++;
-        else // triangle obtuse
-            number_obtuse_triangle++;
+        // if (!is_obtuse_angle(angle_v1v0v2) && !is_obtuse_angle(angle_v2v1v0) && !is_obtuse_angle(angle_v0v2v1)) // Triangle is not obtuse
+        //     number_non_obtuse_triangle++;
+        // else // triangle obtuse
+        //     number_obtuse_triangle++;
+
+        // -------------- end mean curvature edge --------------
+
+        // -------------- MEAN CURVATURE VERTEX --------------
+        // array of A_mixed saved for each vertex
+        voronoi_region[index_v1] += get_voronoi_region_triangle(index_v1, index_v2, index_v3, angle_v2v1v0, angle_v0v2v1);
+        // voronoi_region[index_v1] += get_voronoi_region_triangle(index_v1, index_v3, index_v2, angle_v0v2v1, angle_v2v1v0);
+        // TODO: maybe add also voronoi region between v1 and v3 and so on
+
+        voronoi_region[index_v2] += get_voronoi_region_triangle(index_v2, index_v1, index_v3, angle_v1v0v2, angle_v0v2v1);
+        voronoi_region[index_v3] += get_voronoi_region_triangle(index_v3, index_v1, index_v2, angle_v1v0v2, angle_v2v1v0);
+
+
+        normal_curvature_estimation[index_v1] += 2 * (((v[index_v1] - v[index_v2]) * n)/((v[index_v1] - v[index_v2]).squaredNorm()));
+        normal_curvature_estimation[index_v1] += 2 * (((v[index_v1] - v[index_v3]) * n)/((v[index_v1] - v[index_v3]).squaredNorm()));
+
+        normal_curvature_estimation[index_v2] += 2 * (((v[index_v2] - v[index_v1]) * n)/((v[index_v2] - v[index_v1]).squaredNorm()));
+        normal_curvature_estimation[index_v2] += 2 * (((v[index_v2] - v[index_v3]) * n)/((v[index_v2] - v[index_v3]).squaredNorm()));
+
+        normal_curvature_estimation[index_v3] += 2 * (((v[index_v3] - v[index_v2]) * n)/((v[index_v3] - v[index_v2]).squaredNorm()));
+        normal_curvature_estimation[index_v3] += 2 * (((v[index_v3] - v[index_v1]) * n)/((v[index_v3] - v[index_v1]).squaredNorm()));
     }
 
     // fill out_gc vector
@@ -497,6 +529,12 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         out_mc.push_back(mc_3);
         out_mc.push_back(mc_3);
         // -------------- end mean curvature --------------
+
+        out_mc_vertex.push_back( 1/area_mixed[t[k].v[0]] * 1/8 * voronoi_region[t[k].v[0]] * normal_curvature_estimation[t[k].v[0]]);
+        out_mc_vertex.push_back( 1/area_mixed[t[k].v[1]] * 1/8 * voronoi_region[t[k].v[1]] * normal_curvature_estimation[t[k].v[1]]);
+        out_mc_vertex.push_back( 1/area_mixed[t[k].v[2]] * 1/8 * voronoi_region[t[k].v[2]] * normal_curvature_estimation[t[k].v[2]]);
+                // voronoi_region normal_curvature_estimation
+
     }
     // ofstream file_output;
     // string path_name = path;
