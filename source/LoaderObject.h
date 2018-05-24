@@ -387,7 +387,7 @@ bool read_off_file(const char *path)
 /**
  * Function to load the mesh, find Gaussian Curvature, Mean Curvature...etc.
 */
-bool load(const char *path, vector<float> &out_vertices, vector<float> &out_normals, vector<float> &out_gc, vector<float> &out_mc, vector<float> &out_mc_vertex, vector<float> &gc_vertex_size, vector<float> &mc_vertex_size_edge)
+bool load(const char *path, vector<float> &out_vertices, vector<float> &out_normals, vector<float> &out_gc, vector<float> &out_mc, vector<float> &out_mc_vertex, vector<float> &gc_vertex_size, vector<float> &mc_vertex_size_edge, vector<float> &mc_vertex_size_vertex)
 {
     // --------------------- Read file -----------------------------
     if (!read_off_file(path))
@@ -670,6 +670,10 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         out_normals.push_back(normals[t[k].v[2]].x());
         out_normals.push_back(normals[t[k].v[2]].y());
         out_normals.push_back(normals[t[k].v[2]].z());
+    }
+
+    for(int k = 0; k < num_vertices; k++){
+        mc_vertex_size_vertex.push_back((1.0f/area_mixed[k]) * voronoi_region[k] * normal_curvature_estimation[k]);
     }
 
     // cout << path << " "<< number_obtuse_triangle << ", " << number_non_obtuse_triangle << endl;

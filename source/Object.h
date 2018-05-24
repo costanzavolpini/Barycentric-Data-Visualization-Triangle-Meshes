@@ -24,9 +24,11 @@ class Object
     vector<float> triangle_mc; //mean curvature per edges
     vector<float> triangle_mc_vertex; // mean curvature per vertex
 
-    vector<float> triangle_gc_notduplicatevalue; // vector of gaussian curvature of length vertex (without putting for every vertex gc, gc, gc but just one time)
+    vector<float> triangle_gc_notduplicatevalue; // vector of gaussian curvature of length vertices (without putting for every vertex gc, gc, gc but just one time)
 
-    vector<float> triangle_mc_notduplicatevalue; // vector of gaussian curvature of length edge
+    vector<float> triangle_mc_notduplicatevalue; // vector of mean curvature per edge of length vertices
+
+    vector<float> triangle_mc_vertex_notduplicatevalue; // vector of mean curvature per vertex of length vertices
 
     double best_min_gc;
     double best_max_gc;
@@ -34,10 +36,14 @@ class Object
     double best_min_mc;
     double best_max_mc;
 
+    double best_min_mc_vertex;
+    double best_max_mc_vertex;
+
     int type_gc = 2;
 
     KPercentile k_percentile_gc = KPercentile();
     KPercentile k_percentile_mc = KPercentile();
+    KPercentile k_percentile_mc_vertex = KPercentile();
 
     /**
         Memory on the GPU where we store the vertex data
@@ -55,6 +61,7 @@ class Object
         triangle_mc_vertex.clear();
         triangle_mc_notduplicatevalue.clear();
         triangle_gc_notduplicatevalue.clear();
+        triangle_mc_vertex_notduplicatevalue.clear();
 
         triangle_vertices.shrink_to_fit();
         triangle_normals.shrink_to_fit();
@@ -63,9 +70,10 @@ class Object
         triangle_mc_vertex.shrink_to_fit();
         triangle_mc_notduplicatevalue.shrink_to_fit();
         triangle_gc_notduplicatevalue.shrink_to_fit();
+        triangle_mc_vertex_notduplicatevalue.shrink_to_fit();
 
 
-        if (!load(_path.c_str(), triangle_vertices, triangle_normals, triangle_gc, triangle_mc, triangle_mc_vertex, triangle_gc_notduplicatevalue, triangle_mc_notduplicatevalue))
+        if (!load(_path.c_str(), triangle_vertices, triangle_normals, triangle_gc, triangle_mc, triangle_mc_vertex, triangle_gc_notduplicatevalue, triangle_mc_notduplicatevalue, triangle_mc_vertex_notduplicatevalue))
         {
             cout << "error loading file" << endl;
             return;
@@ -86,6 +94,10 @@ class Object
         vector<double> percentiles_mc = k_percentile_mc.init(triangle_mc_notduplicatevalue);
         best_min_mc = percentiles_mc[0];
         best_max_mc = percentiles_mc[1];
+
+        vector<double> percentiles_mc_vertex = k_percentile_mc_vertex.init(triangle_mc_vertex_notduplicatevalue);
+        best_min_mc_vertex = percentiles_mc_vertex[0];
+        best_max_mc_vertex = percentiles_mc_vertex[1];
         // modify_mc_temp();
         // triangle_mc = triangle_mc_modified_auto; //FIXME: if this is removed then use: vec4(hsv2rgb(interpolation(green, blue, min(val/max_mc, 1.0))), 1.0); into the vertexShaderMC
 
@@ -264,6 +276,10 @@ class Object
 
     vector<double> get_best_values_mc(){
         return vector<double>{best_min_mc, best_max_mc};
+    }
+
+    vector<double> get_best_values_mc_vertex(){
+        return vector<double>{best_min_mc_vertex, best_max_mc_vertex};
     }
 
     double get_min_mean_vertex(){

@@ -272,8 +272,8 @@ int main(int argc, char *argv[])
 
         } else if(imgui_isMeanCurvatureVertexShading){
             ourShader.setBool("isGaussian", false);
-            ourShader.setFloat("min_curvature", object.get_min_mean_vertex());
-            ourShader.setFloat("max_curvature", object.get_max_mean_vertex());
+            ourShader.setFloat("min_curvature", object.get_best_values_mc_vertex()[0]);
+            ourShader.setFloat("max_curvature", object.get_best_values_mc_vertex()[1]);
         }
         // --- end settings shaders ---
 
