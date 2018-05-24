@@ -1,4 +1,4 @@
-\subsection{Barycentric coordinates}
+\subsection{Barycentric coordinates}\label{section:barycentric-coord}
 Barycentric coordinates, discovered by M\"obius in 1827, consist of one of the most progessive area of research in computer graphics and mathematics thanks to the numerous applications in image and geometry processing.
 \cite{REPORT:localbarycentricoordsepfl}
 % ------
@@ -40,7 +40,7 @@ Barycentric coordinates allow the interpolation of values from a set of control 
        -- (L3) node [above] {$p_3$}
        -- (X) node [below] {$p$};
     \end{tikzpicture}}
-    \caption{Let $w_1$ be the red area, $w_2$ the green one and $w_3$ the blue one. Normalizing each of them by the area of the triangle, we will get three values ($\lambda_1, \lambda_2, \lambda_3$) that are the barycentric coordinates of $p$ with respect to the triangle [$p_1, p_2, p_3$].}
+    \caption{Let $w_1$ be the blue area, $w_2$ the red one and $w_3$ the green one. Normalizing each of them by the area of the triangle, we will get three values ($\lambda_1, \lambda_2, \lambda_3$) that are the barycentric coordinates of $p$ with respect to the triangle [$p_1, p_2, p_3$].}
     \label{fig:barycentric-coord}
   \end{figure}
 
@@ -80,31 +80,45 @@ $$ I = I_e + {\rho}_a \cdot I_A + \sum_{j=1}^n ({\rho}_d \cdot cos {\varphi}_j +
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\subsection{Linear interpolation}
+\subsection{Linear interpolation}\label{section:linear-interpolation}
 Linear interpolation is an interpolation method where the result will return an equal spacing between the interpolated values. Given two numbers $n_1$ and $n_2$ (the start and final values of the interpolant), a linear interpolation can be made using a parameter $t$ ($t \in [0,1]$). \cite{WEBSITE:interpolation}
 
 $$ n = n_1 + t (n_2 - n_1)$$
 
 
 The standard linear interpolated visualisation is made passing three attributes (colours) to each vertex of a triangle. OpenGL will interpolate linearly these colors thanks to the barycentric coordinates that will tell how much of each color is being mixed at any position.
+Given a triangle $[p_1, p_2, p_3]$, where the color blue is passed to vertex $p_1$, red to $p_2$, and green to $p_3$, let be $w_1$ the blue area, $w_2$ the red area and $w_3$ the green area (See Fig. \ref{fig:barycentric-coord}). Let define the value at $p$ as a \textit{barycentric interpolation} $$(w_1p_1 + w_2p_2 + w_3p_3)/W$$ where $W$ is the area of the triangle $[p_1, p_2, p_3]$.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{Flat Shading}
 \textit{Flat shading} is a way to compute the colour at each pixel (at a corner or the barycentre) using the triangle normal.
-Given a triangle $[p_1, p_2, p_3]$, the lighting is computed using the normal\footnote{$ \widehat{n} = (p_2 - p_1) \times (p_3 - p_1)$ and then normalize it} $n$ at $p= (p_1 + p_2 + p_3)/3$. This colour is then used for all pixels. Flat shading gives objects with flat facets.
+Given a triangle $[p_1, p_2, p_3]$, the lighting is computed using the normal $n$ $$\widehat{n} = (p_2 - p_1) \times (p_3 - p_1) \;\;\;\;\;\;\;\; n = \frac{ \widehat{n} } { ||\widehat{n}|| } $$ at $p= (p_1 + p_2 + p_3)/3$. This colour is then used for all pixels. Flat shading gives objects with flat facets.
 \cite{SLIDE:ICORSI}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{Gouraud Shading}
-\textit{Gouraud Shading} is a way to compute the colour at each pixel assigning a normal to each corner and after having computed the color for each corner it linearly interpolates these colour values.
+\textit{Gouraud Shading} is a way to compute the colour at each pixel assigning a normal to each corner and after having computed the color for each corner it linearly interpolates these colour values (see Sections \ref{section:barycentric-coord} and \ref{section:linear-interpolation}).
 Given a triangle $[p_1, p_2, p_3]$ and the normal at each corner $n_1, n_2, n_3$.
 The lighting is computed at $p_i$ using normal $n_i$ this applied to each corner return the colour values $c_1, c_2, c_3$.
 These colors are then linearly interpolate $c = {\mu}_1 c_1 + {\mu}_2 c_2 + {\mu}_3 c_3$. Gouraud shading gives objects that appear more curved. \cite{SLIDE:ICORSI}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\subsection{Gaussian Curvature}
+\subsection{Local averaging regions} \label{section:localaveraging}
+A mesh can be constructed either as the limit of a family of smooth surfaces or as a linear approximation of an arbitrary surface. To derive a spatial average of geometric properties we mix finite elements (a linear interpolation between three vertices of a triangle) and finite volumes (finite-volume region on a triangulated surface using Voronoi cells or Barycentric cells, Fig. \ref{fig:localregions}). Restricting the average to the neighboring triangles (\textit{1-ring}) we can choose for each vertex an associated surface patch over which the average will be computed.
+Let $\mathcal{A}_{Barycenter}$ be the area formed using barycenters and $\mathcal{A}_{Voronoi}$ the one formed using \textit{Voronoi} cell. The general case is represented by a point that can be anywhere, let's denote this surface area $\mathcal{A}_M$.
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[scale=0.35]{images/localregions.png}
+    \label{fig:localregions}
+    \caption{Local averaging regions used for computing discrete differential operators associated with the center vertex of the one-ring neighborhood.\cite{polygonmeshprocessing}}
+\end{figure}
+\textit{Voronoi} cell of each vertex is an appropriate local region that provide a stable error bounds.
+The \textit{Voronoi} region for a point $P$ of a triangle non-obtuse $[P, Q, R]$ is expressed as $\frac{1}{8}(| PR|^2 cot \angle Q + |PQ |^2 cot \angle R)$. The sum of these areas for the whole \textit{1-ring neighborhood} gives the non-obtuse \textit{Voronoi} area for a vertex. The above expression for the \textit{Voronoi} finite-volume area does not hold in case of obtuse angles. Let's define a new surface area for each vertex denoted $\mathcal{A}_{Mixed}$. Essentially the idea is to use the circumcenter point for each non-obtuse triangle and to use the midpoint of the edge opposite to the obtuse angle in case of an obtuse triangle. (See Pseudocode \ref{appendix:localaveraging}).\cite{meshlab}
+
+\subsection{Gaussian Curvature} \label{section:gaussian-curvature-intro}
 The \textit{Gaussian curvature} $K$ is defined as the product of the principal curvatures (square of the geometric mean):
 $$K=k_1k_2$$
 where $k_1$ and $k_2$ are the principal directions. A basic interpretation should be to imagine the \textit{Gaussian curvature} like a logical \texttt{AND} since it will check if there is a curvature along both directions.
@@ -137,6 +151,9 @@ angle between the normals of adjacent triangles (see Fig. \ref{fig:mean-curvatur
 \caption{A vertex $V$ with its neighbouring vertices $V_i$ and adjacent triangles $T_i$. Angles opposite the edge $E_i$ are denoted by $\alpha_i$ and $\beta_i$. The
 angle between the normals of adjacent triangles $T_1$ and $T_2$ with positive or negative sign is denoted as ${\theta}_E$.\cite{geometryprocessing}}\label{fig:mean-curvature}
 \end{figure}
+Let's think of an edge as a cylindrical patch $C(E)$ with a radius $r$ that touches the planes defined by adjacent triangles. The \textit{mean curvature} at any point of the cylindrical patch is defined as $1/(2r)$ and the area of $C(E)$ is $r||E||\theta_E$
+$$H(E) = \int_{C(E)} HdA$$
+//TODO: finish!!!!!!!!!!!!!!!!!
 The \textit{mean curvature} at a vertex $V$ is defined as:
 $$ H(V) = \frac{1}{2} \sum_{i=1}^n H(E_i)$$ Averaging the mean curvatures of its adjacent edges guarantee that \textit{mean curvature} of an edge is divide uniformly to both end points.
 \cite{geometryprocessing}
