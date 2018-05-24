@@ -2,6 +2,8 @@
 // Vertex Shader for gaussian curvature
     layout (location = 0) in vec3 aPos;
     layout (location = 2) in vec3 gaussian_curvature;
+    layout (location = 4) in vec3 mean_curvature_vertex;
+
 
     out vec4 color;
 
@@ -11,6 +13,8 @@
 
     uniform float min_curvature;
     uniform float max_curvature;
+
+    uniform bool isGaussian;
 
     vec3 interpolation(vec3 v0, vec3 v1, float t) {
         return (1 - t) * v0 + t * v1;
@@ -25,7 +29,9 @@
 
 
     vec4 get_result_color_gc(){
-       float val = gaussian_curvature[0]; // gaussian_curvature is a vec3 composed by same value
+        float val = gaussian_curvature[0]; // gaussian_curvature is a vec3 composed by same value
+        if(!isGaussian)
+            val = mean_curvature_vertex[0]; // mean curvature is a vec3 composed by same value
 
        // colors in HSV
        vec3 red = vec3(0.0, 1.0, 1.0); //h s v

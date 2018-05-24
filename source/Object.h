@@ -27,10 +27,10 @@ class Object
     vector<float> triangle_mc_vertex; // mean curvature per vertex
 
     vector<float> triangle_gc_modified_auto; //outliers gc
-    vector<float> triangle_gc_vertex; // vector of gaussian curvature of length vertex
+    vector<float> triangle_gc_notduplicatevalue; // vector of gaussian curvature of length vertex (without putting for every vertex gc, gc, gc but just one time)
 
     vector<float> triangle_mc_modified_auto; //outliers mc
-    vector<float> triangle_mc_edge; // vector of gaussian curvature of length edge
+    vector<float> triangle_mc_notduplicatevalue; // vector of gaussian curvature of length edge
 
     double best_min_gc;
     double best_max_gc;
@@ -47,7 +47,7 @@ class Object
         Memory on the GPU where we store the vertex data
         VBO: manage this memory via so called vertex buffer objects (VBO) that can store a large number of vertices in the GPU's memory
     */
-    unsigned int VBO, VAO, VBO_NORMAL, VBO_GAUSSIANCURVATURE, VBO_MEANCURVATURE;
+    unsigned int VBO, VAO, VBO_NORMAL, VBO_GAUSSIANCURVATURE, VBO_MEANCURVATURE, VBO_MEANCURVATURE_VERTEX;
 
     // Constructor
     void set_file(const std::string &_path)
@@ -57,7 +57,7 @@ class Object
         triangle_gc.clear();
         triangle_mc.clear();
         triangle_mc_vertex.clear();
-        triangle_gc_vertex.clear();
+        triangle_gc_notduplicatevalue.clear();
         triangle_gc_modified_auto.clear();
 
         triangle_vertices.shrink_to_fit();
@@ -65,17 +65,16 @@ class Object
         triangle_gc.shrink_to_fit();
         triangle_mc.shrink_to_fit();
         triangle_mc_vertex.shrink_to_fit();
-        triangle_gc_vertex.shrink_to_fit();
+        triangle_gc_notduplicatevalue.shrink_to_fit();
         triangle_gc_modified_auto.shrink_to_fit();
 
 
-        if (!load(_path.c_str(), triangle_vertices, triangle_normals, triangle_gc, triangle_mc, triangle_mc_vertex, triangle_gc_vertex, triangle_mc_edge))
+        if (!load(_path.c_str(), triangle_vertices, triangle_normals, triangle_gc, triangle_mc, triangle_mc_vertex, triangle_gc_notduplicatevalue, triangle_mc_notduplicatevalue))
         {
             cout << "error loading file" << endl;
             return;
         }
     }
-
 
     // Function to initialize VBO and VAO
     // name file and the second it is the method gc
@@ -84,11 +83,11 @@ class Object
         cout << "MAX " << *max_element(triangle_mc_vertex.begin(), triangle_mc_vertex.end()) << endl;
         cout << "MIN " << *min_element(triangle_mc_vertex.begin(), triangle_mc_vertex.end()) << endl;
 
-        vector<double> percentiles_gc = k_percentile_gc.init(triangle_gc_vertex);
+        vector<double> percentiles_gc = k_percentile_gc.init(triangle_gc_notduplicatevalue);
         best_min_gc = percentiles_gc[0];
         best_max_gc = percentiles_gc[1];
 
-        vector<double> percentiles_mc = k_percentile_mc.init(triangle_mc_edge);
+        vector<double> percentiles_mc = k_percentile_mc.init(triangle_mc_notduplicatevalue);
         best_min_mc = percentiles_mc[0];
         best_max_mc = percentiles_mc[1];
         // modify_mc_temp();
@@ -120,6 +119,14 @@ class Object
         glBindBuffer(GL_ARRAY_BUFFER, VBO_GAUSSIANCURVATURE);
 
         glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_gc.size(), &triangle_gc[0], GL_STATIC_DRAW);
+
+        // VBO_MEANCURVATURE_VERTEX
+        glGenBuffers(1, &VBO_MEANCURVATURE_VERTEX); //generate buffer, bufferID = 1
+
+        glBindBuffer(GL_ARRAY_BUFFER, VBO_MEANCURVATURE_VERTEX);
+
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * triangle_mc_vertex.size(), &triangle_mc_vertex[0], GL_STATIC_DRAW);
+
 
         // VBO_MEANCURVATURE
         glGenBuffers(1, &VBO_MEANCURVATURE); //generate buffer, bufferID = 1
@@ -165,7 +172,14 @@ class Object
         glBindBuffer(GL_ARRAY_BUFFER, VBO_MEANCURVATURE);
         //normal attribute
         glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)(0 * sizeof(float)));
-        glEnableVertexAttribArray(3); //this 2 is referred to the layout on shader
+        glEnableVertexAttribArray(3); //this 3 is referred to the layout on shader
+
+        // mean curvature by vertex
+        glBindBuffer(GL_ARRAY_BUFFER, VBO_MEANCURVATURE_VERTEX);
+        //normal attribute
+        glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)(0 * sizeof(float)));
+        glEnableVertexAttribArray(4); //this 4 is referred to the layout on shader
+
 
         /**
             Unbind the VAO so other VAO calls won't accidentally modify this VAO, but this rarely happens.
