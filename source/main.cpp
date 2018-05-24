@@ -18,6 +18,7 @@
 #include <cstdlib>
 #include "glm/ext.hpp" //to test
 #include <glm/gtc/type_ptr.hpp>
+#include <algorithm>
 
 #include "imgui_plot_custom.h"
 
@@ -45,6 +46,7 @@ void error_callback(int error, const char *desc);
 
 // create object
 Object object = Object();
+Object horse = Object();
 
 // Camera options
 float Zoom = 45.0f;
@@ -53,17 +55,21 @@ float Zoom = 45.0f;
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 
 // keyboard
-void process_input(GLFWwindow *window);
+static void process_input(GLFWwindow *window);
 
 double last_mx = 0, last_my = 0, cur_mx = 0, cur_my = 0;
 int arcball_on = false;
 
-void mouse_button_callback(GLFWwindow *window, int button, int action, int mods);
+static void mouse_button_callback(GLFWwindow *window, int button, int action, int mods);
 static void cursor_position_callback(GLFWwindow *window, double xpos, double ypos);
-void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
+static void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
+
 
 // ------- TRANSFORMATION -------
 static glm::mat4 transform_shader = glm::mat4(1.0f);
+glm::mat4 rotated_model;
+glm::mat4 rotated_view;
+glm::mat4 projection;
 
 // ------- IMGUI -----------
 void show_window(bool *p_open, GLFWwindow *window);
@@ -73,14 +79,15 @@ void zoom_settings();
 void set_shader();
 void select_model(GLFWwindow *window);
 void analyse_gaussian_curvature(GLFWwindow *window);
-void initialize_texture_object(GLFWwindow *window);
+void initialize_texture_object(GLFWwindow *window, bool reload_mesh);
+
 
 // set-up parameter imgui
 static float angle = 180.0f;                // angle of rotation - must be the same of transform_shader
 static float axis_x = 0.0f;                 // axis of rotation - must be the same of transform_shader
 static float axis_y = 1.0f;                 // axis of rotation - must be the same of transform_shader
 static float axis_z = 0.0f;                 // axis of rotation - must be the same of transform_shader
-static bool rotate_animation = false;       // animate rotation or not
+static int rotation_set = 0; // 0 mouse - 1 auto - 2 manual
 static bool last_time_was_animated = false; // if was moving and now we have stopped it
 
 static ImVec4 color_imgui = ImColor(0, 0, 0, 255);
@@ -101,6 +108,9 @@ void analyse_gaussian_curvature();
 void set_parameters_shader(int selected_shader);
 
 void swap_gaussian_curvature();
+static double global_min_gc;
+static double global_max_gc;
+double user_minimum_gc, user_maximum_gc;
 
 // ------- END IMGUI -------------
 
@@ -109,10 +119,15 @@ const char *vertex_shader;
 const char *geometry_shader;
 const char *fragment_shader;
 int imgui_isGaussianCurvature;
-int imgui_isLinearInterpolation;
 int imgui_isExtendFlatShading;
 int imgui_isGouraudShading;
-string name_file = "models/icosahedron_1.off"; //default armadillo
+int imgui_isFlatShading;
+int imgui_isMeanCurvatureEdgeShading;
+int imgui_isMeanCurvatureVertexShading;
+string name_file = "models/armadillo.off"; //default armadillo
+
+float min_val, max_val;
+
 
 // ----------- END SETTINGS SHADERS ----------
 
@@ -156,10 +171,11 @@ int main(int argc, char *argv[])
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
     // callback functions
-    glfwSetScrollCallback(window, scroll_callback);                    //zoom
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback); // user resizes the window the viewport should be adjusted as well
     glfwSetMouseButtonCallback(window, mouse_button_callback);         // call the callback when the user press a button. It corresponds to glutMouseFunc
     glfwSetCursorPosCallback(window, cursor_position_callback);        // call the callback when the user move the cursor. It corresponds to glutMotionFunc
+    glfwSetScrollCallback(window, scroll_callback);                    //zoom
+    glfwSetCharCallback(window, ImGui_ImplGlfw_CharCallback);
 
     /**
         ------------- GLAD -------------
@@ -190,7 +206,9 @@ int main(int argc, char *argv[])
     Shader normalShader = Shader();
     normalShader.initialize_shader("normal.vs", "normal.fs", "normal.gs");
 
-    initialize_texture_object(window);
+    initialize_texture_object(window, true);
+    global_min_gc = object.get_best_values_gc()[0];
+    global_max_gc = object.get_best_values_gc()[1];
 
     /**
         application to keep drawing images and handling user input until the program has been explicitly told to stop
@@ -217,14 +235,16 @@ int main(int argc, char *argv[])
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);               //black screen
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the depth buffer before each render iteration (otherwise the depth information of the previous frame stays in the buffer).
 
-        glm::mat4 projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 10.f);
+        projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 10.f);
 
         ourShader.initialize_shader(vertex_shader, fragment_shader, geometry_shader);
         ourShader.use();
 
         // --- setting shaders ---
-        if (imgui_isExtendFlatShading || imgui_isGouraudShading)
+        if (imgui_isExtendFlatShading || imgui_isGouraudShading || imgui_isFlatShading)
         {
+            ourShader.setBool("isFlat", false);
+
             // get matrix's uniform location and set matrix
             ourShader.setVec3("light.position", 0.5f, 0.5f, 0.5f);
             ourShader.setVec3("viewPos", glm::vec3(0.0f, 0.0f, 3.0f));
@@ -234,55 +254,68 @@ int main(int argc, char *argv[])
             ourShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
             ourShader.setVec3("light.specular", 0.2f, 0.2f, 0.2f);
             ourShader.setFloat("shininess", 12.0f);
+
+            if(imgui_isFlatShading)
+                ourShader.setBool("isFlat", true);
         }
         else if (imgui_isGaussianCurvature)
         {
+            ourShader.setBool("isGaussian", true);
+            ourShader.setFloat("min_curvature", global_min_gc);
+            ourShader.setFloat("max_curvature", global_max_gc);
 
-            // gaussian curvature
-            ourShader.setFloat("min_gc", object.get_minimum_gaussian_curvature_value());
-            ourShader.setFloat("max_gc", object.get_maximum_gaussian_curvature_value());
-            ourShader.setFloat("mean_negative_gc", object.get_negative_mean_gaussian_curvature_value());
-            ourShader.setFloat("mean_positive_gc", object.get_positive_mean_gaussian_curvature_value());
+        } else if (imgui_isMeanCurvatureEdgeShading){
+
+            // TODO: mean curvature not working!
+            ourShader.setFloat("min_mc", object.get_best_values_mc()[0]);
+            ourShader.setFloat("max_mc", object.get_best_values_mc()[1]);
+
+        } else if(imgui_isMeanCurvatureVertexShading){
+            ourShader.setBool("isGaussian", false);
+            ourShader.setFloat("min_curvature", object.get_min_mean_vertex());
+            ourShader.setFloat("max_curvature", object.get_max_mean_vertex());
         }
         // --- end settings shaders ---
 
-        // arcball
-        glm::mat4 rotated_view = view * arcball.rotation_matrix_view();
-        glm::mat4 rotated_model = model * arcball.rotation_matrix_model(rotated_view);
-
-        ourShader.setMat4("projection", projection);
-        ourShader.setMat4("view", rotated_view);
-        // ourShader.setMat4("model", rotated_model);
-
+        // ------ ROTATION ------
         // imgui rotation
-        if (rotate_animation == true)
-        {
+        switch(rotation_set){
+            case 1: // auto
+                if (!last_time_was_animated)
+                    count_angle = 0;
 
-            if (!last_time_was_animated)
-                count_angle = 0;
+                angle = count_angle;
 
-            angle = count_angle;
+                if (count_angle > 360)
+                    count_angle = 0;
+                count_angle++;
 
-            // if(count_angle > 360){
-            //     decrease_angle = true;
-            // } else if(count_angle < 0){
-            //     decrease_angle = false;
-            // }
+                transform_shader = glm::rotate(glm::mat4(1.0f), glm::radians((float)angle), glm::vec3(axis_x, axis_y, axis_z));
+                last_time_was_animated = true;
+                ourShader.setMat4("model", transform_shader);
+                ourShader.setMat4("view", view);
+                ourShader.setMat4("projection", projection);
+                break;
 
-            // if(decrease_angle)
-            //     count_angle--;
-            // else
-            //     count_angle++;
+            case 2: // manual
+                transform_shader = glm::rotate(glm::mat4(1.0f), glm::radians((float)angle), glm::vec3(axis_x, axis_y, axis_z));
+                ourShader.setMat4("view", view);
+                ourShader.setMat4("projection", projection);
+                ourShader.setMat4("model", transform_shader);
+                break;
 
-            if (count_angle > 360)
-                count_angle = 0;
-            count_angle++;
+            default: // mouse
+                // arcball
+                // TODO: enable movement mouse when the user is moving into the second column of imgui
+                rotated_view = view * arcball.rotation_matrix_view();
+                rotated_model = model * arcball.rotation_matrix_model(rotated_view);
 
-            transform_shader = glm::rotate(glm::mat4(1.0f), glm::radians((float)angle), glm::vec3(axis_x, axis_y, axis_z));
-            last_time_was_animated = true;
+                ourShader.setMat4("projection", projection);
+                ourShader.setMat4("view", rotated_view);
+                ourShader.setMat4("model", rotated_model);
+                break;
+
         }
-
-        ourShader.setMat4("model", transform_shader);
 
         object.draw(); // draw
 
@@ -353,7 +386,7 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 
 // Function that activate arcball when button left is pressed.
 // mouse button, button action and modifier bits.
-void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
+static void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 {
     arcball.mouse_btn_callback(window, button, action, mods);
 }
@@ -365,14 +398,14 @@ static void cursor_position_callback(GLFWwindow *window, double xpos, double ypo
 }
 
 // keyboard
-void process_input(GLFWwindow *window)
+static void process_input(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
-void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
+static void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 {
     if (Zoom >= 1.0f && Zoom <= 45.0f)
         Zoom -= yoffset;
@@ -456,21 +489,32 @@ void show_window(bool *p_open, GLFWwindow *window)
     }
     ImGui::NextColumn();
 
-    ImGui::Text("ImGui"); // opengl
+    ImGui::Text(""); // opengl
 
     ImGui::SetColumnOffset(1, size_x * 2);
 
+    //TODO: enable arcball just in the column not in the window, otherwise when we set the sample in GC everything will be moved (same for zoom)
+
+    // const bool itemHovered = ImGui::IsItemHovered() && ImGui::IsWindowHovered();
+    // cout << ImGui::IsItemHovered(ImGuiHoveredFlags_Default) << endl;
+
+    // --------- draw image inside GUI --------------
     //pass the texture of the FBO
     //object.getVAO() is the texture of the FBO
     //the next parameter is the upper left corner for the uvs to be applied at
     //the third parameter is the lower right corner
     //the last two parameters are the UVs
     //they have to be flipped (normally they would be (0,0);(1,1)
+    // TODO: image imgui full size not just a small square
+    double width_image = ImGui::GetCursorScreenPos().x + io.DisplaySize.x / 2;
+    double height_image = ImGui::GetCursorScreenPos().y + io.DisplaySize.y / 2;
+
     ImGui::GetWindowDrawList()->AddImage((void *)object.getVAO(),
                                          ImVec2(ImGui::GetCursorScreenPos()),
-                                         ImVec2(ImGui::GetCursorScreenPos().x + io.DisplaySize.x / 2,
-                                                ImGui::GetCursorScreenPos().y + io.DisplaySize.y / 2),
+                                         ImVec2(width_image,
+                                                height_image),
                                          ImVec2(0, 1), ImVec2(1, 0));
+    // ----------- end draw image inside GUI --------------------
 
     ImGui::NextColumn();
 
@@ -485,6 +529,8 @@ void show_window(bool *p_open, GLFWwindow *window)
     ImGui::SetCursorPosY(io.DisplaySize.y - 18.0f); // columns end at the end of window
     ImGui::NextColumn();
 
+    // ImGui::ShowMetricsWindow(p_open); //to test and find informations about window
+
     ImGui::End();
     ImGui::PopStyleColor();
 }
@@ -492,29 +538,42 @@ void show_window(bool *p_open, GLFWwindow *window)
 // Function to handle rotation made by GUI
 void rotation_settings()
 {
-    float prev_angle = angle;
-    float prev_axis_x = axis_x;
-    float prev_axis_y = axis_y;
-    float prev_axis_z = axis_z;
+    ImGui::TextWrapped("You can rotate the object using the mouse, setting the angle or automatically.\n\n");
+    ImGui::RadioButton("Rotate with the mouse", &rotation_set, 0);
+    ImGui::RadioButton("Rotate automatically", &rotation_set, 1);
+    ImGui::RadioButton("Set rotation parameters", &rotation_set, 2);
 
-    ImGui::Text("Set the angle of rotation:");
-    ImGui::SliderFloat("angle", &angle, 0.0f, 360.0f); // Edit 1 angle from 0 to 360
+    float prev_angle, prev_axis_x, prev_axis_y, prev_axis_z;
 
-    ImGui::Text("Set axis of rotation:");
-
-    ImGui::InputFloat("x", &axis_x, 0.01f, 1.0f);
-    ImGui::InputFloat("y", &axis_y, 0.01f, 1.0f);
-    ImGui::InputFloat("z", &axis_z, 0.01f, 1.0f);
-
-    ImGui::Checkbox("rotate/stop", &rotate_animation);
-
-    if (last_time_was_animated && rotate_animation == false)
+    if (last_time_was_animated && rotation_set != 1)
     {
         axis_x = 0.0f;
         axis_y = 1.0f;
         axis_z = 0.0f;
         angle = 180;
         last_time_was_animated = false;
+    }
+
+    switch (rotation_set)
+    {
+        case 2:
+            prev_angle = angle;
+            prev_axis_x = axis_x;
+            prev_axis_y = axis_y;
+            prev_axis_z = axis_z;
+
+            ImGui::Text("Set the angle of rotation:");
+            ImGui::SliderFloat("angle", &angle, 0.0f, 360.0f); // Edit 1 angle from 0 to 360
+
+            ImGui::Text("Set axis of rotation:");
+
+            ImGui::InputFloat("x", &axis_x, 0.01f, 1.0f);
+            ImGui::InputFloat("y", &axis_y, 0.01f, 1.0f);
+            ImGui::InputFloat("z", &axis_z, 0.01f, 1.0f);
+            break;
+
+        default:
+            break;
     }
 
     if ((prev_angle != angle) || (prev_axis_x != axis_x) || (prev_axis_y != axis_y) || (prev_axis_z != axis_z))
@@ -524,18 +583,29 @@ void rotation_settings()
 // function to set zoom into imgui window
 void zoom_settings()
 {
-    ImGui::Text("Zoom-in/out:");
-    ImGui::SliderFloat("zoom", &Zoom, 100, 1); // Zoom
+    switch(rotation_set){
+        case 0:
+            ImGui::TextWrapped("Scroll to zoom in/out");
+            break;
+        default:
+            ImGui::Text("Zoom-in/out:");
+            ImGui::SliderFloat("zoom", &Zoom, 100, 1); // Zoom
+            break;
+    }
+
 }
 
 void set_shader()
 {
+    // TODO: rename shading
     ImGui::TextWrapped("Set a shader experiment to see how the model looks like:\n\n");
-    ImGui::RadioButton("Linear Interpolation", &shader_set, 0);
-    ImGui::RadioButton("Extend Flat Shading", &shader_set, 1);
+    ImGui::RadioButton("Flat Shading", &shader_set, 0);
+    ImGui::RadioButton("Flat Shading per vertex", &shader_set, 1);
     ImGui::RadioButton("Gouraud Shading", &shader_set, 2);
-    ImGui::RadioButton("Gaussian Curvature", &shader_set, 3);
-    ImGui::RadioButton("Linear Interpolation GC", &shader_set, 4);
+    ImGui::RadioButton("Constant Gaussian curvature per vertex", &shader_set, 3);
+    ImGui::RadioButton("Gouraud Gaussian curvature", &shader_set, 4);
+    ImGui::RadioButton("Mean Curvature per edge", &shader_set, 5);
+    ImGui::RadioButton("Mean Curvature per vertex", &shader_set, 6);
 
     set_parameters_shader(shader_set);
 }
@@ -543,8 +613,23 @@ void set_shader()
 // function to set shader
 void set_parameters_shader(int selected_shader)
 {
+    imgui_isFlatShading = 0;
+    imgui_isExtendFlatShading = 0;
+    imgui_isGaussianCurvature = 0;
+    imgui_isGouraudShading = 0;
+    imgui_isMeanCurvatureEdgeShading = 0;
+    imgui_isMeanCurvatureVertexShading = 0;
+
     switch (selected_shader)
     {
+
+    case 0: // flat shading
+        vertex_shader = "vertexShader.vs";
+        fragment_shader = "flatFragmentShader.fs";
+        geometry_shader = NULL;
+
+        imgui_isFlatShading = 1;
+        break;
 
     case 1: // extend flat shading
         vertex_shader = "vertexShader.vs";
@@ -552,9 +637,6 @@ void set_parameters_shader(int selected_shader)
         geometry_shader = "geometryShader.gs";
 
         imgui_isExtendFlatShading = 1;
-        imgui_isGaussianCurvature = 0;
-        imgui_isGouraudShading = 0;
-        imgui_isLinearInterpolation = 0;
         break;
 
         // ---------
@@ -565,44 +647,41 @@ void set_parameters_shader(int selected_shader)
         geometry_shader = NULL;
 
         imgui_isGouraudShading = 1;
-        imgui_isLinearInterpolation = 0;
-        imgui_isExtendFlatShading = 0;
-        imgui_isGaussianCurvature = 0;
         break;
 
         // ---------
 
-    case 3: // gaussian curvature
-        vertex_shader = "vertexShaderGC.vs";
+    case 4: // linear interpolation Gaussian Curvature
+        vertex_shader = "vertexShaderCurvature.vs";
+        fragment_shader = "fragmentShader.fs";
+        geometry_shader = NULL;
+
+        imgui_isGaussianCurvature = 1;
+        break;
+
+    case 5: // mean curvature edge
+        vertex_shader = "vertexShaderMC.vs";
+        fragment_shader = "minDiagramFragmentShader.fs";
+        geometry_shader = "geometryShaderMC.gs";
+
+        imgui_isMeanCurvatureEdgeShading = 1;
+        break;
+
+
+    case 6: // mean curvature vertex
+        vertex_shader = "vertexShaderCurvature.vs";
+        fragment_shader = "fragmentShader.fs";
+        geometry_shader = NULL;
+
+        imgui_isMeanCurvatureVertexShading = 1;
+        break;
+
+    default: // gaussian curvature (3)
+        vertex_shader = "vertexShaderCurvature.vs";
         fragment_shader = "maxDiagramFragmentShader.fs";
         geometry_shader = "geometryShader.gs";
 
         imgui_isGaussianCurvature = 1;
-        imgui_isExtendFlatShading = 0;
-        imgui_isGouraudShading = 0;
-        imgui_isLinearInterpolation = 0;
-        break;
-
-    case 4: // linear interpolation Gaussian Curvature
-        vertex_shader = "vertexShaderGC.vs";
-        fragment_shader = "fragmentShader.fs";
-        geometry_shader = NULL;
-
-        imgui_isGaussianCurvature = 1;
-        imgui_isGouraudShading = 0;
-        imgui_isLinearInterpolation = 0;
-        imgui_isExtendFlatShading = 0;
-        break;
-
-    default: // linear interpolation
-        vertex_shader = "vertexShaderLI.vs";
-        fragment_shader = "fragmentShader.fs";
-        geometry_shader = NULL;
-
-        imgui_isLinearInterpolation = 1;
-        imgui_isExtendFlatShading = 0;
-        imgui_isGouraudShading = 0;
-        imgui_isGaussianCurvature = 0;
         break;
     }
 }
@@ -612,7 +691,7 @@ void select_model(GLFWwindow *window)
 {
     listbox_item_prev = listbox_item_current;
     ImGui::TextWrapped("Select a model to render:\n\n");
-    const char *listbox_items[] = {"armadillo", "eight", "genus3", "horse", "icosahedron_0", "icosahedron_1", "icosahedron_2", "icosahedron_3", "icosahedron_4"};
+    const char *listbox_items[] = {"armadillo", "eight", "genus3", "horse", "icosahedron_1", "icosahedron_2", "icosahedron_3", "icosahedron_4"};
     ImGui::PushItemWidth(-1);
     ImGui::ListBox("", &listbox_item_current, listbox_items, IM_ARRAYSIZE(listbox_items), 10);
 
@@ -620,12 +699,13 @@ void select_model(GLFWwindow *window)
 
     if (listbox_item_current != listbox_item_prev)
     {
+        // clean/delete all resources that were allocated
         object.clear();
         glDeleteFramebuffers(1, &frame_buffer);
         glDeleteTextures(1, &rendered_texture);
         glDeleteRenderbuffers(1, &depth_render_buffer);
-        // clean/delete all resources that were allocated
-        initialize_texture_object(window);
+
+        initialize_texture_object(window, true);
     }
 }
 
@@ -648,11 +728,10 @@ void analyse_gaussian_curvature(GLFWwindow *window)
 
     // Gaussian curvature
     const char *names[] = {"GC", "ZERO"};
-    const ImColor colors[2] = {green, white};
+    const ImColor colors[2] = {green, red};
 
     struct Funcs
     {
-        // static float values_gc(const void* data, int i) { return object.triangle_gc[i]; }
         static float function(const float *data, int i)
         {
             return data[i];
@@ -665,51 +744,104 @@ void analyse_gaussian_curvature(GLFWwindow *window)
 
     std::vector<float> zeros(size, 0.0f);
 
+    vector<float> normalized_triangle_gc;
+
+    copy(object.triangle_gc.begin(), object.triangle_gc.end(), back_inserter(normalized_triangle_gc));
+    for_each (normalized_triangle_gc.begin(), normalized_triangle_gc.end(), [&minimum_gc, &maximum_gc](int i){
+        if(i < 0)
+            i = i/minimum_gc;
+        else
+            i = i/maximum_gc;
+    });
+
     const float **datas_initialize = new const float *[2];
-    datas_initialize[0] = &object.triangle_gc[0];
+    datas_initialize[0] = &normalized_triangle_gc[0];
     datas_initialize[1] = &zeros[0];
 
     const float *const *datas = datas_initialize;
-    ImGui::RadioButton("Untouched GC", &gc_set, 1);
+    ImGui::TextWrapped("\n");
+    ImGui::RadioButton("Gaussian Curvature untouched", &gc_set, 1);
     ImGui::PlotMultiLines("##Gaussian Curvature", 2, names, colors, func, datas, display_count, minimum_gc, maximum_gc, ImVec2(0, 80));
 
     // automatic Gaussian Curvature
-    const char *names_auto[] = {"GC", "ZERO", "MEAN"};
-    const ImColor colors_auto[3] = {green, white, red};
+    const char *names_auto[] = {"GC", "ZERO"};
+    const ImColor colors_auto[2] = {green, red};
 
-    std::vector<float> mean(size, object.gc_helper.mean);
+    const float **datas_initialize_auto = new const float *[2];
 
-    const float **datas_initialize_auto = new const float *[3];
-    datas_initialize_auto[0] = &object.triangle_gc_modified_auto[0];
+    double percentile_minimum_gc = object.get_best_values_gc()[0];
+    double percentile_maximum_gc = object.get_best_values_gc()[1];
+
+    vector<float> modified_triangle_gc;
+
+    copy(object.triangle_gc.begin(), object.triangle_gc.end(), back_inserter(modified_triangle_gc));
+    for_each (modified_triangle_gc.begin(), modified_triangle_gc.end(), [&percentile_minimum_gc, &percentile_maximum_gc](int i){
+        if(i < 0)
+            i = i/percentile_minimum_gc;
+        else
+            i = i/percentile_maximum_gc;
+    });
+    datas_initialize_auto[0] = &modified_triangle_gc[0];
     datas_initialize_auto[1] = &zeros[0];
-    datas_initialize_auto[2] = &mean[0];
 
     const float *const *datas_auto = datas_initialize_auto;
 
-    ImGui::RadioButton("Automatic best GC", &gc_set, 2);
-    ImGui::PlotMultiLines("##Gaussian Curvature automatic", 3, names_auto, colors_auto, func, datas_auto, display_count, minimum_gc, maximum_gc, ImVec2(0, 80));
+    ImGui::TextWrapped("\n");
+    ImGui::RadioButton("Used 90 Percentile", &gc_set, 2);
+    ImGui::PlotMultiLines("##Used 90 Percentile", 2, names_auto, colors_auto, func, datas_auto, display_count, percentile_minimum_gc, percentile_maximum_gc, ImVec2(0, 80));
 
-    //
-    ImGui::RadioButton("Manual GC", &gc_set, 3);
+    // section where the user can set its own minimum and maximum value for gaussian curvature
+    ImGui::TextWrapped("\n");
+    ImGui::RadioButton("Manual bounds", &gc_set, 3);
+
+    // TODO: solve possibility to rewrite value after first time
+    static char buf1[sizeof(double)] = "";
+    static char buf2[sizeof(double)] = "";
+
+    ImGui::InputText("min value", buf1, sizeof(double), ImGuiInputTextFlags_CharsDecimal);
+
+    // if (gc_set == 3) ImGui::SetKeyboardFocusHere();
+    ImGui::InputText("max value", buf2, sizeof(double), ImGuiInputTextFlags_CharsDecimal);
+
+    bool saved = false;
+
+    ImGui::TextWrapped("\n");
+    saved = ImGui::SmallButton("Render");
+
+    if(saved){
+        user_minimum_gc = strtod(buf1, NULL);
+        user_maximum_gc = strtod(buf2, NULL);
+
+        global_min_gc = user_minimum_gc;
+        global_max_gc = user_maximum_gc;
+    }
 
     if (prev_gc != gc_set)
     {
-        object.clear();
-        glDeleteFramebuffers(1, &frame_buffer);
-        glDeleteTextures(1, &rendered_texture);
-        glDeleteRenderbuffers(1, &depth_render_buffer);
+        switch(gc_set){
+            case 1:
+                global_min_gc = minimum_gc;
+                global_max_gc = maximum_gc;
+                break;
 
-        mean.clear();
-        mean.shrink_to_fit();
+            case 3:
+                global_min_gc = user_minimum_gc;
+                global_max_gc = user_maximum_gc;
+                break;
 
-        initialize_texture_object(window);
+            default:
+                global_min_gc = percentile_minimum_gc;
+                global_max_gc = percentile_maximum_gc;
+                break;
+        }
+
+        cout << "changed " << global_min_gc << endl;
     }
 }
 
-void initialize_texture_object(GLFWwindow *window)
+void initialize_texture_object(GLFWwindow *window, bool reload_mesh)
 {
     // --------- SET UP ------------
-
     // Black background
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
@@ -720,7 +852,6 @@ void initialize_texture_object(GLFWwindow *window)
 
     // Cull triangles which normal is not towards the camera
     glEnable(GL_CULL_FACE);
-
     // ----------------------
 
     /**
@@ -729,9 +860,23 @@ void initialize_texture_object(GLFWwindow *window)
 
         Send vertex data to vertex shader (load .off file).
      */
-    object.set_value_gc(gc_set);
     // object.set_file(name_file, std::bind(&Object::auto_detect_outliers_gc, Object()), std::bind(&Object::set_selected_gc, Object()), std::bind(&Object::init, Object())); //load mesh
-    object.set_file(name_file); //load mesh
+    if (reload_mesh)
+        object.set_file(name_file); //load mesh
+    object.init();
+
+    switch(gc_set){
+            case 1:
+                global_min_gc = object.get_minimum_gaussian_curvature_value();
+                global_max_gc = object.get_maximum_gaussian_curvature_value();
+            case 3:
+                global_min_gc = user_minimum_gc;
+                global_max_gc = user_maximum_gc;
+            default:
+                global_min_gc = object.get_best_values_gc()[0];
+                global_max_gc = object.get_best_values_gc()[1];
+    }
+
 
     /**
         IMPORTANT FOR TRANSFORMATION:
@@ -797,7 +942,7 @@ void initialize_texture_object(GLFWwindow *window)
     (void)io;
     // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
     // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
-    ImGui_ImplGlfwGL3_Init(window, true);
+    ImGui_ImplGlfwGL3_Init(window, false);
 
     // Setup style
     ImGui::StyleColorsDark();
