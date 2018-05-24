@@ -200,8 +200,8 @@ void set_max_min_mesh()
 */
 Point3d get_rescaled_value(Point3d value)
 {
-    // return value;                                                        // TODO: need to remove afer
-    return interval / (max_coord - min_coord) * (value - max_coord) + 1; //1 is the max of interval
+    return value;                                                        // TODO: need to remove afer
+    // return interval / (max_coord - min_coord) * (value - max_coord) + 1; //1 is the max of interval
 }
 
 /**
@@ -222,6 +222,7 @@ double get_area_triangle(int index_triangle)
     double s = (edge0 + edge1 + edge2) / 2;
     return sqrt(s * (s - edge0) * (s - edge1) * (s - edge2));
 }
+
 
 /**
  * Function to get the cotangent of an angle
@@ -358,10 +359,10 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
 
     // -- initialize mean curvature per vertex vectors --
     voronoi_region.resize(num_vertices);
-    std::fill(voronoi_region.begin(), voronoi_region.end(), 0);
+    std::fill(voronoi_region.begin(), voronoi_region.end(), 0.0);
 
     normal_curvature_estimation.resize(num_vertices);
-    std::fill(normal_curvature_estimation.begin(), normal_curvature_estimation.end(), 0);
+    std::fill(normal_curvature_estimation.begin(), normal_curvature_estimation.end(), 0.0);
     // ---- end mean curvature vectors per vertex initialization ----
 
     // iterate inside triangles and calculates angle_defeact
@@ -453,24 +454,16 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         // -------------- end mean curvature edge --------------
 
         // -------------- MEAN CURVATURE VERTEX --------------
-        // array of A_mixed saved for each vertex
-        voronoi_region[index_v1] += get_voronoi_region_triangle(index_v1, index_v2, index_v3, angle_v2v1v0, angle_v0v2v1);
-        // voronoi_region[index_v1] += get_voronoi_region_triangle(index_v1, index_v3, index_v2, angle_v0v2v1, angle_v2v1v0);
-        // TODO: maybe add also voronoi region between v1 and v3 and so on
+        // array of A_voronoi_region saved for each vertex
+        // TODO: -- fix normal_curvature_estimation
 
-        voronoi_region[index_v2] += get_voronoi_region_triangle(index_v2, index_v1, index_v3, angle_v1v0v2, angle_v0v2v1);
-        voronoi_region[index_v3] += get_voronoi_region_triangle(index_v3, index_v1, index_v2, angle_v1v0v2, angle_v2v1v0);
+        if (!is_obtuse_angle(angle_v1v0v2) && !is_obtuse_angle(angle_v2v1v0) && !is_obtuse_angle(angle_v0v2v1)){ // Triangle is not obtuse -> Voronoi-safe
+            voronoi_region[index_v1] += get_voronoi_region_triangle(index_v1, index_v2, index_v3, angle_v2v1v0, angle_v0v2v1);
+            voronoi_region[index_v2] += get_voronoi_region_triangle(index_v2, index_v1, index_v3, angle_v1v0v2, angle_v0v2v1);
+            voronoi_region[index_v3] += get_voronoi_region_triangle(index_v3, index_v1, index_v2, angle_v1v0v2, angle_v2v1v0);
+        }
 
-
-        normal_curvature_estimation[index_v1] += 2 * (((v[index_v1] - v[index_v2]) * n)/((v[index_v1] - v[index_v2]).squaredNorm()));
-        normal_curvature_estimation[index_v1] += 2 * (((v[index_v1] - v[index_v3]) * n)/((v[index_v1] - v[index_v3]).squaredNorm()));
-
-        normal_curvature_estimation[index_v2] += 2 * (((v[index_v2] - v[index_v1]) * n)/((v[index_v2] - v[index_v1]).squaredNorm()));
-        normal_curvature_estimation[index_v2] += 2 * (((v[index_v2] - v[index_v3]) * n)/((v[index_v2] - v[index_v3]).squaredNorm()));
-
-        normal_curvature_estimation[index_v3] += 2 * (((v[index_v3] - v[index_v2]) * n)/((v[index_v3] - v[index_v2]).squaredNorm()));
-        normal_curvature_estimation[index_v3] += 2 * (((v[index_v3] - v[index_v1]) * n)/((v[index_v3] - v[index_v1]).squaredNorm()));
-    }
+}
 
     // fill out_gc vector
     // k_G = (2PI - sum_angle_defeact)/A_mixed
@@ -529,11 +522,9 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         out_mc.push_back(mc_3);
         out_mc.push_back(mc_3);
         // -------------- end mean curvature --------------
+        // TODO: why these values are so small?
 
-        out_mc_vertex.push_back( 1/area_mixed[t[k].v[0]] * 1/8 * voronoi_region[t[k].v[0]] * normal_curvature_estimation[t[k].v[0]]);
-        out_mc_vertex.push_back( 1/area_mixed[t[k].v[1]] * 1/8 * voronoi_region[t[k].v[1]] * normal_curvature_estimation[t[k].v[1]]);
-        out_mc_vertex.push_back( 1/area_mixed[t[k].v[2]] * 1/8 * voronoi_region[t[k].v[2]] * normal_curvature_estimation[t[k].v[2]]);
-                // voronoi_region normal_curvature_estimation
+
 
     }
     // ofstream file_output;
@@ -570,6 +561,26 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
     //For each vertex of each triangle
     for (unsigned int k = 0; k < num_triangles; k++)
     {
+        //  cout << "N1: " << (v[t[k].v[0]] - v[t[k].v[1]]) * normals[k] << endl;
+
+
+        int index_v1 = t[k].v[0];
+        int index_v2 = t[k].v[1];
+        int index_v3 = t[k].v[2];
+
+        // cout << "diff " << (v[index_v1] - v[index_v2]) << endl;
+
+        // cout << "Normal: " <<  n << endl;
+
+        // cout << "NORMAL " << pow((v[index_v1] - v[index_v2]).norm(), 2) << endl;
+
+        normal_curvature_estimation[index_v1] += 2 * (((v[index_v1] - v[index_v2]) * normals[index_v1]) / pow((v[index_v1] - v[index_v2]).norm(), 2));
+
+        normal_curvature_estimation[index_v2] += 2 * (((v[index_v2] - v[index_v1]) * normals[index_v2]) /  pow((v[index_v2] - v[index_v1]).norm(), 2));
+
+        normal_curvature_estimation[index_v3] += 2 * (((v[index_v3] - v[index_v1]) * normals[index_v3]) /  pow((v[index_v3] - v[index_v1]).norm(), 2));
+
+
         // insert vertices values in out_vertices
         out_vertices.push_back(get_rescaled_value(v[t[k].v[0]]).x());
         out_vertices.push_back(get_rescaled_value(v[t[k].v[0]]).y());
@@ -595,9 +606,19 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         out_normals.push_back(normals[t[k].v[2]].x());
         out_normals.push_back(normals[t[k].v[2]].y());
         out_normals.push_back(normals[t[k].v[2]].z());
+
+
+        // -------------- mean curvature per vertex --------------
+        // Mean curvature as a quadrature
+        cout << (1.0f/area_mixed[t[k].v[0]]) * voronoi_region[t[k].v[0]] << endl;
+        out_mc_vertex.push_back( (1.0f/area_mixed[t[k].v[0]]) * voronoi_region[t[k].v[0]] * normal_curvature_estimation[t[k].v[0]]);
+        out_mc_vertex.push_back( (1.0f/area_mixed[t[k].v[1]]) * voronoi_region[t[k].v[1]] * normal_curvature_estimation[t[k].v[1]]);
+        out_mc_vertex.push_back( (1.0f/area_mixed[t[k].v[2]]) * voronoi_region[t[k].v[2]] * normal_curvature_estimation[t[k].v[2]]);
+
+        // -------------- end mean curvature per vertex --------------
     }
 
-    cout << path << " "<< number_obtuse_triangle << ", " << number_non_obtuse_triangle << endl;
+    // cout << path << " "<< number_obtuse_triangle << ", " << number_non_obtuse_triangle << endl;
     cout << "Object loaded" << endl;
 
     // ------- clear vectors -------

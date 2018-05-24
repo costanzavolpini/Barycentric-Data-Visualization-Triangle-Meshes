@@ -82,6 +82,7 @@ class Object
     void init()
     {
         cout << "MAX " << *max_element(triangle_mc_vertex.begin(), triangle_mc_vertex.end()) << endl;
+        cout << "MIN " << *min_element(triangle_mc_vertex.begin(), triangle_mc_vertex.end()) << endl;
 
         vector<double> percentiles_gc = k_percentile_gc.init(triangle_gc_vertex);
         best_min_gc = percentiles_gc[0];
@@ -270,6 +271,14 @@ class Object
                 triangle_mc_modified_auto.push_back(triangle_mc[i]/best_min_mc);
             }
         }
+    }
+
+    double get_min_mean_vertex(){
+        return *min_element(triangle_mc_vertex.begin(), triangle_mc_vertex.end());
+    }
+
+    double get_max_mean_vertex(){
+        return *max_element(triangle_mc_vertex.begin(), triangle_mc_vertex.end());
     }
 };
 

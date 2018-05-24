@@ -9,8 +9,8 @@
     uniform mat4 view;
     uniform mat4 projection;
 
-    uniform float min_gc;
-    uniform float max_gc;
+    uniform float min_curvature;
+    uniform float max_curvature;
 
     vec3 interpolation(vec3 v0, vec3 v1, float t) {
         return (1 - t) * v0 + t * v1;
@@ -33,9 +33,9 @@
        vec3 blue = vec3(0.6667, 1.0, 1.0);
 
        if (val < 0) { //negative numbers until 0
-            return vec4(hsv2rgb(interpolation(green, red, min(val/min_gc, 1.0))), 1.0);
+            return vec4(hsv2rgb(interpolation(green, red, min(val/min_curvature, 1.0))), 1.0);
         } else { //from 0 to positive
-            return vec4(hsv2rgb(interpolation(green, blue, min(val/max_gc, 1.0))), 1.0);
+            return vec4(hsv2rgb(interpolation(green, blue, min(val/max_curvature, 1.0))), 1.0);
         }
     }
 
