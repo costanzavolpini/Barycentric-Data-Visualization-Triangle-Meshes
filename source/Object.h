@@ -7,8 +7,6 @@
 #include "LoaderObject.h"
 #include "kPercentileHelper.h"
 
-#include <numeric> // TODO: remove after having debugged the mean curvature
-
 using namespace std;
 
 /***************************************************************************
@@ -26,10 +24,8 @@ class Object
     vector<float> triangle_mc; //mean curvature per edges
     vector<float> triangle_mc_vertex; // mean curvature per vertex
 
-    vector<float> triangle_gc_modified_auto; //outliers gc
     vector<float> triangle_gc_notduplicatevalue; // vector of gaussian curvature of length vertex (without putting for every vertex gc, gc, gc but just one time)
 
-    vector<float> triangle_mc_modified_auto; //outliers mc
     vector<float> triangle_mc_notduplicatevalue; // vector of gaussian curvature of length edge
 
     double best_min_gc;
@@ -57,16 +53,16 @@ class Object
         triangle_gc.clear();
         triangle_mc.clear();
         triangle_mc_vertex.clear();
+        triangle_mc_notduplicatevalue.clear();
         triangle_gc_notduplicatevalue.clear();
-        triangle_gc_modified_auto.clear();
 
         triangle_vertices.shrink_to_fit();
         triangle_normals.shrink_to_fit();
         triangle_gc.shrink_to_fit();
         triangle_mc.shrink_to_fit();
         triangle_mc_vertex.shrink_to_fit();
+        triangle_mc_notduplicatevalue.shrink_to_fit();
         triangle_gc_notduplicatevalue.shrink_to_fit();
-        triangle_gc_modified_auto.shrink_to_fit();
 
 
         if (!load(_path.c_str(), triangle_vertices, triangle_normals, triangle_gc, triangle_mc, triangle_mc_vertex, triangle_gc_notduplicatevalue, triangle_mc_notduplicatevalue))
@@ -217,6 +213,7 @@ class Object
         glDeleteBuffers(1, &VBO_NORMAL);
         glDeleteBuffers(1, &VBO_GAUSSIANCURVATURE);
         glDeleteBuffers(1, &VBO_MEANCURVATURE);
+        glDeleteBuffers(1, &VBO_MEANCURVATURE_VERTEX);
     }
 
     // Point3d interpolation(Point3d v0, Point3d v1, float t) {
@@ -267,24 +264,6 @@ class Object
 
     vector<double> get_best_values_mc(){
         return vector<double>{best_min_mc, best_max_mc};
-    }
-
-    // TODO: check current mean curvature. This is used to sed the mean at the real mean instead of zero in order to debug and find the problem.
-    void modify_mc_temp(){
-        double sum = std::accumulate(triangle_mc.begin(), triangle_mc.end(), 0.0);
-        double mean = sum / triangle_mc.size();
-
-        double sq_sum = std::inner_product(triangle_mc.begin(), triangle_mc.end(), triangle_mc.begin(), 0.0);
-        double stdev = std::sqrt(sq_sum / triangle_mc.size() - mean * mean);
-
-        // remap value triangle_mc
-        for(int i = 0; i < triangle_mc.size(); i++){
-            if(triangle_mc[i] > mean){
-                triangle_mc_modified_auto.push_back(triangle_mc[i]/best_max_mc);
-            }else{
-                triangle_mc_modified_auto.push_back(triangle_mc[i]/best_min_mc);
-            }
-        }
     }
 
     double get_min_mean_vertex(){

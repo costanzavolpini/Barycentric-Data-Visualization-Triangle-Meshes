@@ -387,7 +387,7 @@ bool read_off_file(const char *path)
 /**
  * Function to load the mesh, find Gaussian Curvature, Mean Curvature...etc.
 */
-bool load(const char *path, vector<float> &out_vertices, vector<float> &out_normals, vector<float> &out_gc, vector<float> &out_mc, vector<float> &out_mc_vertex, vector<float> &gc_vertex_size, vector<float> &mc_vertex_size)
+bool load(const char *path, vector<float> &out_vertices, vector<float> &out_normals, vector<float> &out_gc, vector<float> &out_mc, vector<float> &out_mc_vertex, vector<float> &gc_vertex_size, vector<float> &mc_vertex_size_edge)
 {
     // --------------------- Read file -----------------------------
     if (!read_off_file(path))
@@ -395,8 +395,8 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
 
     // size out_vertices, out_normals, out_gc, out_mc = num_triangles * 9
 
-    number_obtuse_triangle = 0;
-    number_non_obtuse_triangle = 0;
+    // number_obtuse_triangle = 0;
+    // number_non_obtuse_triangle = 0;
 
     // ------- VECTOR INITIALIZATION -------
     // vector that contains Point3d normal
@@ -405,7 +405,6 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
 
     vector<int> v_counter(num_vertices);              // vector to count faces for each vertex to calculate normals
     std::fill(v_counter.begin(), v_counter.end(), 0); // initialize every vertex normal to (0,0,0)
-
 
     vector_mc_sum.resize(num_vertices);
     std::fill(vector_mc_sum.begin(), vector_mc_sum.end(), 0.0f);
@@ -576,17 +575,17 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         // mc_3 = get_mean_curvature(index_v1, index_v2, v2v1, v2v1_reverse);
 
         // out_mc vector values
-        out_mc.push_back((1/(2*area_mixed[t[k].v[0]])) *vector_mc_sum[t[k].v[0]]);
-        out_mc.push_back((1/(2*area_mixed[t[k].v[0]])) *vector_mc_sum[t[k].v[0]]);
-        out_mc.push_back((1/(2*area_mixed[t[k].v[0]])) *vector_mc_sum[t[k].v[0]]);
+        out_mc.push_back((1/(2*area_mixed[t[k].v[0]])) * vector_mc_sum[t[k].v[0]]);
+        out_mc.push_back((1/(2*area_mixed[t[k].v[0]])) * vector_mc_sum[t[k].v[0]]);
+        out_mc.push_back((1/(2*area_mixed[t[k].v[0]])) * vector_mc_sum[t[k].v[0]]);
 
-        out_mc.push_back((1/(2*area_mixed[t[k].v[1]])) *vector_mc_sum[t[k].v[1]]);
-        out_mc.push_back((1/(2*area_mixed[t[k].v[1]])) *vector_mc_sum[t[k].v[1]]);
-        out_mc.push_back((1/(2*area_mixed[t[k].v[1]])) *vector_mc_sum[t[k].v[1]]);
+        out_mc.push_back((1/(2*area_mixed[t[k].v[1]])) * vector_mc_sum[t[k].v[1]]);
+        out_mc.push_back((1/(2*area_mixed[t[k].v[1]])) * vector_mc_sum[t[k].v[1]]);
+        out_mc.push_back((1/(2*area_mixed[t[k].v[1]])) * vector_mc_sum[t[k].v[1]]);
 
-        out_mc.push_back((1/(2*area_mixed[t[k].v[2]])) *vector_mc_sum[t[k].v[2]]);
-        out_mc.push_back((1/(2*area_mixed[t[k].v[2]])) *vector_mc_sum[t[k].v[2]]);
-        out_mc.push_back((1/(2*area_mixed[t[k].v[2]])) *vector_mc_sum[t[k].v[2]]);
+        out_mc.push_back((1/(2*area_mixed[t[k].v[2]])) * vector_mc_sum[t[k].v[2]]);
+        out_mc.push_back((1/(2*area_mixed[t[k].v[2]])) * vector_mc_sum[t[k].v[2]]);
+        out_mc.push_back((1/(2*area_mixed[t[k].v[2]])) * vector_mc_sum[t[k].v[2]]);
         // -------------- end mean curvature --------------
     }
     // ofstream file_output;
@@ -596,7 +595,7 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
 
         // gc_vertex_size lenght = vertices
         gc_vertex_size.push_back(((2 * M_PI) - value_angle_defeact_sum[k]) / area_mixed[k]);
-        mc_vertex_size.push_back((1/(2*area_mixed[k])) *vector_mc_sum[k]);
+        mc_vertex_size_edge.push_back((1/(2*area_mixed[k])) * vector_mc_sum[k]);
 
          // write in a file all values of Gaussian curvature
         // file_output << ((2 * M_PI) - value_angle_defeact_sum[k]) / area_mixed[k] << "\n";
@@ -680,6 +679,20 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
 
     value_angle_defeact_sum.clear();
     value_angle_defeact_sum.shrink_to_fit();
+
+    map_edge.clear();
+
+    vector_mc_sum.clear();
+    vector_mc_sum.shrink_to_fit();
+
+    area_mixed.clear();
+    area_mixed.shrink_to_fit();
+
+    voronoi_region.clear();
+    voronoi_region.shrink_to_fit();
+
+    normal_curvature_estimation.clear();
+    normal_curvature_estimation.shrink_to_fit();
 
     // ----------------------------
 
