@@ -636,7 +636,12 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         // Mean curvature as a quadrature
         // cout << (1.0f/area_mixed[t[k].v[0]]) * voronoi_region[t[k].v[0]] << endl;
         out_mc_vertex.push_back( (1.0f/area_mixed[t[k].v[0]]) * voronoi_region[t[k].v[0]] * normal_curvature_estimation[t[k].v[0]]);
+        out_mc_vertex.push_back( (1.0f/area_mixed[t[k].v[0]]) * voronoi_region[t[k].v[0]] * normal_curvature_estimation[t[k].v[0]]);
+
         out_mc_vertex.push_back( (1.0f/area_mixed[t[k].v[1]]) * voronoi_region[t[k].v[1]] * normal_curvature_estimation[t[k].v[1]]);
+        out_mc_vertex.push_back( (1.0f/area_mixed[t[k].v[1]]) * voronoi_region[t[k].v[1]] * normal_curvature_estimation[t[k].v[1]]);
+
+        out_mc_vertex.push_back( (1.0f/area_mixed[t[k].v[2]]) * voronoi_region[t[k].v[2]] * normal_curvature_estimation[t[k].v[2]]);
         out_mc_vertex.push_back( (1.0f/area_mixed[t[k].v[2]]) * voronoi_region[t[k].v[2]] * normal_curvature_estimation[t[k].v[2]]);
         // -------------- end mean curvature per vertex --------------
 
