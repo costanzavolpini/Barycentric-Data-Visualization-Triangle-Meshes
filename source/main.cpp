@@ -260,6 +260,7 @@ int main(int argc, char *argv[])
         }
         else if (imgui_isGaussianCurvature)
         {
+            ourShader.setBool("isMeanCurvatureEdge", false);
             ourShader.setBool("isGaussian", true);
             ourShader.setFloat("min_curvature", global_min_gc);
             ourShader.setFloat("max_curvature", global_max_gc);
@@ -268,6 +269,7 @@ int main(int argc, char *argv[])
 
             // TODO: mean curvature not working!
             ourShader.setBool("isMeanCurvatureEdge", true);
+            ourShader.setBool("isGaussian", false);
             ourShader.setFloat("min_curvature", object.get_best_values_mc()[0]);
             ourShader.setFloat("max_curvature", object.get_best_values_mc()[1]);
 
