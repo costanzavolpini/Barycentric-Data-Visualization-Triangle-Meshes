@@ -149,7 +149,7 @@ Point3d get_normal_edge(int index_v1, int index_v2){
 /**
  * Function to insert a struct edge inside edge-map.
  */
-void insert_edge(int index_v1, int index_v2, bool isCorrectOrder,Point3d n)
+void insert_edge(int index_v1, int index_v2, bool isCorrectOrder, Point3d n)
 // FIXME: fix mean curvature, but that code seems to work correctly
 {
     vector<int> key(2);
@@ -173,11 +173,14 @@ void insert_edge(int index_v1, int index_v2, bool isCorrectOrder,Point3d n)
             it->second.n1 = n;
         else
             it->second.n2 = n;
+
+        vector_mc_sum[it->second.index_v1] += it->second.norm_edge * sin(((it->second.n1).getAngle(it->second.n2)) / 2.0f);
+        // TODO: should I decomment also  vector_mc_sum[it->second.index_v2]
+        // vector_mc_sum[it->second.index_v2] += it->second.norm_edge * sin(((it->second.n2).getAngle(it->second.n1)) / 2.0f);
     }
     else
     {            // create new edge struct
         edge e1; // struct
-        e1.norm_edge = (v[index_v1], v[index_v2]).norm();
         if (isCorrectOrder) // index_v1 < index_v2
         {
             // correct order
@@ -192,39 +195,16 @@ void insert_edge(int index_v1, int index_v2, bool isCorrectOrder,Point3d n)
             e1.n2 = n;
         }
 
-        // e1.value_mean_curvature = e1.norm_edge * sin((v[e1.index_v1]).getAngle(v[e1.index_v2]) / 2);
+        e1.norm_edge = (v[e1.index_v2] - v[e1.index_v1]).norm();
+
         map_edge[key] = e1;
 
-        vector_mc_sum[e1.index_v1] += e1.norm_edge * sin((v[e1.index_v1]).getAngle(v[e1.index_v2]) / 2);
-        vector_mc_sum[e1.index_v2] += e1.norm_edge * sin((v[e1.index_v2]).getAngle(v[e1.index_v1]) / 2);
+        // TODO: should be wrong since we want the signed angle between 2 normals
+        // vector_mc_sum[e1.index_v1] += e1.norm_edge * sin(((v[e1.index_v1]).getAngle(v[e1.index_v2])) / 2.0f);
+        // vector_mc_sum[e1.index_v2] += e1.norm_edge * sin(((v[e1.index_v2]).getAngle(v[e1.index_v1])) / 2.0f);
+
     }
 }
-
-/**
-//  * Function to get the value of mean curvature of an edge from the edge-map.
-//  */
-// float get_mean_curvature(int index_v1, int index_v2, vector<int> key, vector<int> key_2)
-// {
-//     std::map<vector<int>, edge>::iterator it;         // iterator
-//     std::map<vector<int>, edge>::iterator it_reverse; // iterator for reverse vertices index
-
-//     // convention: from smaller to higher index to avoid to count double
-//     it = map_edge.find(key);
-//     it_reverse = map_edge.find(key_2);
-
-//     if (it != map_edge.end())
-//     {
-//         return it->second.value_mean_curvature;
-//     }
-//     else if (it_reverse != map_edge.end())
-//     {
-//         return it_reverse->second.value_mean_curvature;
-//     }
-
-//     // no mean curvature value found
-//     cout << "ERROR MEAN CURVATURE" << endl;
-//     exit(-1);
-// }
 
 /**
  * Function to update the minimum and the maximum value found in coords of an object.
@@ -566,17 +546,17 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         // mc_3 = get_mean_curvature(index_v1, index_v2, v2v1, v2v1_reverse);
 
         // out_mc vector values
-        out_mc.push_back((1/(2*area_mixed[t[k].v[0]])) * vector_mc_sum[t[k].v[0]]);
-        out_mc.push_back((1/(2*area_mixed[t[k].v[0]])) * vector_mc_sum[t[k].v[0]]);
-        out_mc.push_back((1/(2*area_mixed[t[k].v[0]])) * vector_mc_sum[t[k].v[0]]);
+        out_mc.push_back((vector_mc_sum[t[k].v[0]])/(2.0f * area_mixed[t[k].v[0]]));
+        out_mc.push_back((vector_mc_sum[t[k].v[0]])/(2.0f * area_mixed[t[k].v[0]]));
+        out_mc.push_back((vector_mc_sum[t[k].v[0]])/(2.0f * area_mixed[t[k].v[0]]));
 
-        out_mc.push_back((1/(2*area_mixed[t[k].v[1]])) * vector_mc_sum[t[k].v[1]]);
-        out_mc.push_back((1/(2*area_mixed[t[k].v[1]])) * vector_mc_sum[t[k].v[1]]);
-        out_mc.push_back((1/(2*area_mixed[t[k].v[1]])) * vector_mc_sum[t[k].v[1]]);
+        out_mc.push_back((vector_mc_sum[t[k].v[1]])/(2.0f * area_mixed[t[k].v[1]]));
+        out_mc.push_back((vector_mc_sum[t[k].v[1]])/(2.0f * area_mixed[t[k].v[1]]));
+        out_mc.push_back((vector_mc_sum[t[k].v[1]])/(2.0f * area_mixed[t[k].v[1]]));
 
-        out_mc.push_back((1/(2*area_mixed[t[k].v[2]])) * vector_mc_sum[t[k].v[2]]);
-        out_mc.push_back((1/(2*area_mixed[t[k].v[2]])) * vector_mc_sum[t[k].v[2]]);
-        out_mc.push_back((1/(2*area_mixed[t[k].v[2]])) * vector_mc_sum[t[k].v[2]]);
+        out_mc.push_back((vector_mc_sum[t[k].v[2]])/(2.0f * area_mixed[t[k].v[2]]));
+        out_mc.push_back((vector_mc_sum[t[k].v[2]])/(2.0f * area_mixed[t[k].v[2]]));
+        out_mc.push_back((vector_mc_sum[t[k].v[2]])/(2.0f * area_mixed[t[k].v[2]]));
         // -------------- end mean curvature --------------
     }
 
