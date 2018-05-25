@@ -588,20 +588,6 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         out_mc.push_back((1/(2*area_mixed[t[k].v[2]])) * vector_mc_sum[t[k].v[2]]);
         // -------------- end mean curvature --------------
     }
-    // ofstream file_output;
-    // string path_name = path;
-    // file_output.open (path_name + ".txt");
-    for (int k = 0; k < num_vertices; k++){
-
-        // gc_vertex_size lenght = vertices
-        gc_vertex_size.push_back(((2 * M_PI) - value_angle_defeact_sum[k]) / area_mixed[k]);
-        mc_vertex_size_edge.push_back((1/(2*area_mixed[k])) * vector_mc_sum[k]);
-
-         // write in a file all values of Gaussian curvature
-        // file_output << ((2 * M_PI) - value_angle_defeact_sum[k]) / area_mixed[k] << "\n";
-    }
-
-    // file_output.close();
 
     // normals
     // normalize every vertex normal
@@ -672,9 +658,21 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         out_normals.push_back(normals[t[k].v[2]].z());
     }
 
-    for(int k = 0; k < num_vertices; k++){
+    // ofstream file_output;
+    // string path_name = path;
+    // file_output.open (path_name + ".txt");
+    for (int k = 0; k < num_vertices; k++){
+
+        // gc_vertex_size lenght = vertices
+        gc_vertex_size.push_back(((2 * M_PI) - value_angle_defeact_sum[k]) / area_mixed[k]);
+        mc_vertex_size_edge.push_back((1.0f/(2 * area_mixed[k])) * vector_mc_sum[k]);
         mc_vertex_size_vertex.push_back((1.0f/area_mixed[k]) * voronoi_region[k] * normal_curvature_estimation[k]);
+
+         // write in a file all values of Gaussian curvature
+        // file_output << ((2 * M_PI) - value_angle_defeact_sum[k]) / area_mixed[k] << "\n";
     }
+
+    // file_output.close();
 
     // cout << path << " "<< number_obtuse_triangle << ", " << number_non_obtuse_triangle << endl;
     cout << "Object loaded" << endl;

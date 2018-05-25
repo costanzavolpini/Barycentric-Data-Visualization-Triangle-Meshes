@@ -91,9 +91,9 @@ class Object
         best_min_gc = percentiles_gc[0];
         best_max_gc = percentiles_gc[1];
 
-        vector<double> percentiles_mc = k_percentile_mc.init(triangle_mc_notduplicatevalue);
-        best_min_mc = percentiles_mc[0];
-        best_max_mc = percentiles_mc[1];
+        vector<double> percentiles_mc_edge = k_percentile_mc.init(triangle_mc_notduplicatevalue);
+        best_min_mc = percentiles_mc_edge[0];
+        best_max_mc = percentiles_mc_edge[1];
 
         vector<double> percentiles_mc_vertex = k_percentile_mc_vertex.init(triangle_mc_vertex_notduplicatevalue);
         best_min_mc_vertex = percentiles_mc_vertex[0];

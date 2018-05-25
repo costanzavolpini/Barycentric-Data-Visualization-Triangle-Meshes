@@ -1,8 +1,7 @@
 /**
-    ref: https://learnopengl.com
     glfw3: brew install glfw3
     glew: brew install glew
-    just use make clean && make && ./main
+    make clean && make && ./main
     Costanza Volpini
 */
 
@@ -266,7 +265,6 @@ int main(int argc, char *argv[])
             ourShader.setFloat("max_curvature", global_max_gc);
 
         } else if (imgui_isMeanCurvatureEdgeShading){
-
             // TODO: mean curvature not working!
             ourShader.setBool("isMeanCurvatureEdge", true);
             ourShader.setBool("isGaussian", false);
@@ -274,6 +272,7 @@ int main(int argc, char *argv[])
             ourShader.setFloat("max_curvature", object.get_best_values_mc()[1]);
 
         } else if(imgui_isMeanCurvatureVertexShading){
+            // TODO: mean curvature not working!
             ourShader.setBool("isGaussian", false);
             ourShader.setBool("isMeanCurvatureEdge", false);
             ourShader.setFloat("min_curvature", object.get_best_values_mc_vertex()[0]);
@@ -672,7 +671,7 @@ void set_parameters_shader(int selected_shader)
         break;
 
 
-    case 6: // mean curvature vertex
+    case 6: // mean curvature vertex (like Gouraud Shading)
         vertex_shader = "vertexShaderCurvature.vs";
         fragment_shader = "fragmentShader.fs";
         geometry_shader = NULL;

@@ -2,8 +2,9 @@
 // Vertex Shader for gaussian curvature
     layout (location = 0) in vec3 aPos;
     layout (location = 2) in vec3 gaussian_curvature;
-    layout (location = 4) in vec3 mean_curvature_vertex;
     layout (location = 3) in vec3 mean_curvature_edge;
+    layout (location = 4) in vec3 mean_curvature_vertex;
+
 
 
     out vec4 color;
