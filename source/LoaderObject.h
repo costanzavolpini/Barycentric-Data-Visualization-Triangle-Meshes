@@ -58,7 +58,7 @@ struct edge
     int index_v2;
     Point3d n1;
     Point3d n2;
-    float value_mean_curvature;
+    // float value_mean_curvature;
 };
 
 // map for struct edge
@@ -192,48 +192,39 @@ void insert_edge(int index_v1, int index_v2, bool isCorrectOrder,Point3d n)
             e1.n2 = n;
         }
 
-        e1.value_mean_curvature = e1.norm_edge * sin((v[e1.index_v1]).getAngle(v[e1.index_v2]) / 2);
+        // e1.value_mean_curvature = e1.norm_edge * sin((v[e1.index_v1]).getAngle(v[e1.index_v2]) / 2);
         map_edge[key] = e1;
 
-        if (isCorrectOrder) // index_v1 < index_v2
-        {
-            vector_mc_sum[e1.index_v1] += e1.norm_edge * sin((v[e1.index_v1]).getAngle(v[e1.index_v2]) / 2);
-        }else{
-            vector_mc_sum[e1.index_v2] += e1.norm_edge * sin((v[e1.index_v2]).getAngle(v[e1.index_v1]) / 2);
-        }
-
-        // map_edge is of length edge/2 -> I need to pass it to the fragment shader somehow! and read it, but how? I cannot
-        // save it per vertex otherwise will be the same as meshlab
-
-        // TODO: ADD THIS FOR EVERY VERTEX IN A VECTOR (but that should be the same as meshlab) since it will return a per vertex mean curvature
+        vector_mc_sum[e1.index_v1] += e1.norm_edge * sin((v[e1.index_v1]).getAngle(v[e1.index_v2]) / 2);
+        vector_mc_sum[e1.index_v2] += e1.norm_edge * sin((v[e1.index_v2]).getAngle(v[e1.index_v1]) / 2);
     }
 }
 
 /**
- * Function to get the value of mean curvature of an edge from the edge-map.
- */
-float get_mean_curvature(int index_v1, int index_v2, vector<int> key, vector<int> key_2)
-{
-    std::map<vector<int>, edge>::iterator it;         // iterator
-    std::map<vector<int>, edge>::iterator it_reverse; // iterator for reverse vertices index
+//  * Function to get the value of mean curvature of an edge from the edge-map.
+//  */
+// float get_mean_curvature(int index_v1, int index_v2, vector<int> key, vector<int> key_2)
+// {
+//     std::map<vector<int>, edge>::iterator it;         // iterator
+//     std::map<vector<int>, edge>::iterator it_reverse; // iterator for reverse vertices index
 
-    // convention: from smaller to higher index to avoid to count double
-    it = map_edge.find(key);
-    it_reverse = map_edge.find(key_2);
+//     // convention: from smaller to higher index to avoid to count double
+//     it = map_edge.find(key);
+//     it_reverse = map_edge.find(key_2);
 
-    if (it != map_edge.end())
-    {
-        return it->second.value_mean_curvature;
-    }
-    else if (it_reverse != map_edge.end())
-    {
-        return it_reverse->second.value_mean_curvature;
-    }
+//     if (it != map_edge.end())
+//     {
+//         return it->second.value_mean_curvature;
+//     }
+//     else if (it_reverse != map_edge.end())
+//     {
+//         return it_reverse->second.value_mean_curvature;
+//     }
 
-    // no mean curvature value found
-    cout << "ERROR MEAN CURVATURE" << endl;
-    exit(-1);
-}
+//     // no mean curvature value found
+//     cout << "ERROR MEAN CURVATURE" << endl;
+//     exit(-1);
+// }
 
 /**
  * Function to update the minimum and the maximum value found in coords of an object.
