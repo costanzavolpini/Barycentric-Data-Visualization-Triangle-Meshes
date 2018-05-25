@@ -3,6 +3,7 @@
     layout (location = 0) in vec3 aPos;
     layout (location = 2) in vec3 gaussian_curvature;
     layout (location = 4) in vec3 mean_curvature_vertex;
+    layout (location = 3) in vec3 mean_curvature_edge;
 
 
     out vec4 color;
@@ -15,6 +16,7 @@
     uniform float max_curvature;
 
     uniform bool isGaussian;
+    uniform bool isMeanCurvatureEdge;
 
     vec3 interpolation(vec3 v0, vec3 v1, float t) {
         return (1 - t) * v0 + t * v1;
@@ -30,8 +32,10 @@
 
     vec4 get_result_color_gc(){
         float val = gaussian_curvature[0]; // gaussian_curvature is a vec3 composed by same value
-        if(!isGaussian)
+        if(!isGaussian && !isMeanCurvatureEdge)
             val = mean_curvature_vertex[0]; // mean curvature is a vec3 composed by same value
+        else if(!isGaussian && isMeanCurvatureEdge)
+            val = mean_curvature_edge[0]; // mean curvature is a vec3 composed by same value
 
        // colors in HSV
        vec3 red = vec3(0.0, 1.0, 1.0); //h s v

@@ -267,11 +267,13 @@ int main(int argc, char *argv[])
         } else if (imgui_isMeanCurvatureEdgeShading){
 
             // TODO: mean curvature not working!
-            ourShader.setFloat("min_mc", object.get_best_values_mc()[0]);
-            ourShader.setFloat("max_mc", object.get_best_values_mc()[1]);
+            ourShader.setBool("isMeanCurvatureEdge", true);
+            ourShader.setFloat("min_curvature", object.get_best_values_mc()[0]);
+            ourShader.setFloat("max_curvature", object.get_best_values_mc()[1]);
 
         } else if(imgui_isMeanCurvatureVertexShading){
             ourShader.setBool("isGaussian", false);
+            ourShader.setBool("isMeanCurvatureEdge", false);
             ourShader.setFloat("min_curvature", object.get_best_values_mc_vertex()[0]);
             ourShader.setFloat("max_curvature", object.get_best_values_mc_vertex()[1]);
         }
@@ -660,9 +662,9 @@ void set_parameters_shader(int selected_shader)
         break;
 
     case 5: // mean curvature edge
-        vertex_shader = "vertexShaderMC.vs";
+        vertex_shader = "vertexShaderCurvature.vs";
         fragment_shader = "minDiagramFragmentShader.fs";
-        geometry_shader = "geometryShaderMC.gs";
+        geometry_shader = "geometryShader.gs";
 
         imgui_isMeanCurvatureEdgeShading = 1;
         break;
