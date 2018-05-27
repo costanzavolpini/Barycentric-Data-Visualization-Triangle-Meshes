@@ -152,10 +152,14 @@ angle between the normals of adjacent triangles (see Fig. \ref{fig:mean-curvatur
 angle between the normals of adjacent triangles $T_1$ and $T_2$ with positive or negative sign is denoted as ${\theta}_E$.\cite{geometryprocessing}}\label{fig:mean-curvature}
 \end{figure}
 Let's think of an edge as a cylindrical patch $C(E)$ with a radius $r$ that touches the planes defined by adjacent triangles. The \textit{mean curvature} at any point of the cylindrical patch is defined as $1/(2r)$ and the area of $C(E)$ is $r||E||\theta_E$
-$$H(E) = \int_{C(E)} HdA$$
-//TODO: finish!!!!!!!!!!!!!!!!!
-The \textit{mean curvature} at a vertex $V$ is defined as:
-$$ H(V) = \frac{1}{2} \sum_{i=1}^n H(E_i)$$ Averaging the mean curvatures of its adjacent edges guarantee that \textit{mean curvature} of an edge is divide uniformly to both end points.
+$$H(E) = \int_{C(E)} HdA$$. The \textit{mean curvature} at a vertex $V$ is defined as $$H(V) = \frac{1}{2} \sum_{i=1}^n H(E_i)$$ Averaging the mean curvatures of its adjacent edges guarantee that \textit{mean curvature} of an edge is divide uniformly to both end points. $H(E)$ and $H(V)$ should be seen as integral curvature values associated to regions $S(E)$ and $S(V)$.
+\cite{geometryprocessing}
+\subsubsection{Mean Curvature Vector}
+Let be $H = H n$ the surface normal vector scaled by the \textit{mean curvature} to derive the discrete mean curvature vector associated to the mesh edge $E=[V, W]$
+$$ H(E) = \int_{C(E)} HdA = \frac{1}{2} (V-W) \times (n(T_1) - n(T_2))$$
+The length of $H(E)$ gives the edge mean curvature $H(E) = ||H(E) || = ||E|| sin(\theta_E/2)$. The discrete mean curvature vector associated to $V$ can be obtained averaging $H(E)$ over the edges adjacent to a vertex $V$
+$$H(V) = \frac{1}{2} \sum_{i=1}^{n} H(E_i) = \frac{1}{4}\sum_{i=1}^n (\cot \alpha_i + \cot \beta_i)(V - V_i)$$
+where $\alpha_i$ and $\beta_i$ are angles opposite to $E_i$ (see Fig. \ref{fig:mean-curvature}).
 \cite{geometryprocessing}
 
 
