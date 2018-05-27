@@ -4,7 +4,7 @@ This section shows alternative methods to extend the idea of flat shading from t
 %%%%%%%%%%%%%
 
 
-\begin{figure}[h]
+\begin{figure}[!h]
     \centering
     \minipage[b]{.5\linewidth}
     \centering
@@ -54,7 +54,7 @@ We want to avoid an automatic interpolation of colors, in order to return the re
 \end{figure}
 
 
-\subsubsection{Comparison}
+\subsection{Comparison between triangle flat shading, triangle Gouraud shading and vertex flat shading}
 The standard approaches: \textit{triangle flat shading} and \textit{triangle Gouraud shading} are then compared with the new technique \textit{vertex flat shading}. In Fig. \ref{fig:comparison-icosahedron} we can see that the icosahedron where we have applied the vertex flat shading shader seems to be a good compromise since it preserves details without affecting too much with shapes (triangles) the final result. Vertex regions look more realistic and less noising than triangle regions, this united by the fact that Gouraud shading sometimes smoothes and loses many details in some meshes, made this new technique a good trade-off.
 \begin{figure}[!h]
     \centering
@@ -72,7 +72,8 @@ The standard approaches: \textit{triangle flat shading} and \textit{triangle Gou
     \centering
     \includegraphics[scale=0.5]{images/extentflatshading.png}\label{fig:flat-shading-vertex}
     \endminipage
-    \caption{Comparison between: triangle flat shading, triangle Gouraud shading and vertex flat shading.}\caption{fig:comparison-icosahedron}
+    \caption{Comparison between: triangle flat shading, triangle Gouraud shading and vertex flat shading.}
+    \label{fig:comparison-icosahedron}
 \end{figure}
 
 
@@ -155,7 +156,7 @@ $$K(V) = (2\pi - \sum_j \theta_j)/\mathcal{A}_{Mixed}$$
             \draw (3.2,1.7) arc (295:360:0.7cm) node[near start,right] {$\theta_j$};
         \end{scope}
     \end{tikzpicture}}
-    \caption{On the left: angle defect is denoted with $\theta_j$.}
+    \caption{On the left: angle defect is denoted with $\theta_j$.}\label{fig:gc-angle}
 \end{figure}
 %%
 
@@ -202,7 +203,7 @@ These changes of curvature, positive (blue), flat (green) and negative regions (
 \textit{Gouraud Gaussian curvature} is more smoothed that causes a loss of small details, this is particularly evident in armadillo's legs mesh. Instead, \textit{constant Gaussian curvature per vertex} generates sharped edges that less emphasizes the general lines of the model causing a small loss of 3-dimensionality.
 \textit{Constant Gaussian curvature per vertex} better shows the muscle constrasts given a more detailed character to models.
 
-\begin{figure}[!h]
+\begin{figure}[H]
     \centering
     \minipage[b]{.5\linewidth}
     \centering
