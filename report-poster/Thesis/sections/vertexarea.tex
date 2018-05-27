@@ -29,7 +29,7 @@ The color is given by the region farthest from a vertex (Fig. \ref{fig:max-diagr
 
 %%%%%%%%%%%%%
 
-\subsection{Flat shading per vertex} \label{section:extend-flat-shading-lighting}
+\subsection{Vertex Flat Shading} \label{section:extend-flat-shading-lighting}
 An extension of \textit{flat shading} would be to have each vertex area to be in one constant color. This color can be taken using the normal at the vertex and the vertex position.
 The color will then be computed as in \textit{Gouraud shading}.
 The idea is to compute the color per vertex but instead of linearly interpolated it in each triangle (as \textit{Gouraud shading} does) we color regions around a vertex with that constant color (using the GPU fragment program: max diagram \ref{section:max-diagram}).
@@ -50,7 +50,7 @@ We want to avoid an automatic interpolation of colors, in order to return the re
     \centering
     \includegraphics[scale=0.3]{images/armadillo-extendfs-2.png}
     \endminipage
-    \caption{Flat shading per vertex}
+    \caption{Vertex flat shading}
 \end{figure}
 
 
@@ -62,17 +62,17 @@ We want to avoid an automatic interpolation of colors, in order to return the re
     \minipage[b]{.3\linewidth}
     \centering
     % \includegraphics[scale=0.15]{images/.png}
-    \caption{Flat shading per triangle}\label{fig:flat-shading-triangle}
+    \caption{Triangle flat shading}\label{fig:flat-shading-triangle}
     \endminipage\hfill
     \minipage[b]{.3\linewidth}
     \centering
     \includegraphics[scale=0.5]{images/gouraudshading.png}
-    \caption{Gouraud shading per triangle}\label{fig:gouraud-shading}
+    \caption{Triangle gouraud shading}\label{fig:gouraud-shading}
     \endminipage\hfill
     \minipage[b]{.3\linewidth}
     \centering
     \includegraphics[scale=0.5]{images/extentflatshading.png}
-    \caption{Flat shading per vertex}\label{fig:flat-shading-vertex}
+    \caption{Vertex flat shading}\label{fig:flat-shading-vertex}
     \endminipage
 \end{figure}
 
