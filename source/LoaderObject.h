@@ -85,8 +85,8 @@ int number_non_obtuse_triangle;
 */
 Point3d get_rescaled_value(Point3d value)
 {
-    return value;                                                        // TODO: need to remove afer
-    // return interval / (max_coord - min_coord) * (value - max_coord) + 1; //1 is the max of interval
+    // return value;                                                        // TODO: need to remove afer
+    return interval / (max_coord - min_coord) * (value - max_coord) + 1; //1 is the max of interval
 }
 
 /**

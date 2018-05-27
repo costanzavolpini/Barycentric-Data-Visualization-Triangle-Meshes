@@ -1,5 +1,5 @@
 \label{section:vertex-area-chapter}
-This section shows alternative methods to extend the idea of flat shading from triangles to vertices and edges. The idea of flat shading is to draw all the pixels of a triangle with the same colour. The extension of this approach is to split the surface of the triangle mesh likewise into regions around vertices and edges and draw all pixels in these regions with the same colour (Fig. \ref{fig:vertex-area}), thus visualizing data given at the vertices or edges of the mesh in a piecewise constant, not necessarily continuous way, resembling the classical triangle flat shading. The aforementioned regions can easily be defined using barycentric coordinates and a simple GPU fragment program (Fig. \ref{fig:max-diagram}) can be used to find out for each pixel to which region is belongs and which colour it should be painted with.
+This section shows alternative methods to extend the idea of flat shading from triangles to vertices. The idea of flat shading is to draw all the pixels of a triangle with the same colour. The extension of this approach is to split the surface of the triangle mesh likewise into regions around vertices and draw all pixels in these regions with the same colour (Fig. \ref{fig:vertex-area}), thus visualizing data given at the vertices of the mesh in a piecewise constant, not necessarily continuous way, resembling the classical triangle flat shading. The aforementioned regions can easily be defined using barycentric coordinates and a simple GPU fragment program (Fig. \ref{fig:max-diagram}) can be used to find out for each pixel to which region is belongs and which colour it should be painted with.
 
 %%%%%%%%%%%%%
 
@@ -24,8 +24,8 @@ This section shows alternative methods to extend the idea of flat shading from t
 Passing barycentric coordinates to the \textit{fragment shader} will clearly demonstrate that we can get different results from the classic color interpolation.\cite{WEBSITE:redbloggames}
 %----------
 There are different approaches to color interpolation focusing on the distance from vertices. For each point in a triangle, we can easily determine its closest vertex, which we use as a cue for coloring.
-A different approach from interpolating, can be found coloring vertex areas based on the minimum barycentric coordinate.
-The color is given by the region farthest from a vertex (Fig. \ref{fig:max-diagram}, Pseudocode \ref{appendix:max-diagram}).
+A different approach from interpolating, can be found coloring vertex areas based on the maximum barycentric coordinate.
+The color is given by the region closest to a vertex (Fig. \ref{fig:max-diagram}, Pseudocode \ref{appendix:max-diagram}).
 
 %%%%%%%%%%%%%
 
@@ -50,30 +50,89 @@ We want to avoid an automatic interpolation of colors, in order to return the re
     \centering
     \includegraphics[scale=0.3]{images/armadillo-extendfs-2.png}
     \endminipage
-    \caption{Vertex flat shading}
+    \caption{Vertex flat shading.}
 \end{figure}
 
 
 \subsubsection{Comparison}
-\color{red}{TODO: add armadillo, horse, etc. images with these 3 effects (flat shading 1 and 2, gouraud shading)}
-\color{black} %to remove after
+The standard approaches: \textit{triangle flat shading} and \textit{triangle Gouraud shading} are then compared with the new technique \textit{vertex flat shading}. In Fig. \ref{fig:comparison-icosahedron} we can see that the icosahedron where we have applied the vertex flat shading shader seems to be a good compromise since it preserves details without affecting too much with shapes (triangles) the final result. Vertex regions look more realistic and less noising than triangle regions, this united by the fact that Gouraud shading sometimes smoothes and loses many details in some meshes, made this new technique a good trade-off.
 \begin{figure}[!h]
     \centering
     \minipage[b]{.3\linewidth}
     \centering
-    % \includegraphics[scale=0.15]{images/.png}
-    \caption{Triangle flat shading}\label{fig:flat-shading-triangle}
+    \includegraphics[scale=0.5]{images/flatshading.png}
+    \label{fig:flat-shading-triangle}
     \endminipage\hfill
     \minipage[b]{.3\linewidth}
     \centering
     \includegraphics[scale=0.5]{images/gouraudshading.png}
-    \caption{Triangle gouraud shading}\label{fig:gouraud-shading}
+    \label{fig:gouraud-shading}
     \endminipage\hfill
     \minipage[b]{.3\linewidth}
     \centering
-    \includegraphics[scale=0.5]{images/extentflatshading.png}
-    \caption{Vertex flat shading}\label{fig:flat-shading-vertex}
+    \includegraphics[scale=0.5]{images/extentflatshading.png}\label{fig:flat-shading-vertex}
     \endminipage
+    \caption{Comparison between: triangle flat shading, triangle Gouraud shading and vertex flat shading.}\caption{fig:comparison-icosahedron}
+\end{figure}
+
+
+\begin{figure}[!h]
+    \centering
+    \minipage[b]{.33\linewidth}
+    \centering
+    \includegraphics[scale=0.5]{images/genus-fs.png}
+    \endminipage\hfill
+    \centering
+    \minipage[b]{.33\linewidth}
+    \centering
+    \includegraphics[scale=0.5]{images/genus-gs.png}
+    \endminipage\hfill
+    \minipage[b]{.33\linewidth}
+    \centering
+    \includegraphics[scale=0.5]{images/genus-efs.png}
+    \endminipage\hfill
+    \minipage[b]{.33\linewidth}
+    \centering
+    \includegraphics[scale=0.35]{images/eight-fs.png}
+    \endminipage\hfill
+    \centering
+    \minipage[b]{.33\linewidth}
+    \centering
+    \includegraphics[scale=0.35]{images/eight-gs.png}
+    \endminipage\hfill
+    \minipage[b]{.33\linewidth}
+    \centering
+    \includegraphics[scale=0.35]{images/eight-efs.png}
+    \endminipage\hfill
+    \centering
+    \minipage[b]{.33\linewidth}
+    \centering
+    \includegraphics[scale=0.5]{images/armadillo-fs.png}
+    \endminipage\hfill
+    \centering
+    \minipage[b]{.33\linewidth}
+    \centering
+    \includegraphics[scale=0.5]{images/armadillo-gs.png}
+    \endminipage\hfill
+    \minipage[b]{.33\linewidth}
+    \centering
+    \includegraphics[scale=0.5]{images/armadillo-efs.png}
+    \endminipage\hfill
+    \minipage[b]{.33\linewidth}
+    \centering
+    \includegraphics[scale=0.39]{images/horse-fs.png}
+    \endminipage\hfill
+    \centering
+    \minipage[b]{.33\linewidth}
+    \centering
+    \includegraphics[scale=0.39]{images/horse-gs.png}
+    \endminipage\hfill
+    \minipage[b]{.33\linewidth}
+    \centering
+    \includegraphics[scale=0.39]{images/horse-efs.png}
+    \endminipage\hfill
+    \caption{On the left: Triangle flat shading. On the center: Triangle Gouraud shading. On the right: Vertex flat shading.}
+    \label{fig:comparison-gc-gci}
 \end{figure}
 
 %%%
@@ -81,39 +140,29 @@ We want to avoid an automatic interpolation of colors, in order to return the re
 \label{section:vertex-area-gaussian-curvature}
 Another interesting alternative data visualization technique is to compute the \textit{Gaussian curvature} per vertex. That can be done summing up, for each vertex, angles at this vertex with adjacent triangles and then subtracting this value to $2\pi$.
 After having obtained this value, called \textit{angle defect} (Fig. \ref{fig:gc-angle}), we map linearly this value to a color range.
-The resulting color will be the vertex flat shading visualisation of \textit{Gaussian curvature}.
+The resulting color will be the vertex flat shading visualisation of \textit{Gaussian curvature} (See Section \ref{section:localaveraging} and \ref{section:gaussian-curvature-intro}).
 $$K(V) = (2\pi - \sum_j \theta_j)/\mathcal{A}_{Mixed}$$
-(See Section \ref{section:localaveraging} and \ref{section:gaussian-curvature-intro}).
 %%
 \begin{figure}[!h]
-    \centering
-    \minipage[b]{.5\linewidth}
     \centering
     \scalebox{0.65}{\begin{tikzpicture}
         \coordinate (J) at (3.1,2.9);
         \coordinate (circle) at (3.1,2.9);
-        \node[anchor=south west,inner sep=0] at (0,0) {\includegraphics[scale=0.2]{images/vertex-area.png}};
+        \node[anchor=south west,inner sep=0] at (0,0) {\includegraphics[scale=0.25]{images/vertex-area.png}};
         \draw (J) node [below left] {$j$};
         \filldraw (2.8, 2.2) circle (2pt);
         \begin{scope}[line width=0.4mm, line cap=round]
             \draw (3.2,1.7) arc (295:360:0.7cm) node[near start,right] {$\theta_j$};
         \end{scope}
     \end{tikzpicture}}
-    \label{fig:gc-angle}
-    \endminipage\hfill
-    \minipage[b]{.5\linewidth}
-    \centering
-    \includegraphics[scale=0.13]{images/gaussian-ball.png}
-    \label{fig:gc-icosahedron}
-    \endminipage
-    \caption{On the left: angle defect is denoted with $\theta_j$. On the right: analysis that shows how constant vertex area should look on an icosahedron.}
+    \caption{On the left: angle defect is denoted with $\theta_j$.}
 \end{figure}
 %%
 
 %%%%%%%%
 
 \subsection{Constant Gaussian curvature per vertex}
-\textit{Constant Gaussian curvature per vertex} returns a constant color around each vertex (Fig. \ref{fig:gc-icosahedron}, Pseudocode \ref{appendix:vs-gaussiancurvature}). After having calculated the \textit{Gaussian curvature} per vertex, this value is mapped into a color range to get the curvature color (for example: green for flat surfaces). This process is made separately for each vertex of the triangle and after, using the technique explained above of max-diagram (See section \ref{section:max-diagram}) the final resulting constant color is returned.
+\textit{Constant Gaussian curvature per vertex} returns a constant color around each vertex (Fig. \ref{fig:gc-angle}, Pseudocode \ref{appendix:vs-gaussiancurvature}). After having calculated the \textit{Gaussian curvature} per vertex, this value is mapped into a color range to get the curvature color (for example: green for flat surfaces). This process is made separately for each vertex of the triangle and after, using the technique explained above of max-diagram (See section \ref{section:max-diagram}) the final resulting constant color is returned.
 \begin{figure}[!h]
     \centering
     \minipage[b]{.5\linewidth}
@@ -157,35 +206,35 @@ These changes of curvature, positive (blue), flat (green) and negative regions (
     \centering
     \minipage[b]{.5\linewidth}
     \centering
-    \includegraphics[scale=0.7]{images/gc-genus.png}
+    \includegraphics[scale=0.9]{images/gc-genus.png}
     \endminipage\hfill
     \minipage[b]{.5\linewidth}
     \centering
-    \includegraphics[scale=0.7]{images/gci-genus.png}
+    \includegraphics[scale=0.9]{images/gci-genus.png}
     \endminipage\hfill
     \minipage[b]{.5\linewidth}
     \centering
-    \includegraphics[scale=0.7]{images/gc-eight.png}
+    \includegraphics[scale=0.9]{images/gc-eight.png}
     \endminipage\hfill
     \minipage[b]{.5\linewidth}
     \centering
-    \includegraphics[scale=0.7]{images/gci-eight.png}
+    \includegraphics[scale=0.9]{images/gci-eight.png}
     \endminipage\hfill
     \minipage[b]{.5\linewidth}
     \centering
-    \includegraphics[scale=0.7]{images/gc-armadillo.png}
+    \includegraphics[scale=0.9]{images/gc-armadillo.png}
     \endminipage\hfill
     \minipage[b]{.5\linewidth}
     \centering
-    \includegraphics[scale=0.7]{images/gci-armadillo.png}
+    \includegraphics[scale=0.9]{images/gci-armadillo.png}
     \endminipage\hfill
     \minipage[b]{.5\linewidth}
     \centering
-    \includegraphics[scale=0.7]{images/gc-horse.png}
+    \includegraphics[scale=0.9]{images/gc-horse.png}
     \endminipage\hfill
     \minipage[b]{.5\linewidth}
     \centering
-    \includegraphics[scale=0.7]{images/gci-horse.png}
+    \includegraphics[scale=0.9]{images/gci-horse.png}
     \endminipage
     \caption{On the left: Constant Gaussian curvature per vertex. On the right: Gouraud Gaussian curvature.}
     \label{fig:comparison-gc-gci}
