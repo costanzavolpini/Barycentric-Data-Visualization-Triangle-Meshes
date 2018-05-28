@@ -627,9 +627,9 @@ void set_parameters_shader(int selected_shader)
     {
 
     case 0: // flat shading
-        vertex_shader = "vertexShader.vs";
-        fragment_shader = "flatFragmentShader.fs";
-        geometry_shader = NULL;
+        vertex_shader = "vertexShaderFS.vs";
+        fragment_shader = "fragmentShaderFS.fs";
+        geometry_shader = "geometryShaderFS.gs";
 
         imgui_isFlatShading = 1;
         break;

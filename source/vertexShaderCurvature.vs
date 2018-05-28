@@ -5,8 +5,6 @@
     layout (location = 3) in vec3 mean_curvature_edge;
     layout (location = 4) in vec3 mean_curvature_vertex;
 
-
-
     out vec4 color;
 
     uniform mat4 model;
