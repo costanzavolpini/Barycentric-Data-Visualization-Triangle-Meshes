@@ -60,6 +60,8 @@ struct edge
     Point3d n2;
     float value_mean_curvature;
     float value_mean_curvature_2;
+    float cot_alpha;
+    float cot_beta;
 };
 
 // map for struct edge
@@ -71,9 +73,7 @@ vector<float> vector_mc_sum;
 // use the circumcenter point, and for each obtuse triangle, we use the midpoint
 // of the edge opposite to the obtuse angle
 vector<float> area_mixed;
-
-vector<float> voronoi_region;
-vector<float> normal_curvature_estimation;
+vector<float> mean_curvature_vertex_sum;
 
 // counter obtuse triangle and not-obtuse triangle
 int number_obtuse_triangle;
@@ -85,8 +85,16 @@ int number_non_obtuse_triangle;
 */
 Point3d get_rescaled_value(Point3d value)
 {
-    return value; // TODO: need to remove afer
-    // return interval / (max_coord - min_coord) * (value - max_coord) + 1; //1 is the max of interval
+    // return value; // TODO: need to remove afer
+    return interval / (max_coord - min_coord) * (value - max_coord) + 1; //1 is the max of interval
+}
+
+/**
+ * Function to get the cotangent of an angle
+ */
+double get_cotangent(double angle)
+{
+    return cos(angle) / sin(angle);
 }
 
 /**
@@ -156,7 +164,7 @@ Point3d get_normal_edge(int index_v1, int index_v2)
 /**
  * Function to insert a struct edge inside edge-map.
  */
-void insert_edge(int index_v1, int index_v2, bool isCorrectOrder, Point3d n)
+void insert_edge(int index_v1, int index_v2, bool isCorrectOrder, Point3d n, double angle)
 // FIXME: fix mean curvature, but that code seems to work correctly
 {
     vector<int> key(2);
@@ -178,10 +186,13 @@ void insert_edge(int index_v1, int index_v2, bool isCorrectOrder, Point3d n)
 
     if (it != map_edge.end()) // update information edge struct if exist
     {
-        if (isCorrectOrder) // means index_1 < index_2
+        if (isCorrectOrder){ // means index_1 < index_2
             it->second.n1 = n;
-        else
+            it->second.cot_alpha = get_cotangent(angle);
+        }else{
             it->second.n2 = n;
+            it->second.cot_beta = get_cotangent(angle);
+        }
 
         it->second.value_mean_curvature = it->second.norm_edge * sin(((it->second.n1).getAngle(it->second.n2)) / 2.0f);
         it->second.value_mean_curvature_2 = it->second.norm_edge * sin(((it->second.n2).getAngle(it->second.n1)) / 2.0f);
@@ -198,12 +209,14 @@ void insert_edge(int index_v1, int index_v2, bool isCorrectOrder, Point3d n)
             e1.index_v1 = index_v1;
             e1.index_v2 = index_v2;
             e1.n1 = n;
+            it->second.cot_alpha = get_cotangent(angle);
         }
         else
         { // reverse case
             e1.index_v1 = index_v2;
             e1.index_v2 = index_v1;
             e1.n2 = n;
+            it->second.cot_beta = get_cotangent(angle);
         }
 
         e1.norm_edge = (v[e1.index_v2] - v[e1.index_v1]).norm();
@@ -259,14 +272,6 @@ double get_area_triangle(int index_triangle)
 
     double s = (edge0 + edge1 + edge2) / 2;
     return sqrt(s * (s - edge0) * (s - edge1) * (s - edge2));
-}
-
-/**
- * Function to get the cotangent of an angle
- */
-double get_cotangent(double angle)
-{
-    return cos(angle) / sin(angle);
 }
 
 /**
@@ -384,6 +389,9 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
 
     vector_mc_sum.resize(num_vertices);
     std::fill(vector_mc_sum.begin(), vector_mc_sum.end(), 0.0f);
+
+    mean_curvature_vertex_sum.resize(num_vertices);
+    std:fill(mean_curvature_vertex_sum.begin(), mean_curvature_vertex_sum.end(), 0.0f);
     // ----
 
     // -- initialize Gaussian curvature vectors --
@@ -397,14 +405,6 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
     // ---- end Gaussian curvature vectors initialization ----
 
     set_max_min_mesh(); // find min value and max value of a mesh (in order to rescale values correctly)
-
-    // -- initialize mean curvature per vertex vectors --
-    voronoi_region.resize(num_vertices);
-    std::fill(voronoi_region.begin(), voronoi_region.end(), 0.0);
-
-    normal_curvature_estimation.resize(num_vertices);
-    std::fill(normal_curvature_estimation.begin(), normal_curvature_estimation.end(), 0.0);
-    // ---- end mean curvature vectors per vertex initialization ----
 
     // iterate inside triangles and calculates angle_defeact
     for (int k = 0; k < num_triangles; k++)
@@ -427,36 +427,10 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         v_counter[t[k].v[1]]++; // update counter for normals
         v_counter[t[k].v[2]]++; // update counter for normals
 
-        // -------------- MEAN CURVATURE EDGE -------------- TODO: check the code
-
         // fill map edges
         int index_v1 = t[k].v[0];
         int index_v2 = t[k].v[1];
         int index_v3 = t[k].v[2];
-
-        bool isCorrectedOrder = false;
-
-        if (index_v1 < index_v2)
-            isCorrectedOrder = true;
-
-        insert_edge(index_v1, index_v2, isCorrectedOrder, n);
-
-        isCorrectedOrder = false;
-
-        if (index_v3 < index_v1)
-            isCorrectedOrder = true;
-
-        insert_edge(index_v3, index_v1, isCorrectedOrder, n);
-
-        isCorrectedOrder = false;
-
-        if (index_v2 < index_v3)
-            isCorrectedOrder = true;
-
-        insert_edge(index_v2, index_v3, isCorrectedOrder, n);
-
-        // -------------- end mean curvature --------------
-
         // -------------- GAUSSIAN CURVATURE --------------
         // calculate angle defeact for each vertex of triangle
         // vertex 1
@@ -492,18 +466,39 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         // else // triangle obtuse
         //     number_obtuse_triangle++;
 
+        // -------------- MEAN CURVATURE EDGE -------------- TODO: check the code
+        bool isCorrectedOrder = false;
+
+        if (index_v1 < index_v2)
+            isCorrectedOrder = true;
+
+        // angle is v1v3v2
+        insert_edge(index_v1, index_v2, isCorrectedOrder, n, angle_v0v2v1);
+
+        isCorrectedOrder = false;
+
+        if (index_v3 < index_v1)
+            isCorrectedOrder = true;
+
+        // angle is v3v2v1
+        insert_edge(index_v3, index_v1, isCorrectedOrder, n, angle_v2v1v0);
+
+        isCorrectedOrder = false;
+
+        if (index_v2 < index_v3)
+            isCorrectedOrder = true;
+
+        // angle is v2v1v3
+        insert_edge(index_v2, index_v3, isCorrectedOrder, n, angle_v1v0v2);
+
+        // -------------- end mean curvature --------------
+
         // -------------- end mean curvature edge --------------
 
         // -------------- MEAN CURVATURE VERTEX --------------
         // array of A_voronoi_region saved for each vertex
         // TODO: -- fix normal_curvature_estimation
 
-        if (!is_obtuse_angle(angle_v1v0v2) && !is_obtuse_angle(angle_v2v1v0) && !is_obtuse_angle(angle_v0v2v1))
-        { // Triangle is not obtuse -> Voronoi-safe
-            voronoi_region[index_v1] += get_voronoi_region_triangle(index_v1, index_v2, index_v3, angle_v2v1v0, angle_v0v2v1);
-            voronoi_region[index_v2] += get_voronoi_region_triangle(index_v2, index_v1, index_v3, angle_v1v0v2, angle_v0v2v1);
-            voronoi_region[index_v3] += get_voronoi_region_triangle(index_v3, index_v1, index_v2, angle_v1v0v2, angle_v2v1v0);
-        }
     }
 
     // fill out_gc vector
@@ -563,6 +558,13 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
                 vector_mc_sum[current_edge[1]] = it->second.value_mean_curvature;
                 vector_mc_sum[current_edge[0]] = it->second.value_mean_curvature_2;
             }
+            // add value mean curvature vertex
+            //TODO: should be:
+        //     mean_curvature_vertex_sum[it->second.index_v1] += ((it->second.cot_alpha + it->second.cot_beta) * (v[it->second.index_v1] - v[it->second.index_v2]));
+        //     mean_curvature_vertex_sum[it->second.index_v2] += ((it->second.cot_alpha + it->second.cot_beta) * (v[it->second.index_v2] - v[it->second.index_v1]));
+            mean_curvature_vertex_sum[it->second.index_v1] += ((it->second.cot_alpha + it->second.cot_beta) * (get_distance_points(v[it->second.index_v2], v[it->second.index_v1])));
+            mean_curvature_vertex_sum[it->second.index_v2] += ((it->second.cot_alpha + it->second.cot_beta) * (get_distance_points(v[it->second.index_v1], v[it->second.index_v2])));
+
         }
 
         // case vertex v1
@@ -594,6 +596,10 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
                 vector_mc_sum[current_edge[1]] = it->second.value_mean_curvature;
                 vector_mc_sum[current_edge[0]] = it->second.value_mean_curvature_2;
             }
+
+            // add value mean curvature vertex
+            mean_curvature_vertex_sum[it->second.index_v1] += ((it->second.cot_alpha + it->second.cot_beta) * (get_distance_points(v[it->second.index_v2], v[it->second.index_v1])));
+            mean_curvature_vertex_sum[it->second.index_v2] += ((it->second.cot_alpha + it->second.cot_beta) * (get_distance_points(v[it->second.index_v1], v[it->second.index_v2])));
         }
 
         // case vertex v2
@@ -625,8 +631,12 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
                 vector_mc_sum[current_edge[1]] = it->second.value_mean_curvature;
                 vector_mc_sum[current_edge[0]] = it->second.value_mean_curvature_2;
             }
+            // add value mean curvature vertex
+            mean_curvature_vertex_sum[it->second.index_v1] += ((it->second.cot_alpha + it->second.cot_beta) * (get_distance_points(v[it->second.index_v2], v[it->second.index_v1])));
+            mean_curvature_vertex_sum[it->second.index_v2] += ((it->second.cot_alpha + it->second.cot_beta) * (get_distance_points(v[it->second.index_v1], v[it->second.index_v2])));
         }
         // -------------- end mean curvature --------------
+
     }
 
     // normals
@@ -641,34 +651,22 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         normals[k].normalize();
     }
 
+
     // output vectors
     //For each vertex of each triangle
     for (unsigned int k = 0; k < num_triangles; k++)
     {
-        // -------------- mean curvature per vertex --------------
-        int index_v1 = t[k].v[0];
-        int index_v2 = t[k].v[1];
-        int index_v3 = t[k].v[2];
-
-        // // using edge normal --> worst!!!!!!!!!
-        // normal_curvature_estimation[index_v1] += 2 * ((get_rescaled_value(v[index_v1] - v[index_v2]) * get_normal_edge(index_v1, index_v2)) / pow(get_rescaled_value(v[index_v1] - v[index_v2]).norm(), 2));
-        // normal_curvature_estimation[index_v2] += 2 * ((get_rescaled_value(v[index_v2] - v[index_v1]) * get_normal_edge(index_v2, index_v1)) /  pow(get_rescaled_value(v[index_v2] - v[index_v1]).norm(), 2));
-        // normal_curvature_estimation[index_v3] += 2 * ((get_rescaled_value(v[index_v3] - v[index_v1]) * get_normal_edge(index_v3, index_v1)) /  pow(get_rescaled_value(v[index_v3] - v[index_v1]).norm(), 2));
-
-        normal_curvature_estimation[index_v1] += 2 * ((get_rescaled_value(v[index_v1] - v[index_v2]) * normals[index_v1]) / pow(get_rescaled_value(v[index_v1] - v[index_v2]).norm(), 2));
-        normal_curvature_estimation[index_v2] += 2 * ((get_rescaled_value(v[index_v2] - v[index_v1]) * normals[index_v2]) / pow(get_rescaled_value(v[index_v2] - v[index_v1]).norm(), 2));
-        normal_curvature_estimation[index_v3] += 2 * ((get_rescaled_value(v[index_v3] - v[index_v1]) * normals[index_v3]) / pow(get_rescaled_value(v[index_v3] - v[index_v1]).norm(), 2));
 
         // Mean curvature as a quadrature
         // cout << (1.0f/area_mixed[t[k].v[0]]) * voronoi_region[t[k].v[0]] << endl;
-        out_mc_vertex.push_back((1.0f / area_mixed[t[k].v[0]]) * voronoi_region[t[k].v[0]] * normal_curvature_estimation[t[k].v[0]]);
-        out_mc_vertex.push_back((1.0f / area_mixed[t[k].v[0]]) * voronoi_region[t[k].v[0]] * normal_curvature_estimation[t[k].v[0]]);
+        out_mc_vertex.push_back((1.0f / area_mixed[t[k].v[0]]) * mean_curvature_vertex_sum[t[k].v[0]]);
+        out_mc_vertex.push_back((1.0f / area_mixed[t[k].v[0]]) * mean_curvature_vertex_sum[t[k].v[0]]);
 
-        out_mc_vertex.push_back((1.0f / area_mixed[t[k].v[1]]) * voronoi_region[t[k].v[1]] * normal_curvature_estimation[t[k].v[1]]);
-        out_mc_vertex.push_back((1.0f / area_mixed[t[k].v[1]]) * voronoi_region[t[k].v[1]] * normal_curvature_estimation[t[k].v[1]]);
+        out_mc_vertex.push_back((1.0f / area_mixed[t[k].v[1]]) * mean_curvature_vertex_sum[t[k].v[1]]);
+        out_mc_vertex.push_back((1.0f / area_mixed[t[k].v[1]]) * mean_curvature_vertex_sum[t[k].v[1]]);
 
-        out_mc_vertex.push_back((1.0f / area_mixed[t[k].v[2]]) * voronoi_region[t[k].v[2]] * normal_curvature_estimation[t[k].v[2]]);
-        out_mc_vertex.push_back((1.0f / area_mixed[t[k].v[2]]) * voronoi_region[t[k].v[2]] * normal_curvature_estimation[t[k].v[2]]);
+        out_mc_vertex.push_back((1.0f / area_mixed[t[k].v[2]]) * mean_curvature_vertex_sum[t[k].v[2]]);
+        out_mc_vertex.push_back((1.0f / area_mixed[t[k].v[2]]) * mean_curvature_vertex_sum[t[k].v[2]]);
         // -------------- end mean curvature per vertex --------------
 
         // insert vertices values in out_vertices
@@ -720,7 +718,7 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         // gc_vertex_size lenght = vertices
         gc_vertex_size.push_back(((2 * M_PI) - value_angle_defeact_sum[k]) / area_mixed[k]);
         mc_vertex_size_edge.push_back((1.0f / (2 * area_mixed[k])) * vector_mc_sum[k]);
-        mc_vertex_size_vertex.push_back((1.0f / area_mixed[k]) * voronoi_region[k] * normal_curvature_estimation[k]);
+        mc_vertex_size_vertex.push_back((1.0f / area_mixed[k]) * mean_curvature_vertex_sum[k]);
 
         // write in a file all values of Gaussian curvature
         // file_output << ((2 * M_PI) - value_angle_defeact_sum[k]) / area_mixed[k] << "\n";
@@ -749,11 +747,8 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
     area_mixed.clear();
     area_mixed.shrink_to_fit();
 
-    voronoi_region.clear();
-    voronoi_region.shrink_to_fit();
-
-    normal_curvature_estimation.clear();
-    normal_curvature_estimation.shrink_to_fit();
+    mean_curvature_vertex_sum.clear();
+    mean_curvature_vertex_sum.shrink_to_fit();
 
     // ----------------------------
 
