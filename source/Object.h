@@ -87,8 +87,8 @@ class Object
         cout << "MAX " << *max_element(triangle_mc_vertex.begin(), triangle_mc_vertex.end()) << endl;
         cout << "MIN " << *min_element(triangle_mc_vertex.begin(), triangle_mc_vertex.end()) << endl;
 
-        cout << "MAX2 " << *max_element(triangle_mc.begin(), triangle_mc.end()) << endl;
-        cout << "MIN2 " << *min_element(triangle_mc.begin(), triangle_mc.end()) << endl;
+        // cout << "MAX2 " << *max_element(triangle_mc.begin(), triangle_mc.end()) << endl;
+        // cout << "MIN2 " << *min_element(triangle_mc.begin(), triangle_mc.end()) << endl;
 
         vector<double> percentiles_gc = k_percentile_gc.init(triangle_gc_notduplicatevalue);
         best_min_gc = percentiles_gc[0];

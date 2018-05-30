@@ -73,7 +73,7 @@ vector<float> vector_mc_sum;
 // use the circumcenter point, and for each obtuse triangle, we use the midpoint
 // of the edge opposite to the obtuse angle
 vector<float> area_mixed;
-vector<float> mean_curvature_vertex_sum;
+vector<Point3d> mean_curvature_vertex_sum;
 
 // counter obtuse triangle and not-obtuse triangle
 int number_obtuse_triangle;
@@ -85,8 +85,8 @@ int number_non_obtuse_triangle;
 */
 Point3d get_rescaled_value(Point3d value)
 {
-    // return value; // TODO: need to remove afer
-    return interval / (max_coord - min_coord) * (value - max_coord) + 1; //1 is the max of interval
+    return value; // TODO: need to remove afer
+    // return interval / (max_coord - min_coord) * (value - max_coord) + 1; //1 is the max of interval
 }
 
 /**
@@ -186,6 +186,9 @@ void insert_edge(int index_v1, int index_v2, bool isCorrectOrder, Point3d n, dou
 
     if (it != map_edge.end()) // update information edge struct if exist
     {
+        // cout << "check " << isCorrectOrder << endl;
+        // cout << "first " << it->second.cot_alpha << endl;
+        // cout << "second " << it->second.cot_beta << endl;
         if (isCorrectOrder){ // means index_1 < index_2
             it->second.n1 = n;
             it->second.cot_alpha = get_cotangent(angle);
@@ -193,12 +196,12 @@ void insert_edge(int index_v1, int index_v2, bool isCorrectOrder, Point3d n, dou
             it->second.n2 = n;
             it->second.cot_beta = get_cotangent(angle);
         }
+        cout << "first " << it->second.cot_alpha << endl;
+        cout << "second " << it->second.cot_beta << endl;
 
+        // value mean curvature for mean curvature per edge H(E) = ||E|| * sin(theta/2)
         it->second.value_mean_curvature = it->second.norm_edge * sin(((it->second.n1).getAngle(it->second.n2)) / 2.0f);
         it->second.value_mean_curvature_2 = it->second.norm_edge * sin(((it->second.n2).getAngle(it->second.n1)) / 2.0f);
-        // vector_mc_sum[it->second.index_v1] += it->second.norm_edge * sin(((it->second.n1).getAngle(it->second.n2)) / 2.0f);
-        // TODO: should I decomment also  vector_mc_sum[it->second.index_v2]
-        // vector_mc_sum[it->second.index_v2] += it->second.norm_edge * sin(((it->second.n2).getAngle(it->second.n1)) / 2.0f);
     }
     else
     {                       // create new edge struct
@@ -209,14 +212,14 @@ void insert_edge(int index_v1, int index_v2, bool isCorrectOrder, Point3d n, dou
             e1.index_v1 = index_v1;
             e1.index_v2 = index_v2;
             e1.n1 = n;
-            it->second.cot_alpha = get_cotangent(angle);
+            e1.cot_alpha = get_cotangent(angle);
         }
         else
         { // reverse case
             e1.index_v1 = index_v2;
             e1.index_v2 = index_v1;
             e1.n2 = n;
-            it->second.cot_beta = get_cotangent(angle);
+            e1.cot_beta = get_cotangent(angle);
         }
 
         e1.norm_edge = (v[e1.index_v2] - v[e1.index_v1]).norm();
@@ -391,7 +394,7 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
     std::fill(vector_mc_sum.begin(), vector_mc_sum.end(), 0.0f);
 
     mean_curvature_vertex_sum.resize(num_vertices);
-    std:fill(mean_curvature_vertex_sum.begin(), mean_curvature_vertex_sum.end(), 0.0f);
+    std:fill(mean_curvature_vertex_sum.begin(), mean_curvature_vertex_sum.end(), Point3d(0.0f, 0.0f, 0.0f));
     // ----
 
     // -- initialize Gaussian curvature vectors --
@@ -472,32 +475,28 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         if (index_v1 < index_v2)
             isCorrectedOrder = true;
 
-        // angle is v1v3v2
-        insert_edge(index_v1, index_v2, isCorrectedOrder, n, angle_v0v2v1);
+        // angle is v1v2v0
+        // TODO: angle_v0v2v1 or -angle_v0v2v1
+        insert_edge(index_v1, index_v2, isCorrectedOrder, n, -angle_v0v2v1);
 
         isCorrectedOrder = false;
 
         if (index_v3 < index_v1)
             isCorrectedOrder = true;
 
-        // angle is v3v2v1
-        insert_edge(index_v3, index_v1, isCorrectedOrder, n, angle_v2v1v0);
+        // angle is v0v1v2
+        insert_edge(index_v3, index_v1, isCorrectedOrder, n, -angle_v2v1v0);
 
         isCorrectedOrder = false;
 
         if (index_v2 < index_v3)
             isCorrectedOrder = true;
 
-        // angle is v2v1v3
-        insert_edge(index_v2, index_v3, isCorrectedOrder, n, angle_v1v0v2);
-
-        // -------------- end mean curvature --------------
+        // angle is v2v0v1
+        insert_edge(index_v2, index_v3, isCorrectedOrder, n, -angle_v1v0v2);
 
         // -------------- end mean curvature edge --------------
 
-        // -------------- MEAN CURVATURE VERTEX --------------
-        // array of A_voronoi_region saved for each vertex
-        // TODO: -- fix normal_curvature_estimation
 
     }
 
@@ -528,10 +527,9 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
 
         // case vertex v0
         // insert value of edge v1v2
-
         vector<int> current_edge(2);
         bool isReversed = false;
-        if (t[k].v[1] <= t[k].v[2])
+        if (t[k].v[1] < t[k].v[2])
         {
             current_edge[0] = t[k].v[1];
             current_edge[1] = t[k].v[2];
@@ -558,18 +556,19 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
                 vector_mc_sum[current_edge[1]] = it->second.value_mean_curvature;
                 vector_mc_sum[current_edge[0]] = it->second.value_mean_curvature_2;
             }
-            // add value mean curvature vertex
-            //TODO: should be:
-        //     mean_curvature_vertex_sum[it->second.index_v1] += ((it->second.cot_alpha + it->second.cot_beta) * (v[it->second.index_v1] - v[it->second.index_v2]));
-        //     mean_curvature_vertex_sum[it->second.index_v2] += ((it->second.cot_alpha + it->second.cot_beta) * (v[it->second.index_v2] - v[it->second.index_v1]));
-            mean_curvature_vertex_sum[it->second.index_v1] += ((it->second.cot_alpha + it->second.cot_beta) * (get_distance_points(v[it->second.index_v2], v[it->second.index_v1])));
-            mean_curvature_vertex_sum[it->second.index_v2] += ((it->second.cot_alpha + it->second.cot_beta) * (get_distance_points(v[it->second.index_v1], v[it->second.index_v2])));
 
+            mean_curvature_vertex_sum[it->second.index_v2] += ((it->second.cot_alpha + it->second.cot_beta) * (v[it->second.index_v2] - v[it->second.index_v1]));
+            mean_curvature_vertex_sum[it->second.index_v1] += ((it->second.cot_alpha + it->second.cot_beta) * (v[it->second.index_v1] - v[it->second.index_v2]));
+
+            // // add value mean curvature vertex
+            // if(!it->second.cot_alpha || !it->second.cot_beta){
+            //     cout << "SHIIIIT " << endl;
+            // }
         }
 
         // case vertex v1
         // insert value of edge v0v2
-        if (t[k].v[0] <= t[k].v[2])
+        if (t[k].v[0] < t[k].v[2])
         {
             current_edge[0] = t[k].v[0];
             current_edge[1] = t[k].v[2];
@@ -590,6 +589,7 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
             {
                 vector_mc_sum[current_edge[0]] = it->second.value_mean_curvature;
                 vector_mc_sum[current_edge[1]] = it->second.value_mean_curvature_2;
+
             }
             else
             {
@@ -597,14 +597,13 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
                 vector_mc_sum[current_edge[0]] = it->second.value_mean_curvature_2;
             }
 
-            // add value mean curvature vertex
-            mean_curvature_vertex_sum[it->second.index_v1] += ((it->second.cot_alpha + it->second.cot_beta) * (get_distance_points(v[it->second.index_v2], v[it->second.index_v1])));
-            mean_curvature_vertex_sum[it->second.index_v2] += ((it->second.cot_alpha + it->second.cot_beta) * (get_distance_points(v[it->second.index_v1], v[it->second.index_v2])));
+            mean_curvature_vertex_sum[it->second.index_v2] += ((it->second.cot_alpha + it->second.cot_beta) * (v[it->second.index_v2] - v[it->second.index_v1]));
+            mean_curvature_vertex_sum[it->second.index_v1] += ((it->second.cot_alpha + it->second.cot_beta) * (v[it->second.index_v1] - v[it->second.index_v2]));
         }
 
         // case vertex v2
         // insert value of edge v0v1
-        if (t[k].v[0] <= t[k].v[1])
+        if (t[k].v[0] < t[k].v[1])
         {
             current_edge[0] = t[k].v[0];
             current_edge[1] = t[k].v[1];
@@ -625,15 +624,18 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
             {
                 vector_mc_sum[current_edge[0]] = it->second.value_mean_curvature;
                 vector_mc_sum[current_edge[1]] = it->second.value_mean_curvature_2;
+
+
             }
             else
             {
                 vector_mc_sum[current_edge[1]] = it->second.value_mean_curvature;
                 vector_mc_sum[current_edge[0]] = it->second.value_mean_curvature_2;
+
             }
-            // add value mean curvature vertex
-            mean_curvature_vertex_sum[it->second.index_v1] += ((it->second.cot_alpha + it->second.cot_beta) * (get_distance_points(v[it->second.index_v2], v[it->second.index_v1])));
-            mean_curvature_vertex_sum[it->second.index_v2] += ((it->second.cot_alpha + it->second.cot_beta) * (get_distance_points(v[it->second.index_v1], v[it->second.index_v2])));
+
+            mean_curvature_vertex_sum[it->second.index_v2] += ((it->second.cot_alpha + it->second.cot_beta) * (v[it->second.index_v2] - v[it->second.index_v1]));
+            mean_curvature_vertex_sum[it->second.index_v1] += ((it->second.cot_alpha + it->second.cot_beta) * (v[it->second.index_v1] - v[it->second.index_v2]));
         }
         // -------------- end mean curvature --------------
 
@@ -659,14 +661,14 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
 
         // Mean curvature as a quadrature
         // cout << (1.0f/area_mixed[t[k].v[0]]) * voronoi_region[t[k].v[0]] << endl;
-        out_mc_vertex.push_back((1.0f / area_mixed[t[k].v[0]]) * mean_curvature_vertex_sum[t[k].v[0]]);
-        out_mc_vertex.push_back((1.0f / area_mixed[t[k].v[0]]) * mean_curvature_vertex_sum[t[k].v[0]]);
+        out_mc_vertex.push_back( ( (1.0f / (2 * area_mixed[t[k].v[0]])) * mean_curvature_vertex_sum[t[k].v[0]]).norm() );
+        out_mc_vertex.push_back(((1.0f / (2 * area_mixed[t[k].v[0]])) * mean_curvature_vertex_sum[t[k].v[0]]).norm());
 
-        out_mc_vertex.push_back((1.0f / area_mixed[t[k].v[1]]) * mean_curvature_vertex_sum[t[k].v[1]]);
-        out_mc_vertex.push_back((1.0f / area_mixed[t[k].v[1]]) * mean_curvature_vertex_sum[t[k].v[1]]);
+        out_mc_vertex.push_back(((1.0f / (2 * area_mixed[t[k].v[1]])) * mean_curvature_vertex_sum[t[k].v[1]]).norm());
+        out_mc_vertex.push_back(((1.0f / (2 * area_mixed[t[k].v[1]])) * mean_curvature_vertex_sum[t[k].v[1]]).norm());
 
-        out_mc_vertex.push_back((1.0f / area_mixed[t[k].v[2]]) * mean_curvature_vertex_sum[t[k].v[2]]);
-        out_mc_vertex.push_back((1.0f / area_mixed[t[k].v[2]]) * mean_curvature_vertex_sum[t[k].v[2]]);
+        out_mc_vertex.push_back(((1.0f / (2 * area_mixed[t[k].v[2]])) * mean_curvature_vertex_sum[t[k].v[2]]).norm());
+        out_mc_vertex.push_back(((1.0f / (2 * area_mixed[t[k].v[2]])) * mean_curvature_vertex_sum[t[k].v[2]]).norm());
         // -------------- end mean curvature per vertex --------------
 
         // insert vertices values in out_vertices
@@ -718,7 +720,7 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         // gc_vertex_size lenght = vertices
         gc_vertex_size.push_back(((2 * M_PI) - value_angle_defeact_sum[k]) / area_mixed[k]);
         mc_vertex_size_edge.push_back((1.0f / (2 * area_mixed[k])) * vector_mc_sum[k]);
-        mc_vertex_size_vertex.push_back((1.0f / area_mixed[k]) * mean_curvature_vertex_sum[k]);
+        mc_vertex_size_vertex.push_back((((1.0f / (2 * area_mixed[k])) * mean_curvature_vertex_sum[k]).norm())/2.0f);
 
         // write in a file all values of Gaussian curvature
         // file_output << ((2 * M_PI) - value_angle_defeact_sum[k]) / area_mixed[k] << "\n";
