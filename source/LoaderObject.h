@@ -434,9 +434,9 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         v_counter[t[k].v[2]]++; // update counter for normals
 
         // fill map edges
-        int index_v1 = t[k].v[0];
-        int index_v2 = t[k].v[1];
-        int index_v3 = t[k].v[2];
+        int index_v0 = t[k].v[0];
+        int index_v1 = t[k].v[1];
+        int index_v2 = t[k].v[2];
         // -------------- GAUSSIAN CURVATURE --------------
         // calculate angle defeact for each vertex of triangle
         // vertex 1
@@ -463,43 +463,43 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         value_angle_defeact_sum[t[k].v[2]] += angle_v0v2v1;
 
         // find A_mixed (obtuse and not obtuse triangle)
-        calculate_A_mixed(k, index_v1, index_v2, index_v3, angle_v1v0v2, angle_v2v1v0, angle_v0v2v1);
-        calculate_A_mixed(k, index_v2, index_v1, index_v3, angle_v2v1v0, angle_v1v0v2, angle_v0v2v1);
-        calculate_A_mixed(k, index_v3, index_v1, index_v2, angle_v0v2v1, angle_v1v0v2, angle_v2v1v0);
+        calculate_A_mixed(k, index_v0, index_v1, index_v2, angle_v1v0v2, angle_v2v1v0, angle_v0v2v1);
+        calculate_A_mixed(k, index_v1, index_v0, index_v2, angle_v2v1v0, angle_v1v0v2, angle_v0v2v1);
+        calculate_A_mixed(k, index_v2, index_v0, index_v1, angle_v0v2v1, angle_v1v0v2, angle_v2v1v0);
 
         // if (!is_obtuse_angle(angle_v1v0v2) && !is_obtuse_angle(angle_v2v1v0) && !is_obtuse_angle(angle_v0v2v1)) // Triangle is not obtuse
         //     number_non_obtuse_triangle++;
         // else // triangle obtuse
         //     number_obtuse_triangle++;
 
-        // -------------- MEAN CURVATURE EDGE -------------- TODO: check the code
+        // -------------- MEAN CURVATURE EDGE --------------
         bool isCorrectedOrder = false;
 
-        if (index_v1 < index_v2)
+        if (index_v0 < index_v1)
             isCorrectedOrder = true;
 
         // angle is v1v2v0
-        // TODO: angle_v0v2v1 or -angle_v0v2v1
+        // angle_v0v2v1
         // edge v0v1
-        insert_edge(index_v1, index_v2, isCorrectedOrder, n, angle_v0v2v1);
+        insert_edge(index_v0, index_v1, isCorrectedOrder, n, angle_v0v2v1);
 
         isCorrectedOrder = false;
 
-        if (index_v3 < index_v1)
+        if (index_v2 < index_v0)
             isCorrectedOrder = true;
 
         // angle is v0v1v2
         // edge v2v0
-        insert_edge(index_v3, index_v1, isCorrectedOrder, n, angle_v2v1v0);
+        insert_edge(index_v2, index_v0, isCorrectedOrder, n, angle_v2v1v0);
 
         isCorrectedOrder = false;
 
-        if (index_v2 < index_v3)
+        if (index_v1 < index_v2)
             isCorrectedOrder = true;
 
         // angle is v2v0v1
         // edge v1v2
-        insert_edge(index_v2, index_v3, isCorrectedOrder, n, angle_v1v0v2);
+        insert_edge(index_v1, index_v2, isCorrectedOrder, n, angle_v1v0v2);
         // -------------- end mean curvature edge --------------
     }
 
