@@ -60,9 +60,10 @@ struct edge
     Point3d n1;
     Point3d n2;
     float value_mean_curvature;
-    float value_mean_curvature_2;
     float cot_alpha;
     float cot_beta;
+    float area_t1;
+    float area_t2;
 };
 
 // map for struct edge
@@ -86,8 +87,8 @@ int number_non_obtuse_triangle;
 */
 Point3d get_rescaled_value(Point3d value)
 {
-    return value; // TODO: need to remove afer
-    // return interval / (max_coord - min_coord) * (value - max_coord) + 1; //1 is the max of interval
+    // return value; // TODO: need to remove afer
+    return interval / (max_coord - min_coord) * (value - max_coord) + 1; //1 is the max of interval
 }
 
 /**
@@ -165,7 +166,7 @@ Point3d get_normal_edge(int index_v1, int index_v2)
 /**
  * Function to insert a struct edge inside edge-map.
  */
-void insert_edge(int index_v1, int index_v2, bool isCorrectOrder, Point3d n, double angle)
+void insert_edge(int index_v1, int index_v2, bool isCorrectOrder, Point3d n, double angle, double area_triangle)
 // FIXME: fix mean curvature, but that code seems to work correctly
 {
     vector<int> key(2);
@@ -191,19 +192,25 @@ void insert_edge(int index_v1, int index_v2, bool isCorrectOrder, Point3d n, dou
         { // means index_1 < index_2
             it->second.n1 = n;
             it->second.cot_alpha = get_cotangent(angle);
+            it->second.area_t1 = area_triangle;
         }
         else
         {
             it->second.n2 = n;
             it->second.cot_beta = get_cotangent(angle);
+            it->second.area_t2 = area_triangle;
         }
 
         // value mean curvature for mean curvature per edge H(E) = ||E|| * sin(theta/2)
-        it->second.value_mean_curvature = it->second.norm_edge * sin(((it->second.n1).getAngle(it->second.n2)) / 2.0f);
-        it->second.value_mean_curvature_2 = it->second.norm_edge * sin(((it->second.n2).getAngle(it->second.n1)) / 2.0f);
+        float value = it->second.norm_edge * ((it->second.n1).getAngle(it->second.n2) / 2.0f);
+        float normalized_value = value / ((it->second.area_t1 + it->second.area_t2)/2.0f);// divide the value by edge area (1/2 * (area triangles))
+        if(it->second.n2 * it->second.n1 < 0) // negative value
+            it->second.value_mean_curvature = (-1) * normalized_value;
+        else
+            it->second.value_mean_curvature = normalized_value;
     }
     else
-    {                       // create new edge struct
+    {    // create new edge struct
         edge e1;            // struct
         if (isCorrectOrder) // index_v1 < index_v2
         {
@@ -212,6 +219,7 @@ void insert_edge(int index_v1, int index_v2, bool isCorrectOrder, Point3d n, dou
             e1.index_v2 = index_v2;
             e1.n1 = n;
             e1.cot_alpha = get_cotangent(angle);
+            e1.area_t1 = area_triangle;
         }
         else
         { // reverse case
@@ -219,6 +227,7 @@ void insert_edge(int index_v1, int index_v2, bool isCorrectOrder, Point3d n, dou
             e1.index_v2 = index_v1;
             e1.n2 = n;
             e1.cot_beta = get_cotangent(angle);
+            e1.area_t2 = area_triangle;
         }
 
         e1.norm_edge = (v[e1.index_v2] - v[e1.index_v1]).norm();
@@ -244,9 +253,8 @@ void insert_values_mean_curvature(int index_1, int index_2, int opposite_index)
 
         if (it != map_edge.end())
         {
-
             // update mean curvature values per edge
-            vector_mc_sum[opposite_index] = it->second.value_mean_curvature; // TODO: correct it!!!!!!!!!
+            vector_mc_sum[opposite_index] += it->second.value_mean_curvature;
 
             // update mean curvature values per vertex
             mean_curvature_vertex_sum[it->second.index_v2] += (it->second.cot_alpha + it->second.cot_beta) * (v[it->second.index_v2] - v[it->second.index_v1]);
@@ -265,9 +273,8 @@ void insert_values_mean_curvature(int index_1, int index_2, int opposite_index)
 
         if (it != map_edge.end())
         {
-
             // update mean curvature values per edge
-            vector_mc_sum[opposite_index] = it->second.value_mean_curvature_2; // TODO: correct it!!!!!!!!! (or opposite value - convex and concav)
+            vector_mc_sum[opposite_index] += it->second.value_mean_curvature;
         }
         else
         {
@@ -520,6 +527,8 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         //     number_obtuse_triangle++;
 
         // -------------- MEAN CURVATURE EDGE --------------
+        float area_triangle = get_area_triangle(k);
+
         bool isCorrectedOrder = false;
 
         if (index_v0 < index_v1)
@@ -528,7 +537,7 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         // angle is v1v2v0
         // angle_v0v2v1
         // edge v0v1
-        insert_edge(index_v0, index_v1, isCorrectedOrder, n, angle_v0v2v1);
+        insert_edge(index_v0, index_v1, isCorrectedOrder, n, angle_v0v2v1, area_triangle);
 
         isCorrectedOrder = false;
 
@@ -537,7 +546,7 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
 
         // angle is v0v1v2
         // edge v2v0
-        insert_edge(index_v2, index_v0, isCorrectedOrder, n, angle_v2v1v0);
+        insert_edge(index_v2, index_v0, isCorrectedOrder, n, angle_v2v1v0, area_triangle);
 
         isCorrectedOrder = false;
 
@@ -546,7 +555,7 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
 
         // angle is v2v0v1
         // edge v1v2
-        insert_edge(index_v1, index_v2, isCorrectedOrder, n, angle_v1v0v2);
+        insert_edge(index_v1, index_v2, isCorrectedOrder, n, angle_v1v0v2, area_triangle);
         // -------------- end mean curvature edge --------------
     }
 

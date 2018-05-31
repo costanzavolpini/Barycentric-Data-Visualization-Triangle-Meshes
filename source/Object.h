@@ -82,12 +82,15 @@ class Object
             cout << "error loading file" << endl;
             return;
         }
+
+        cout << _path << endl;
     }
 
     // Function to initialize VBO and VAO
     // name file and the second it is the method gc
     void init()
     {
+        cout << "min " << *min_element(triangle_mc_vertex.begin(), triangle_mc_vertex.end()) << " max " << *max_element(triangle_mc_vertex.begin(), triangle_mc_vertex.end()) << endl;
         // cout << "MAX2 " << *max_element(triangle_mc.begin(), triangle_mc.end()) << endl;
         // cout << "MIN2 " << *min_element(triangle_mc.begin(), triangle_mc.end()) << endl;
 
