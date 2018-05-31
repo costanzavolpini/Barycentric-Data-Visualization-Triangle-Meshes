@@ -123,7 +123,7 @@ int imgui_isGouraudShading;
 int imgui_isFlatShading;
 int imgui_isMeanCurvatureEdgeShading;
 int imgui_isMeanCurvatureVertexShading;
-string name_file = "models/armadillo.off"; //default armadillo
+string name_file = "models/icosahedron_0.off"; //default armadillo
 
 float min_val, max_val;
 
@@ -627,9 +627,9 @@ void set_parameters_shader(int selected_shader)
     {
 
     case 0: // flat shading
-        vertex_shader = "vertexShaderFS.vs";
-        fragment_shader = "fragmentShaderFS.fs";
-        geometry_shader = "geometryShaderFS.gs";
+        vertex_shader = "vertexShader.vs";
+        fragment_shader = "maxDiagramFragmentShader.fs";
+        geometry_shader = "geometryShader.gs";
 
         imgui_isFlatShading = 1;
         break;

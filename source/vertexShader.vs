@@ -12,7 +12,6 @@
     };
 
     out vec4 color;
-    flat out vec4 color_flat;
 
     uniform mat4 model;
     uniform mat4 view;
@@ -21,8 +20,6 @@
     uniform vec3 view_position;
     uniform Light light;
     uniform float shininess;
-
-    uniform bool isFlat;
 
 
     // get specular color at current Pos
@@ -62,16 +59,14 @@
 
 
     void main() {
+
         vec3 world_position = vec3(model * vec4(aPos, 1.0));
         vec3 world_normal = mat3(transpose(inverse(model))) * aNormal;
 
         vec3 light_pos = vec3(projection * vec4(light.position, 1.0));
 
 
-        if(isFlat)
-            color_flat = get_result_color_lighting(world_position, world_normal, light_pos); // color obtained with lighting calculations
-        else
-            color = get_result_color_lighting(world_position, world_normal, light_pos); // color obtained with lighting calculations
+        color = get_result_color_lighting(world_position, world_normal, light_pos); // color obtained with lighting calculations
 
         gl_Position = projection * view * model * vec4(aPos, 1.0);
     }
