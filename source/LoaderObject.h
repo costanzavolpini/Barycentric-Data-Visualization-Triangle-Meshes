@@ -372,7 +372,7 @@ bool read_off_file(const char *path)
 /**
  * Function to load the mesh, find Gaussian Curvature, Mean Curvature...etc.
 */
-bool load(const char *path, vector<float> &out_vertices, vector<float> &out_normals, vector<float> &out_gc, vector<float> &out_mc, vector<float> &out_mc_vertex, vector<float> &gc_vertex_size, vector<float> &mc_vertex_size_edge, vector<float> &mc_vertex_size_vertex)
+bool load(const char *path, vector<float> &out_vertices, vector<float> &out_normals, vector<float> &out_normals_triangle, vector<float> &out_gc, vector<float> &out_mc, vector<float> &out_mc_vertex, vector<float> &gc_vertex_size, vector<float> &mc_vertex_size_edge, vector<float> &mc_vertex_size_vertex)
 {
     // --------------------- Read file -----------------------------
     if (!read_off_file(path))
@@ -659,20 +659,20 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         out_normals.push_back(normals[t[k].v[2]].y());
         out_normals.push_back(normals[t[k].v[2]].z());
 
-        // TODO: normals flat shading
-        // out_normals.push_back(t[k].n.x());
-        // out_normals.push_back(t[k].n.y());
-        // out_normals.push_back(t[k].n.z());
+        // normals flat shading
+        out_normals_triangle.push_back(t[k].n.x());
+        out_normals_triangle.push_back(t[k].n.y());
+        out_normals_triangle.push_back(t[k].n.z());
 
 
-        // out_normals.push_back(t[k].n.x());
-        // out_normals.push_back(t[k].n.y());
-        // out_normals.push_back(t[k].n.z());
+        out_normals_triangle.push_back(t[k].n.x());
+        out_normals_triangle.push_back(t[k].n.y());
+        out_normals_triangle.push_back(t[k].n.z());
 
 
-        // out_normals.push_back(t[k].n.x());
-        // out_normals.push_back(t[k].n.y());
-        // out_normals.push_back(t[k].n.z());
+        out_normals_triangle.push_back(t[k].n.x());
+        out_normals_triangle.push_back(t[k].n.y());
+        out_normals_triangle.push_back(t[k].n.z());
 
         // insert mean value into vector
         out_mc.push_back((vector_mc_sum[t[k].v[0]]) / (2.0f * area_mixed[t[k].v[0]]));

@@ -628,7 +628,7 @@ void set_parameters_shader(int selected_shader)
 
     case 0: // flat shading
         vertex_shader = "vertexShader.vs";
-        fragment_shader = "maxDiagramFragmentShader.fs";
+        fragment_shader = "barycenterFragmentShader.fs";
         geometry_shader = "geometryShader.gs";
 
         imgui_isFlatShading = 1;
@@ -641,6 +641,15 @@ void set_parameters_shader(int selected_shader)
 
         imgui_isExtendFlatShading = 1;
         break;
+
+
+        // Alternative effect (normal triangle + max diagram) -- Decomment if you want to see it
+        // vertex_shader = "vertexShader.vs";
+        // geometry_shader = "geometryShader.gs";
+        // fragment_shader = "maxDiagramFragmentShader.fs";
+        // imgui_isFlatShading = 1;
+        // imgui_isExtendFlatShading = 0;
+        // break;
 
         // ---------
 
