@@ -254,8 +254,8 @@ void insert_values_mean_curvature(int index_1, int index_2, int opposite_index)
             vector_mc_sum[opposite_index] = it->second.value_mean_curvature; // TODO: correct it!!!!!!!!!
 
             // update mean curvature values per vertex
-            mean_curvature_vertex_sum[it->second.index_v2] += ((it->second.cot_alpha + it->second.cot_beta) * (v[it->second.index_v2] - v[it->second.index_v1]));
-            mean_curvature_vertex_sum[it->second.index_v1] += ((it->second.cot_alpha + it->second.cot_beta) * (v[it->second.index_v1] - v[it->second.index_v2]));
+            mean_curvature_vertex_sum[it->second.index_v2] += (it->second.cot_alpha + it->second.cot_beta) * (v[it->second.index_v2] - v[it->second.index_v1]);
+            mean_curvature_vertex_sum[it->second.index_v1] += (it->second.cot_alpha + it->second.cot_beta) * (v[it->second.index_v1] - v[it->second.index_v2]);
         }
         else
         {
@@ -556,6 +556,18 @@ std:
         // -------------- end mean curvature edge --------------
     }
 
+    // normals
+    // normalize every vertex normal
+    // average of norms of adj triangle of a vertex (sum of triangle norms / number of triangles)
+    for (int k = 0; k < num_vertices; k++)
+    {
+        if (v_counter[k] != 0)
+        {
+            normals[k] = normals[k] / v_counter[k];
+        }
+        normals[k].normalize();
+    }
+
     // fill out_gc vector
     // k_G = (2PI - sum_angle_defeact)/A_mixed
     for (int k = 0; k < num_triangles; k++)
@@ -596,38 +608,38 @@ std:
         // -------------- end mean curvature --------------
     }
 
-    // normals
-    // normalize every vertex normal
-    // average of norms of adj triangle of a vertex (sum of triangle norms / number of triangles)
-    for (int k = 0; k < num_vertices; k++)
-    {
-        if (v_counter[k] != 0)
-        {
-            normals[k] = normals[k] / v_counter[k];
-        }
-        normals[k].normalize();
-    }
-
     // output vectors
     //For each vertex of each triangle
     for (unsigned int k = 0; k < num_triangles; k++)
     {
-        // Mean curvature as a quadrature
-        // cout << (1.0f/area_mixed[t[k].v[0]]) * voronoi_region[t[k].v[0]] << endl;
-        out_mc_vertex.push_back((((1.0f / (2 * area_mixed[t[k].v[0]])) * mean_curvature_vertex_sum[t[k].v[0]]).norm()) / 2.0f);
-        out_mc_vertex.push_back((((1.0f / (2 * area_mixed[t[k].v[0]])) * mean_curvature_vertex_sum[t[k].v[0]]).norm()) / 2.0f);
+        // Mean curvature per vertex
+        // vertex 0
+        float current_mean_curvature_value = (((1.0f / (2 * area_mixed[t[k].v[0]])) * mean_curvature_vertex_sum[t[k].v[0]]).norm()) / 2.0f;
 
-        cout << ((((1.0f / (2 * area_mixed[t[k].v[0]])) * mean_curvature_vertex_sum[t[k].v[0]]).norm()) / 2.0f) << endl;
+        if(mean_curvature_vertex_sum[t[k].v[0]] * normals[t[k].v[0]] < 0)
+            current_mean_curvature_value = (- 1) * current_mean_curvature_value;
 
-        out_mc_vertex.push_back((((1.0f / (2 * area_mixed[t[k].v[1]])) * mean_curvature_vertex_sum[t[k].v[1]]).norm()) / 2.0f);
-        out_mc_vertex.push_back((((1.0f / (2 * area_mixed[t[k].v[1]])) * mean_curvature_vertex_sum[t[k].v[1]]).norm()) / 2.0f);
+        out_mc_vertex.push_back(current_mean_curvature_value);
+        out_mc_vertex.push_back(current_mean_curvature_value);
 
-        cout << ((((1.0f / (2 * area_mixed[t[k].v[1]])) * mean_curvature_vertex_sum[t[k].v[1]]).norm()) / 2.0f) << endl;
+        // vertex 1
+        current_mean_curvature_value = (((1.0f / (2 * area_mixed[t[k].v[1]])) * mean_curvature_vertex_sum[t[k].v[1]]).norm()) / 2.0f;
 
-        out_mc_vertex.push_back((((1.0f / (2 * area_mixed[t[k].v[2]])) * mean_curvature_vertex_sum[t[k].v[2]]).norm()) / 2.0f);
-        out_mc_vertex.push_back((((1.0f / (2 * area_mixed[t[k].v[2]])) * mean_curvature_vertex_sum[t[k].v[2]]).norm()) / 2.0f);
+        if(mean_curvature_vertex_sum[t[k].v[1]] * normals[t[k].v[1]] < 0)
+            current_mean_curvature_value = (- 1) * current_mean_curvature_value;
 
-        cout << ((((1.0f / (2 * area_mixed[t[k].v[2]])) * mean_curvature_vertex_sum[t[k].v[2]]).norm()) / 2.0f) << endl;
+        out_mc_vertex.push_back(current_mean_curvature_value);
+        out_mc_vertex.push_back(current_mean_curvature_value);
+
+
+        // vertex 2
+        current_mean_curvature_value = (((1.0f / (2 * area_mixed[t[k].v[2]])) * mean_curvature_vertex_sum[t[k].v[2]]).norm()) / 2.0f;
+
+        if(mean_curvature_vertex_sum[t[k].v[2]] * normals[t[k].v[2]] < 0)
+            current_mean_curvature_value = (- 1) * current_mean_curvature_value;
+
+        out_mc_vertex.push_back(current_mean_curvature_value);
+        out_mc_vertex.push_back(current_mean_curvature_value);
 
         // -------------- end mean curvature per vertex --------------
 
@@ -695,7 +707,14 @@ std:
         // gc_vertex_size lenght = vertices
         gc_vertex_size.push_back(((2 * M_PI) - value_angle_defeact_sum[k]) / area_mixed[k]);
         mc_vertex_size_edge.push_back((1.0f / (2 * area_mixed[k])) * vector_mc_sum[k]);
-        mc_vertex_size_vertex.push_back((((1.0f / (2 * area_mixed[k])) * mean_curvature_vertex_sum[k]).norm()) / 2.0f);
+
+
+        float current_mean_curvature_value = (((1.0f / (2 * area_mixed[k])) * mean_curvature_vertex_sum[k]).norm()) / 2.0f;
+
+        if(mean_curvature_vertex_sum[k] * normals[k] < 0)
+            current_mean_curvature_value = (- 1) * current_mean_curvature_value;
+
+        mc_vertex_size_vertex.push_back(current_mean_curvature_value);
         // write in a file all values of Gaussian curvature
         // file_output << ((2 * M_PI) - value_angle_defeact_sum[k]) / area_mixed[k] << "\n";
     }
