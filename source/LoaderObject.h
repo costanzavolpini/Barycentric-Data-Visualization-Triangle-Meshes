@@ -59,6 +59,7 @@ struct edge
     int index_v2;
     Point3d n1;
     Point3d n2;
+    Point3d n_edge;
     float value_mean_curvature;
     float cot_alpha;
     float cot_beta;
@@ -204,10 +205,14 @@ void insert_edge(int index_v1, int index_v2, bool isCorrectOrder, Point3d n, dou
         // value mean curvature for mean curvature per edge H(E) = ||E|| * sin(theta/2)
         float value = it->second.norm_edge * ((it->second.n1).getAngle(it->second.n2) / 2.0f);
         float normalized_value = value / ((it->second.area_t1 + it->second.area_t2)/2.0f);// divide the value by edge area (1/2 * (area triangles))
-        if(it->second.n2 * it->second.n1 < 0) // negative value
-            it->second.value_mean_curvature = (-1) * normalized_value;
-        else
+        // if(it->second.n2 * it->second.n1 < 0) // negative value
+        //     it->second.value_mean_curvature = (-1) * normalized_value;
+        // else
             it->second.value_mean_curvature = normalized_value;
+
+        Point3d normal_edge = it->second.n1 + it->second.n2;
+        normal_edge.normalize();
+        it->second.n_edge = normal_edge;
     }
     else
     {    // create new edge struct
@@ -688,18 +693,75 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         out_normals_triangle.push_back(t[k].n.y());
         out_normals_triangle.push_back(t[k].n.z());
 
-        // insert mean value into vector
-        out_mc.push_back((vector_mc_sum[t[k].v[0]]) / (2.0f * area_mixed[t[k].v[0]]));
-        out_mc.push_back((vector_mc_sum[t[k].v[0]]) / (2.0f * area_mixed[t[k].v[0]]));
-        out_mc.push_back((vector_mc_sum[t[k].v[0]]) / (2.0f * area_mixed[t[k].v[0]]));
+        // ------ insert mean value per edge into vector ---------
+        std::map<vector<int>, edge>::iterator it; // iterator
 
-        out_mc.push_back((vector_mc_sum[t[k].v[1]]) / (2.0f * area_mixed[t[k].v[1]]));
-        out_mc.push_back((vector_mc_sum[t[k].v[1]]) / (2.0f * area_mixed[t[k].v[1]]));
-        out_mc.push_back((vector_mc_sum[t[k].v[1]]) / (2.0f * area_mixed[t[k].v[1]]));
+        // case vertex v0
+        // edge v1v2
+        if (t[k].v[1] < t[k].v[2]){
+            it = map_edge.find({t[k].v[1], t[k].v[2]});
+        } else{
+            it = map_edge.find({t[k].v[2], t[k].v[1]});
+        }
 
-        out_mc.push_back((vector_mc_sum[t[k].v[2]]) / (2.0f * area_mixed[t[k].v[2]]));
-        out_mc.push_back((vector_mc_sum[t[k].v[2]]) / (2.0f * area_mixed[t[k].v[2]]));
-        out_mc.push_back((vector_mc_sum[t[k].v[2]]) / (2.0f * area_mixed[t[k].v[2]]));
+        current_mean_curvature_value = ((vector_mc_sum[t[k].v[0]]) / (2.0f * area_mixed[t[k].v[0]]));
+
+        if(it->second.n_edge * normals[t[k].v[0]] < 0){
+            current_mean_curvature_value = (-1) * current_mean_curvature_value;
+        }
+
+        out_mc.push_back(current_mean_curvature_value);
+        out_mc.push_back(current_mean_curvature_value);
+        out_mc.push_back(current_mean_curvature_value);
+
+
+        // case vertex v1
+        // insert value of edge v2v0
+        if (t[k].v[2] < t[k].v[0]){
+            it = map_edge.find({t[k].v[2], t[k].v[0]});
+        } else{
+            it = map_edge.find({t[k].v[0], t[k].v[2]});
+        }
+
+        current_mean_curvature_value = ((vector_mc_sum[t[k].v[1]]) / (2.0f * area_mixed[t[k].v[1]]));
+
+        if(it->second.n_edge * normals[t[k].v[1]] < 0){
+            current_mean_curvature_value = (-1) * current_mean_curvature_value;
+        }
+
+        out_mc.push_back(current_mean_curvature_value);
+        out_mc.push_back(current_mean_curvature_value);
+        out_mc.push_back(current_mean_curvature_value);
+
+        // case vertex v2
+        // insert value of edge v0v1
+        if (t[k].v[0] < t[k].v[1]){
+            it = map_edge.find({t[k].v[0], t[k].v[1]});
+        } else{
+            it = map_edge.find({t[k].v[1], t[k].v[0]});
+        }
+
+        current_mean_curvature_value = ((vector_mc_sum[t[k].v[2]]) / (2.0f * area_mixed[t[k].v[2]]));
+
+        if(it->second.n_edge * normals[t[k].v[2]] < 0){
+            current_mean_curvature_value = (-1) * current_mean_curvature_value;
+        }
+
+        out_mc.push_back(current_mean_curvature_value);
+        out_mc.push_back(current_mean_curvature_value);
+        out_mc.push_back(current_mean_curvature_value);
+
+        // out_mc.push_back((vector_mc_sum[t[k].v[0]]) / (2.0f * area_mixed[t[k].v[0]]));
+        // out_mc.push_back((vector_mc_sum[t[k].v[0]]) / (2.0f * area_mixed[t[k].v[0]]));
+        // out_mc.push_back((vector_mc_sum[t[k].v[0]]) / (2.0f * area_mixed[t[k].v[0]]));
+
+        // out_mc.push_back((vector_mc_sum[t[k].v[1]]) / (2.0f * area_mixed[t[k].v[1]]));
+        // out_mc.push_back((vector_mc_sum[t[k].v[1]]) / (2.0f * area_mixed[t[k].v[1]]));
+        // out_mc.push_back((vector_mc_sum[t[k].v[1]]) / (2.0f * area_mixed[t[k].v[1]]));
+
+        // out_mc.push_back((vector_mc_sum[t[k].v[2]]) / (2.0f * area_mixed[t[k].v[2]]));
+        // out_mc.push_back((vector_mc_sum[t[k].v[2]]) / (2.0f * area_mixed[t[k].v[2]]));
+        // out_mc.push_back((vector_mc_sum[t[k].v[2]]) / (2.0f * area_mixed[t[k].v[2]]));
     }
 
     cout << map_edge.size() << endl;
