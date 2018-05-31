@@ -123,7 +123,7 @@ int imgui_isGouraudShading;
 int imgui_isFlatShading;
 int imgui_isMeanCurvatureEdgeShading;
 int imgui_isMeanCurvatureVertexShading;
-string name_file = "models/icosahedron_0.off"; //default armadillo
+string name_file = "models/armadillo.off"; //default armadillo
 
 float min_val, max_val;
 
@@ -271,8 +271,7 @@ int main(int argc, char *argv[])
             ourShader.setFloat("min_curvature", object.get_best_values_mc()[0]);
             ourShader.setFloat("max_curvature", object.get_best_values_mc()[1]);
 
-        } else if(imgui_isMeanCurvatureVertexShading){
-            // TODO: mean curvature not working!
+        } else if(imgui_isMeanCurvatureVertexShading) {
             ourShader.setBool("isGaussian", false);
             ourShader.setBool("isMeanCurvatureEdge", false);
             ourShader.setFloat("min_curvature", object.get_best_values_mc_vertex()[0]);
@@ -688,7 +687,7 @@ void set_parameters_shader(int selected_shader)
         imgui_isMeanCurvatureVertexShading = 1;
         break;
 
-    default: // gaussian curvature (3)
+    default: // gaussian curvature (constant color)
         vertex_shader = "vertexShaderCurvature.vs";
         fragment_shader = "maxDiagramFragmentShader.fs";
         geometry_shader = "geometryShader.gs";

@@ -187,9 +187,6 @@ void insert_edge(int index_v1, int index_v2, bool isCorrectOrder, Point3d n, dou
 
     if (it != map_edge.end()) // update information edge struct if exist
     {
-        // cout << "check " << isCorrectOrder << endl;
-        // cout << "first " << it->second.cot_alpha << endl;
-        // cout << "second " << it->second.cot_beta << endl;
         if (isCorrectOrder)
         { // means index_1 < index_2
             it->second.n1 = n;
@@ -200,8 +197,6 @@ void insert_edge(int index_v1, int index_v2, bool isCorrectOrder, Point3d n, dou
             it->second.n2 = n;
             it->second.cot_beta = get_cotangent(angle);
         }
-        cout << "first " << it->second.cot_alpha << endl;
-        cout << "second " << it->second.cot_beta << endl;
 
         // value mean curvature for mean curvature per edge H(E) = ||E|| * sin(theta/2)
         it->second.value_mean_curvature = it->second.norm_edge * sin(((it->second.n1).getAngle(it->second.n2)) / 2.0f);
@@ -448,8 +443,7 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
     std::fill(vector_mc_sum.begin(), vector_mc_sum.end(), 0.0f);
 
     mean_curvature_vertex_sum.resize(num_vertices);
-std:
-    fill(mean_curvature_vertex_sum.begin(), mean_curvature_vertex_sum.end(), Point3d(0.0f, 0.0f, 0.0f));
+    std::fill(mean_curvature_vertex_sum.begin(), mean_curvature_vertex_sum.end(), Point3d(0.0f, 0.0f, 0.0f));
     // ----
 
     // -- initialize Gaussian curvature vectors --
@@ -621,6 +615,7 @@ std:
 
         out_mc_vertex.push_back(current_mean_curvature_value);
         out_mc_vertex.push_back(current_mean_curvature_value);
+        out_mc_vertex.push_back(current_mean_curvature_value);
 
         // vertex 1
         current_mean_curvature_value = (((1.0f / (2 * area_mixed[t[k].v[1]])) * mean_curvature_vertex_sum[t[k].v[1]]).norm()) / 2.0f;
@@ -628,6 +623,7 @@ std:
         if(mean_curvature_vertex_sum[t[k].v[1]] * normals[t[k].v[1]] < 0)
             current_mean_curvature_value = (- 1) * current_mean_curvature_value;
 
+        out_mc_vertex.push_back(current_mean_curvature_value);
         out_mc_vertex.push_back(current_mean_curvature_value);
         out_mc_vertex.push_back(current_mean_curvature_value);
 
@@ -638,6 +634,7 @@ std:
         if(mean_curvature_vertex_sum[t[k].v[2]] * normals[t[k].v[2]] < 0)
             current_mean_curvature_value = (- 1) * current_mean_curvature_value;
 
+        out_mc_vertex.push_back(current_mean_curvature_value);
         out_mc_vertex.push_back(current_mean_curvature_value);
         out_mc_vertex.push_back(current_mean_curvature_value);
 

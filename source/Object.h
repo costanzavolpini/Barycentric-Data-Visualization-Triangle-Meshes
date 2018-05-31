@@ -88,9 +88,6 @@ class Object
     // name file and the second it is the method gc
     void init()
     {
-        cout << "MAX " << *max_element(triangle_mc_vertex.begin(), triangle_mc_vertex.end()) << endl;
-        cout << "MIN " << *min_element(triangle_mc_vertex.begin(), triangle_mc_vertex.end()) << endl;
-
         // cout << "MAX2 " << *max_element(triangle_mc.begin(), triangle_mc.end()) << endl;
         // cout << "MIN2 " << *min_element(triangle_mc.begin(), triangle_mc.end()) << endl;
 
@@ -105,8 +102,6 @@ class Object
         vector<double> percentiles_mc_vertex = k_percentile_mc_vertex.init(triangle_mc_vertex_notduplicatevalue);
         best_min_mc_vertex = percentiles_mc_vertex[0];
         best_max_mc_vertex = percentiles_mc_vertex[1];
-        // modify_mc_temp();
-        // triangle_mc = triangle_mc_modified_auto; //FIXME: if this is removed then use: vec4(hsv2rgb(interpolation(green, blue, min(val/max_mc, 1.0))), 1.0); into the vertexShaderMC
 
         // ------------- VBO -------------
         // Use VBO to avoid to send data vertex at a time (we send everything together)
