@@ -7,21 +7,21 @@ out vec4 fragColor;
 void main()
 {
 		if (coords[0] > coords[1]) {
-			if (coords[0] > coords[2]) {
+			if (coords[0] > coords[2]) { // 0 > 1 && 0 > 2
 				// fragColor = vec4(1.0, 0.0, 0.0, 1.0);
 				fragColor = wedge_color[0];
 			}
-			else {
+			else { // 0 > 1 && 2 > 0 --> 2 > 0 > 1
 				// fragColor = vec4(0.0, 0.0, 1.0, 1.0);
 				fragColor = wedge_color[2];
 			}
 		}
 		else {
-			if (coords[1] > coords[2]) {
+			if (coords[1] > coords[2]) { // 1 > 0 && 1 > 2
 				// fragColor = vec4(0.0, 1.0, 0.0, 1.0);
 				fragColor = wedge_color[1];
 			}
-			else {
+			else { // 1 > 0 && 1 < 2 --> 2 > 1 > 0
 				// fragColor = vec4(0.0, 0.0, 1.0, 1.0);
 				fragColor = wedge_color[2];
 			}
