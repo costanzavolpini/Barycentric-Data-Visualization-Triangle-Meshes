@@ -219,6 +219,7 @@ void insert_edge(int index_v1, int index_v2, bool isCorrectOrder, Point3d n, dou
             it->second.value_mean_curvature = (-1) * normalized_value;
         else
             it->second.value_mean_curvature = normalized_value;
+
     }
     else
     {    // create new edge struct
@@ -700,17 +701,74 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         out_normals_triangle.push_back(t[k].n.z());
 
         // ------ insert mean value per edge into vector ---------
-        out_mc.push_back((vector_mc_sum[t[k].v[0]]) / (2.0f * area_mixed[t[k].v[0]]));
-        out_mc.push_back((vector_mc_sum[t[k].v[0]]) / (2.0f * area_mixed[t[k].v[0]]));
-        out_mc.push_back((vector_mc_sum[t[k].v[0]]) / (2.0f * area_mixed[t[k].v[0]]));
+        // edge 0 : v1v2
+        // edge 1 : v2v0
+        // edge 2: v0v1
 
-        out_mc.push_back((vector_mc_sum[t[k].v[1]]) / (2.0f * area_mixed[t[k].v[1]]));
-        out_mc.push_back((vector_mc_sum[t[k].v[1]]) / (2.0f * area_mixed[t[k].v[1]]));
-        out_mc.push_back((vector_mc_sum[t[k].v[1]]) / (2.0f * area_mixed[t[k].v[1]]));
+        std::map<vector<int>, edge>::iterator it; // iterator
+        it = map_edge.find({t[k].v[1], t[k].v[2]});
+        if(it != map_edge.end()){
+            out_mc.push_back((it->second.value_mean_curvature));
+            out_mc.push_back((it->second.value_mean_curvature));
+            out_mc.push_back((it->second.value_mean_curvature));
+            mc_vertex_size_edge.push_back((it->second.value_mean_curvature));
+        }
 
-        out_mc.push_back((vector_mc_sum[t[k].v[2]]) / (2.0f * area_mixed[t[k].v[2]]));
-        out_mc.push_back((vector_mc_sum[t[k].v[2]]) / (2.0f * area_mixed[t[k].v[2]]));
-        out_mc.push_back((vector_mc_sum[t[k].v[2]]) / (2.0f * area_mixed[t[k].v[2]]));
+        it = map_edge.find({t[k].v[2], t[k].v[1]});
+        if(it != map_edge.end()){
+            out_mc.push_back((it->second.value_mean_curvature));
+            out_mc.push_back((it->second.value_mean_curvature));
+            out_mc.push_back((it->second.value_mean_curvature));
+            mc_vertex_size_edge.push_back((it->second.value_mean_curvature));
+        }
+
+it = map_edge.find({t[k].v[2], t[k].v[0]});
+        if(it != map_edge.end()){
+            out_mc.push_back((it->second.value_mean_curvature));
+            out_mc.push_back((it->second.value_mean_curvature));
+            out_mc.push_back((it->second.value_mean_curvature));
+            mc_vertex_size_edge.push_back((it->second.value_mean_curvature));
+        }
+
+        it = map_edge.find({t[k].v[0], t[k].v[2]});
+        if(it != map_edge.end()){
+            out_mc.push_back((it->second.value_mean_curvature));
+            out_mc.push_back((it->second.value_mean_curvature));
+            out_mc.push_back((it->second.value_mean_curvature));
+            mc_vertex_size_edge.push_back((it->second.value_mean_curvature));
+        }
+
+it = map_edge.find({t[k].v[0], t[k].v[1]});
+        if(it != map_edge.end()){
+            out_mc.push_back((it->second.value_mean_curvature));
+            out_mc.push_back((it->second.value_mean_curvature));
+            out_mc.push_back((it->second.value_mean_curvature));
+            mc_vertex_size_edge.push_back((it->second.value_mean_curvature));
+        }
+
+        it = map_edge.find({t[k].v[1], t[k].v[0]});
+        if(it != map_edge.end()){
+            out_mc.push_back((it->second.value_mean_curvature));
+            out_mc.push_back((it->second.value_mean_curvature));
+            out_mc.push_back((it->second.value_mean_curvature));
+             mc_vertex_size_edge.push_back((it->second.value_mean_curvature));
+        }
+
+
+
+
+
+        // out_mc.push_back((vector_mc_sum[t[k].v[0]]) / (2.0f * area_mixed[t[k].v[0]]));
+        // out_mc.push_back((vector_mc_sum[t[k].v[0]]) / (2.0f * area_mixed[t[k].v[0]]));
+        // out_mc.push_back((vector_mc_sum[t[k].v[0]]) / (2.0f * area_mixed[t[k].v[0]]));
+
+        // out_mc.push_back((vector_mc_sum[t[k].v[1]]) / (2.0f * area_mixed[t[k].v[1]]));
+        // out_mc.push_back((vector_mc_sum[t[k].v[1]]) / (2.0f * area_mixed[t[k].v[1]]));
+        // out_mc.push_back((vector_mc_sum[t[k].v[1]]) / (2.0f * area_mixed[t[k].v[1]]));
+
+        // out_mc.push_back((vector_mc_sum[t[k].v[2]]) / (2.0f * area_mixed[t[k].v[2]]));
+        // out_mc.push_back((vector_mc_sum[t[k].v[2]]) / (2.0f * area_mixed[t[k].v[2]]));
+        // out_mc.push_back((vector_mc_sum[t[k].v[2]]) / (2.0f * area_mixed[t[k].v[2]]));
     }
 
     cout << map_edge.size() << endl;
@@ -723,7 +781,9 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
 
         // gc_vertex_size lenght = vertices
         gc_vertex_size.push_back(((2 * M_PI) - value_angle_defeact_sum[k]) / area_mixed[k]);
-        mc_vertex_size_edge.push_back((vector_mc_sum[k]) / (2.0f * area_mixed[k]));
+        // mc_vertex_size_edge.push_back((vector_mc_sum[k]));
+
+
 
         float current_mean_curvature_value = (((1.0f / (2 * area_mixed[k])) * mean_curvature_vertex_sum[k]).norm()) / 2.0f;
 

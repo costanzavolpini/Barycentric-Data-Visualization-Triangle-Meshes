@@ -90,8 +90,14 @@ class Object
     // name file and the second it is the method gc
     void init()
     {
-        cout << "MAX " << *max_element(triangle_mc.begin(), triangle_mc.end()) << endl;
-        cout << "MIN " << *min_element(triangle_mc.begin(), triangle_mc.end()) << endl;
+        cout << "MAX mean curvatire" << *max_element(triangle_mc.begin(), triangle_mc.end()) << endl;
+        cout << "MIN mean curvatire" << *min_element(triangle_mc.begin(), triangle_mc.end()) << endl;
+
+
+
+cout << "MAX vertex mean curvatire" << *max_element(triangle_mc_vertex.begin(), triangle_mc_vertex.end()) << endl;
+        cout << "MIN  mean curvatire" << *min_element(triangle_mc_vertex.begin(), triangle_mc_vertex.end()) << endl;
+
 
         vector<double> percentiles_gc = k_percentile_gc.init(triangle_gc_notduplicatevalue);
         best_min_gc = percentiles_gc[0];
@@ -101,9 +107,13 @@ class Object
         best_min_mc = percentiles_mc_edge[0];
         best_max_mc = percentiles_mc_edge[1];
 
+
         vector<double> percentiles_mc_vertex = k_percentile_mc_vertex.init(triangle_mc_vertex_notduplicatevalue);
         best_min_mc_vertex = percentiles_mc_vertex[0];
         best_max_mc_vertex = percentiles_mc_vertex[1];
+
+        cout << "percentile max mc " << best_max_mc_vertex << " min " << best_min_mc_vertex<< endl;
+        cout << "percentile max mc " << best_max_mc << " min " << best_min_mc<< endl;
 
         // ------------- VBO -------------
         // Use VBO to avoid to send data vertex at a time (we send everything together)
