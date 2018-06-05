@@ -232,6 +232,7 @@ int main(int argc, char *argv[])
 
         // render colours
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);               //black screen
+        //  glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // white for poster and report
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the depth buffer before each render iteration (otherwise the depth information of the previous frame stays in the buffer).
 
         projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 10.f);
@@ -271,8 +272,7 @@ int main(int argc, char *argv[])
             ourShader.setFloat("min_curvature", object.get_best_values_mc()[0]);
             ourShader.setFloat("max_curvature", object.get_best_values_mc()[1]);
 
-        } else if(imgui_isMeanCurvatureVertexShading){
-            // TODO: mean curvature not working!
+        } else if(imgui_isMeanCurvatureVertexShading) {
             ourShader.setBool("isGaussian", false);
             ourShader.setBool("isMeanCurvatureEdge", false);
             ourShader.setFloat("min_curvature", object.get_best_values_mc_vertex()[0]);
@@ -309,13 +309,38 @@ int main(int argc, char *argv[])
 
             default: // mouse
                 // arcball
-                // TODO: enable movement mouse when the user is moving into the second column of imgui
+                // TODO: enable movement mouse when the user is moving into the second column of imgui + trim photoshop
                 rotated_view = view * arcball.rotation_matrix_view();
                 rotated_model = model * arcball.rotation_matrix_model(rotated_view);
 
                 ourShader.setMat4("projection", projection);
                 ourShader.setMat4("view", rotated_view);
                 ourShader.setMat4("model", rotated_model);
+
+                // cout << "view " << glm::to_string(rotated_view) << endl;
+                // cout << "model " << glm::to_string(rotated_model) << endl;
+                // cout << "projection " << glm::to_string(projection) << endl;
+
+                // // armadillo: for screenshot (make a screenshot of all white image)
+                // rotated_view = glm::mat4{glm::vec4(-0.336114, 0.169931, 0.926364, 0.000000), glm::vec4(0.374466, 0.926613, -0.034108, 0.000000), glm::vec4(-0.864177, 0.335428, -0.375081, 0.000000), glm::vec4(0.000000, 0.000000, -5.830953, 1.000000)};
+                // rotated_model = glm::mat4{glm::vec4(0.365809, -0.365534, 0.855902, 0.000000), glm::vec4(-0.128588, 0.890972, 0.435470, 0.000000), glm::vec4(-0.921764, -0.269357, 0.278922, 0.000000), glm::vec4(0.000000, 0.000000, 0.000000, 1.000000)};
+                // projection = glm::mat4{glm::vec4(2.818707, 0.000000, 0.000000, 0.000000), glm::vec4(0.000000, 3.758276, 0.000000, 0.000000), glm::vec4(0.000000, 0.000000, -1.020202, -1.000000), glm::vec4(0.000000, 0.000000, -0.202020, 0.000000)};
+                // ourShader.setMat4("projection", projection);
+                // ourShader.setMat4("view", rotated_view);
+                // ourShader.setMat4("model", rotated_model);
+
+                // // zoom image screenshot (square + trasparent + trim)
+                // rotated_model = glm::translate(rotated_model, glm::vec3(0.4, -0.4, 0));
+                // rotated_view = glm::translate(rotated_view, glm::vec3(0.4, -0.4, 0));
+                // ourShader.setMat4("view", rotated_view);
+                // ourShader.setMat4("model", rotated_model);
+
+                // Zoom = 7;
+                // projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 10.f);
+                // ourShader.setMat4("projection", projection);
+
+                // cout << Zoom << endl;
+
                 break;
 
         }
@@ -627,9 +652,9 @@ void set_parameters_shader(int selected_shader)
     {
 
     case 0: // flat shading
-        vertex_shader = "vertexShaderFS.vs";
-        fragment_shader = "fragmentShaderFS.fs";
-        geometry_shader = "geometryShaderFS.gs";
+        vertex_shader = "vertexShader.vs";
+        fragment_shader = "barycenterFragmentShader.fs";
+        geometry_shader = "geometryShader.gs";
 
         imgui_isFlatShading = 1;
         break;
@@ -641,6 +666,15 @@ void set_parameters_shader(int selected_shader)
 
         imgui_isExtendFlatShading = 1;
         break;
+
+
+        // Alternative effect (normal triangle + max diagram) -- Decomment if you want to see it
+        // vertex_shader = "vertexShader.vs";
+        // geometry_shader = "geometryShader.gs";
+        // fragment_shader = "maxDiagramFragmentShader.fs";
+        // imgui_isFlatShading = 1;
+        // imgui_isExtendFlatShading = 0;
+        // break;
 
         // ---------
 
@@ -679,7 +713,7 @@ void set_parameters_shader(int selected_shader)
         imgui_isMeanCurvatureVertexShading = 1;
         break;
 
-    default: // gaussian curvature (3)
+    default: // gaussian curvature (constant color)
         vertex_shader = "vertexShaderCurvature.vs";
         fragment_shader = "maxDiagramFragmentShader.fs";
         geometry_shader = "geometryShader.gs";

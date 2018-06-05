@@ -2,6 +2,7 @@
 // Vertex Shader for extend flat shading
     layout (location = 0) in vec3 aPos;
     layout (location = 1) in vec3 aNormal;
+    layout (location = 5) in vec3 aNormalTriangle;
 
     struct Light {
         vec3 position;
@@ -12,7 +13,6 @@
     };
 
     out vec4 color;
-    flat out vec4 color_flat;
 
     uniform mat4 model;
     uniform mat4 view;
@@ -62,16 +62,19 @@
 
 
     void main() {
+
         vec3 world_position = vec3(model * vec4(aPos, 1.0));
-        vec3 world_normal = mat3(transpose(inverse(model))) * aNormal;
+        vec3 world_normal;
+
+        if(isFlat){ // triangle normal
+            world_normal = mat3(transpose(inverse(model))) * aNormalTriangle;
+        } else { // vertex normal
+            world_normal = mat3(transpose(inverse(model))) * aNormal;
+        }
 
         vec3 light_pos = vec3(projection * vec4(light.position, 1.0));
 
-
-        if(isFlat)
-            color_flat = get_result_color_lighting(world_position, world_normal, light_pos); // color obtained with lighting calculations
-        else
-            color = get_result_color_lighting(world_position, world_normal, light_pos); // color obtained with lighting calculations
+        color = get_result_color_lighting(world_position, world_normal, light_pos); // color obtained with lighting calculations
 
         gl_Position = projection * view * model * vec4(aPos, 1.0);
     }

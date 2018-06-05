@@ -31,10 +31,11 @@
 
     vec4 get_result_color_gc(){
         float val = gaussian_curvature[0]; // gaussian_curvature is a vec3 composed by same value
-        if(!isGaussian && !isMeanCurvatureEdge)
+        if(!isGaussian && !isMeanCurvatureEdge){
             val = mean_curvature_vertex[0]; // mean curvature is a vec3 composed by same value
-        else if(!isGaussian && isMeanCurvatureEdge)
+        } else if(!isGaussian && isMeanCurvatureEdge){
             val = mean_curvature_edge[0]; // mean curvature is a vec3 composed by same value
+        }
 
        // colors in HSV
        vec3 red = vec3(0.0, 1.0, 1.0); //h s v
