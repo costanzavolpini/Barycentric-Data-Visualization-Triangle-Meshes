@@ -231,8 +231,8 @@ int main(int argc, char *argv[])
         glViewport(0, 0, current_width, current_height); // Render on the whole framebuffer, complete from the lower left corner to the upper right
 
         // render colours
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);               //black screen
-        //  glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // white for poster and report
+        // glClearColor(0.0f, 0.0f, 0.0f, 1.0f);               //black screen
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // white for poster and report
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the depth buffer before each render iteration (otherwise the depth information of the previous frame stays in the buffer).
 
         projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 10.f);
@@ -266,7 +266,6 @@ int main(int argc, char *argv[])
             ourShader.setFloat("max_curvature", global_max_gc);
 
         } else if (imgui_isMeanCurvatureEdgeShading){
-            // TODO: mean curvature not working!
             ourShader.setBool("isMeanCurvatureEdge", true);
             ourShader.setBool("isGaussian", false);
             ourShader.setFloat("min_curvature", object.get_best_values_mc()[0]);
@@ -321,7 +320,7 @@ int main(int argc, char *argv[])
                 // cout << "model " << glm::to_string(rotated_model) << endl;
                 // cout << "projection " << glm::to_string(projection) << endl;
 
-                // // armadillo: for screenshot (make a screenshot of all white image)
+                // armadillo: for screenshot (make a screenshot of all white image)
                 // rotated_view = glm::mat4{glm::vec4(-0.336114, 0.169931, 0.926364, 0.000000), glm::vec4(0.374466, 0.926613, -0.034108, 0.000000), glm::vec4(-0.864177, 0.335428, -0.375081, 0.000000), glm::vec4(0.000000, 0.000000, -5.830953, 1.000000)};
                 // rotated_model = glm::mat4{glm::vec4(0.365809, -0.365534, 0.855902, 0.000000), glm::vec4(-0.128588, 0.890972, 0.435470, 0.000000), glm::vec4(-0.921764, -0.269357, 0.278922, 0.000000), glm::vec4(0.000000, 0.000000, 0.000000, 1.000000)};
                 // projection = glm::mat4{glm::vec4(2.818707, 0.000000, 0.000000, 0.000000), glm::vec4(0.000000, 3.758276, 0.000000, 0.000000), glm::vec4(0.000000, 0.000000, -1.020202, -1.000000), glm::vec4(0.000000, 0.000000, -0.202020, 0.000000)};
