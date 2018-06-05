@@ -13,8 +13,6 @@ using namespace std;
 Object.h
 Comment:  This file contains all Object definitions to construct and draw an object.
 ***************************************************************************/
-
-//TODO: fix mean curvature when change model -> not work (maybe)
 class Object
 {
   public:
@@ -28,7 +26,7 @@ class Object
 
     vector<float> triangle_gc_notduplicatevalue; // vector of gaussian curvature of length vertices (without putting for every vertex gc, gc, gc but just one time)
 
-    vector<float> triangle_mc_notduplicatevalue; // vector of mean curvature per edge of length vertices
+    vector<float> triangle_mc_notduplicatevalue; // vector of mean curvature per edge of length triangles
 
     vector<float> triangle_mc_vertex_notduplicatevalue; // vector of mean curvature per vertex of length vertices
 
@@ -90,15 +88,6 @@ class Object
     // name file and the second it is the method gc
     void init()
     {
-        cout << "MAX mean curvatire" << *max_element(triangle_mc.begin(), triangle_mc.end()) << endl;
-        cout << "MIN mean curvatire" << *min_element(triangle_mc.begin(), triangle_mc.end()) << endl;
-
-
-
-cout << "MAX vertex mean curvatire" << *max_element(triangle_mc_vertex.begin(), triangle_mc_vertex.end()) << endl;
-        cout << "MIN  mean curvatire" << *min_element(triangle_mc_vertex.begin(), triangle_mc_vertex.end()) << endl;
-
-
         vector<double> percentiles_gc = k_percentile_gc.init(triangle_gc_notduplicatevalue);
         best_min_gc = percentiles_gc[0];
         best_max_gc = percentiles_gc[1];
@@ -111,9 +100,6 @@ cout << "MAX vertex mean curvatire" << *max_element(triangle_mc_vertex.begin(), 
         vector<double> percentiles_mc_vertex = k_percentile_mc_vertex.init(triangle_mc_vertex_notduplicatevalue);
         best_min_mc_vertex = percentiles_mc_vertex[0];
         best_max_mc_vertex = percentiles_mc_vertex[1];
-
-        cout << "percentile max mc " << best_max_mc_vertex << " min " << best_min_mc_vertex<< endl;
-        cout << "percentile max mc " << best_max_mc << " min " << best_min_mc<< endl;
 
         // ------------- VBO -------------
         // Use VBO to avoid to send data vertex at a time (we send everything together)
@@ -258,10 +244,6 @@ cout << "MAX vertex mean curvatire" << *max_element(triangle_mc_vertex.begin(), 
         glDeleteBuffers(1, &VBO_MEANCURVATURE);
         glDeleteBuffers(1, &VBO_MEANCURVATURE_VERTEX);
     }
-
-    // Point3d interpolation(Point3d v0, Point3d v1, float t) {
-    //     return (1 - t) * v0 + t * v1;
-    // }
 
     /**
      * Get the minimum value of gaussian curvature

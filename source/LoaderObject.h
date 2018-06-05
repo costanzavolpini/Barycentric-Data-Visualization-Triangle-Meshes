@@ -461,7 +461,7 @@ bool read_off_file(const char *path)
 /**
  * Function to load the mesh, find Gaussian Curvature, Mean Curvature...etc.
 */
-bool load(const char *path, vector<float> &out_vertices, vector<float> &out_normals, vector<float> &out_normals_triangle, vector<float> &out_gc, vector<float> &out_mc, vector<float> &out_mc_vertex, vector<float> &gc_vertex_size, vector<float> &mc_vertex_size_edge, vector<float> &mc_vertex_size_vertex)
+bool load(const char *path, vector<float> &out_vertices, vector<float> &out_normals, vector<float> &out_normals_triangle, vector<float> &out_gc, vector<float> &out_mc, vector<float> &out_mc_vertex, vector<float> &gc_vertex_size, vector<float> &mc_triangle_size_edge, vector<float> &mc_vertex_size_vertex)
 {
     // --------------------- Read file -----------------------------
     if (!read_off_file(path))
@@ -728,7 +728,7 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         out_mc.push_back((value_mean_curvature_edge));
         out_mc.push_back((value_mean_curvature_edge));
         out_mc.push_back((value_mean_curvature_edge));
-        mc_vertex_size_edge.push_back((value_mean_curvature_edge));
+        mc_triangle_size_edge.push_back((value_mean_curvature_edge));
 
         // edge 1 : v2v0
         value_mean_curvature_edge = get_mean_curvature_edge(t[k].v[2], t[k].v[0]);
@@ -736,7 +736,7 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         out_mc.push_back((value_mean_curvature_edge));
         out_mc.push_back((value_mean_curvature_edge));
         out_mc.push_back((value_mean_curvature_edge));
-        mc_vertex_size_edge.push_back((value_mean_curvature_edge));
+        mc_triangle_size_edge.push_back((value_mean_curvature_edge));
 
         // edge 2: v0v1
         value_mean_curvature_edge = get_mean_curvature_edge(t[k].v[0], t[k].v[1]);
@@ -744,7 +744,7 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         out_mc.push_back((value_mean_curvature_edge));
         out_mc.push_back((value_mean_curvature_edge));
         out_mc.push_back((value_mean_curvature_edge));
-        mc_vertex_size_edge.push_back((value_mean_curvature_edge));
+        mc_triangle_size_edge.push_back((value_mean_curvature_edge));
     }
 
     cout << map_edge.size() << endl;
@@ -757,8 +757,6 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
 
         // gc_vertex_size lenght = vertices
         gc_vertex_size.push_back(((2 * M_PI) - value_angle_defeact_sum[k]) / area_mixed[k]);
-        // mc_vertex_size_edge.push_back((vector_mc_sum[k]));
-
         float current_mean_curvature_value = (((1.0f / (2 * area_mixed[k])) * mean_curvature_vertex_sum[k]).norm()) / 2.0f;
 
         if (mean_curvature_vertex_sum[k] * normals[k] < 0)
