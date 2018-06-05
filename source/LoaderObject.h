@@ -168,7 +168,6 @@ Point3d get_normal_edge(int index_v1, int index_v2)
  * Function to insert a struct edge inside edge-map.
  */
 void insert_edge(int index_v1, int index_v2, bool isCorrectOrder, Point3d n, double angle, double area_triangle)
-// FIXME: fix mean curvature, but that code seems to work correctly
 {
     vector<int> key(2);
     if (isCorrectOrder)
@@ -204,25 +203,23 @@ void insert_edge(int index_v1, int index_v2, bool isCorrectOrder, Point3d n, dou
 
         // value mean curvature for mean curvature per edge H(E) = ||E|| * sin(theta/2)
         float value = it->second.norm_edge * ((it->second.n1).getAngle(it->second.n2) / 2.0f);
-        float normalized_value = value / ((it->second.area_t1 + it->second.area_t2)/3.0f);// divide the value by edge area (1/3 * (area triangles))
+        float normalized_value = value / ((it->second.area_t1 + it->second.area_t2) / 3.0f); // divide the value by edge area (1/3 * (area triangles))
 
         // create matrix M = [e, n1, n2] with these vectors as columns
         double M[3][3] = {
             {(v[it->second.index_v2] - v[it->second.index_v1])[0], it->second.n1[0], it->second.n2[0]},
             {(v[it->second.index_v2] - v[it->second.index_v1])[1], it->second.n1[1], it->second.n2[1]},
-            {(v[it->second.index_v2] - v[it->second.index_v1])[2], it->second.n1[2], it->second.n2[2]}
-        };
+            {(v[it->second.index_v2] - v[it->second.index_v1])[2], it->second.n1[2], it->second.n2[2]}};
 
-        double determinant = M[0][0] * ((M[1][1] * M[2][2]) - (M[2][1] * M[1][2])) -M[0][1] * (M[1][0] * M[2][2] - M[2][0] * M[1][2]) + M[0][2] * (M[1][0] * M[2][1] - M[2][0] * M[1][1]);
+        double determinant = M[0][0] * ((M[1][1] * M[2][2]) - (M[2][1] * M[1][2])) - M[0][1] * (M[1][0] * M[2][2] - M[2][0] * M[1][2]) + M[0][2] * (M[1][0] * M[2][1] - M[2][0] * M[1][1]);
 
-        if(determinant < 0.0) // negative value
+        if (determinant < 0.0) // negative value
             it->second.value_mean_curvature = (-1) * normalized_value;
         else
             it->second.value_mean_curvature = normalized_value;
-
     }
     else
-    {    // create new edge struct
+    {                       // create new edge struct
         edge e1;            // struct
         if (isCorrectOrder) // index_v1 < index_v2
         {
@@ -246,6 +243,31 @@ void insert_edge(int index_v1, int index_v2, bool isCorrectOrder, Point3d n, dou
 
         map_edge[key] = e1;
     }
+}
+
+/**
+ * Function to get mean curvature edge
+ */
+double get_mean_curvature_edge(int vertex_1, int vertex_2)
+{
+    vector<int> current_edge;
+    if (vertex_1 < vertex_2) // correct order
+    {
+        current_edge = {vertex_1, vertex_2};
+    }
+    else
+        current_edge = {vertex_2, vertex_1}; // reverse order
+
+    std::map<vector<int>, edge>::iterator it; // iterator
+    it = map_edge.find(current_edge);
+
+    if (it != map_edge.end())
+    {
+        return it->second.value_mean_curvature;
+    }
+
+    cout << "Mean curvature per edge not found for edge: " << current_edge[0] << " " << current_edge[1] << endl;
+    exit(-1);
 }
 
 /**
@@ -631,8 +653,8 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         // vertex 0
         float current_mean_curvature_value = (((1.0f / (2 * area_mixed[t[k].v[0]])) * mean_curvature_vertex_sum[t[k].v[0]]).norm()) / 2.0f;
 
-        if(mean_curvature_vertex_sum[t[k].v[0]] * normals[t[k].v[0]] < 0)
-            current_mean_curvature_value = (- 1) * current_mean_curvature_value;
+        if (mean_curvature_vertex_sum[t[k].v[0]] * normals[t[k].v[0]] < 0)
+            current_mean_curvature_value = (-1) * current_mean_curvature_value;
 
         out_mc_vertex.push_back(current_mean_curvature_value);
         out_mc_vertex.push_back(current_mean_curvature_value);
@@ -641,19 +663,18 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         // vertex 1
         current_mean_curvature_value = (((1.0f / (2 * area_mixed[t[k].v[1]])) * mean_curvature_vertex_sum[t[k].v[1]]).norm()) / 2.0f;
 
-        if(mean_curvature_vertex_sum[t[k].v[1]] * normals[t[k].v[1]] < 0)
-            current_mean_curvature_value = (- 1) * current_mean_curvature_value;
+        if (mean_curvature_vertex_sum[t[k].v[1]] * normals[t[k].v[1]] < 0)
+            current_mean_curvature_value = (-1) * current_mean_curvature_value;
 
         out_mc_vertex.push_back(current_mean_curvature_value);
         out_mc_vertex.push_back(current_mean_curvature_value);
         out_mc_vertex.push_back(current_mean_curvature_value);
-
 
         // vertex 2
         current_mean_curvature_value = (((1.0f / (2 * area_mixed[t[k].v[2]])) * mean_curvature_vertex_sum[t[k].v[2]]).norm()) / 2.0f;
 
-        if(mean_curvature_vertex_sum[t[k].v[2]] * normals[t[k].v[2]] < 0)
-            current_mean_curvature_value = (- 1) * current_mean_curvature_value;
+        if (mean_curvature_vertex_sum[t[k].v[2]] * normals[t[k].v[2]] < 0)
+            current_mean_curvature_value = (-1) * current_mean_curvature_value;
 
         out_mc_vertex.push_back(current_mean_curvature_value);
         out_mc_vertex.push_back(current_mean_curvature_value);
@@ -702,73 +723,28 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
 
         // ------ insert mean value per edge into vector ---------
         // edge 0 : v1v2
+        double value_mean_curvature_edge = get_mean_curvature_edge(t[k].v[1], t[k].v[2]);
+
+        out_mc.push_back((value_mean_curvature_edge));
+        out_mc.push_back((value_mean_curvature_edge));
+        out_mc.push_back((value_mean_curvature_edge));
+        mc_vertex_size_edge.push_back((value_mean_curvature_edge));
+
         // edge 1 : v2v0
+        value_mean_curvature_edge = get_mean_curvature_edge(t[k].v[2], t[k].v[0]);
+
+        out_mc.push_back((value_mean_curvature_edge));
+        out_mc.push_back((value_mean_curvature_edge));
+        out_mc.push_back((value_mean_curvature_edge));
+        mc_vertex_size_edge.push_back((value_mean_curvature_edge));
+
         // edge 2: v0v1
+        value_mean_curvature_edge = get_mean_curvature_edge(t[k].v[0], t[k].v[1]);
 
-        std::map<vector<int>, edge>::iterator it; // iterator
-        it = map_edge.find({t[k].v[1], t[k].v[2]});
-        if(it != map_edge.end()){
-            out_mc.push_back((it->second.value_mean_curvature));
-            out_mc.push_back((it->second.value_mean_curvature));
-            out_mc.push_back((it->second.value_mean_curvature));
-            mc_vertex_size_edge.push_back((it->second.value_mean_curvature));
-        }
-
-        it = map_edge.find({t[k].v[2], t[k].v[1]});
-        if(it != map_edge.end()){
-            out_mc.push_back((it->second.value_mean_curvature));
-            out_mc.push_back((it->second.value_mean_curvature));
-            out_mc.push_back((it->second.value_mean_curvature));
-            mc_vertex_size_edge.push_back((it->second.value_mean_curvature));
-        }
-
-it = map_edge.find({t[k].v[2], t[k].v[0]});
-        if(it != map_edge.end()){
-            out_mc.push_back((it->second.value_mean_curvature));
-            out_mc.push_back((it->second.value_mean_curvature));
-            out_mc.push_back((it->second.value_mean_curvature));
-            mc_vertex_size_edge.push_back((it->second.value_mean_curvature));
-        }
-
-        it = map_edge.find({t[k].v[0], t[k].v[2]});
-        if(it != map_edge.end()){
-            out_mc.push_back((it->second.value_mean_curvature));
-            out_mc.push_back((it->second.value_mean_curvature));
-            out_mc.push_back((it->second.value_mean_curvature));
-            mc_vertex_size_edge.push_back((it->second.value_mean_curvature));
-        }
-
-it = map_edge.find({t[k].v[0], t[k].v[1]});
-        if(it != map_edge.end()){
-            out_mc.push_back((it->second.value_mean_curvature));
-            out_mc.push_back((it->second.value_mean_curvature));
-            out_mc.push_back((it->second.value_mean_curvature));
-            mc_vertex_size_edge.push_back((it->second.value_mean_curvature));
-        }
-
-        it = map_edge.find({t[k].v[1], t[k].v[0]});
-        if(it != map_edge.end()){
-            out_mc.push_back((it->second.value_mean_curvature));
-            out_mc.push_back((it->second.value_mean_curvature));
-            out_mc.push_back((it->second.value_mean_curvature));
-             mc_vertex_size_edge.push_back((it->second.value_mean_curvature));
-        }
-
-
-
-
-
-        // out_mc.push_back((vector_mc_sum[t[k].v[0]]) / (2.0f * area_mixed[t[k].v[0]]));
-        // out_mc.push_back((vector_mc_sum[t[k].v[0]]) / (2.0f * area_mixed[t[k].v[0]]));
-        // out_mc.push_back((vector_mc_sum[t[k].v[0]]) / (2.0f * area_mixed[t[k].v[0]]));
-
-        // out_mc.push_back((vector_mc_sum[t[k].v[1]]) / (2.0f * area_mixed[t[k].v[1]]));
-        // out_mc.push_back((vector_mc_sum[t[k].v[1]]) / (2.0f * area_mixed[t[k].v[1]]));
-        // out_mc.push_back((vector_mc_sum[t[k].v[1]]) / (2.0f * area_mixed[t[k].v[1]]));
-
-        // out_mc.push_back((vector_mc_sum[t[k].v[2]]) / (2.0f * area_mixed[t[k].v[2]]));
-        // out_mc.push_back((vector_mc_sum[t[k].v[2]]) / (2.0f * area_mixed[t[k].v[2]]));
-        // out_mc.push_back((vector_mc_sum[t[k].v[2]]) / (2.0f * area_mixed[t[k].v[2]]));
+        out_mc.push_back((value_mean_curvature_edge));
+        out_mc.push_back((value_mean_curvature_edge));
+        out_mc.push_back((value_mean_curvature_edge));
+        mc_vertex_size_edge.push_back((value_mean_curvature_edge));
     }
 
     cout << map_edge.size() << endl;
@@ -783,12 +759,10 @@ it = map_edge.find({t[k].v[0], t[k].v[1]});
         gc_vertex_size.push_back(((2 * M_PI) - value_angle_defeact_sum[k]) / area_mixed[k]);
         // mc_vertex_size_edge.push_back((vector_mc_sum[k]));
 
-
-
         float current_mean_curvature_value = (((1.0f / (2 * area_mixed[k])) * mean_curvature_vertex_sum[k]).norm()) / 2.0f;
 
-        if(mean_curvature_vertex_sum[k] * normals[k] < 0)
-            current_mean_curvature_value = (- 1) * current_mean_curvature_value;
+        if (mean_curvature_vertex_sum[k] * normals[k] < 0)
+            current_mean_curvature_value = (-1) * current_mean_curvature_value;
 
         mc_vertex_size_vertex.push_back(current_mean_curvature_value);
         // write in a file all values of Gaussian curvature
