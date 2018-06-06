@@ -162,7 +162,14 @@ $$K(V) = (2\pi - \sum_j \theta_j)/\mathcal{A}_{Mixed}$$
 %%%%%%%%
 
 \subsection{Constant Gaussian curvature per vertex}
-\textit{Constant Gaussian curvature per vertex} returns a constant color around each vertex (Fig. \ref{fig:gc-angle}, Pseudocode \ref{appendix:vs-gaussiancurvature}). Calculating the \textit{Gaussian curvature} per vertex, this value is mapped into a color range to get the curvature color (for example: green for flat surfaces). This process is made separately for each vertex of the triangle and after, using the technique explained above of max-diagram (See section \ref{section:max-diagram}) the final resulting constant color is returned.
+\textit{Constant Gaussian curvature per vertex} returns a constant color around each vertex (Fig. \ref{fig:gc-angle}, Pseudocode \ref{appendix:vs-gaussiancurvature}). Calculating the \textit{Gaussian curvature} per vertex, this value is mapped into a color range to get the curvature color (see Fig. \ref{fig:color-range-curvature}). This process is made separately for each vertex of the triangle and consequently, using the technique of max-diagram explained above (See section \ref{section:max-diagram}), the final resulting constant color is returned.
+\begin{figure}[!h]
+    \centering
+    \includegraphics[scale=1.2]{images/gradient-curvature.png}
+    \caption{Color bar showing respective colors for negative, flat and positive curvatures. Negative curvatures are colored in red, flat curvatures in green and positive curvatures in blue.} \label{fig:color-range-curvature}
+\end{figure}
+
+
 \begin{figure}[!h]
     \centering
     \minipage[b]{.5\linewidth}
@@ -175,6 +182,7 @@ $$K(V) = (2\pi - \sum_j \theta_j)/\mathcal{A}_{Mixed}$$
     \endminipage
     \caption{Constant Gaussian curvature per vertex} \label{fig:gc-detail}
 \end{figure}
+
 
 
 \subsection{Gouraud Gaussian curvature}
@@ -195,12 +203,12 @@ $$K(V) = (2\pi - \sum_j \theta_j)/\mathcal{A}_{Mixed}$$
 
 
 \subsection{Evaluation and Comparison between constant Gaussian curvature per vertex and Gouraud Gaussian curvature}
-We want now to compare the \textit{constant Gaussian curvature per vertex} (Fig. \ref{fig:gc-detail}) with the \textit{Gouraud Gaussian curvature} (Fig. \ref{fig:gci-detail}).
-In Fig. \ref{fig:gc-detail} each vertex area is colored applying the method \textit{max diagram} described in the above section \ref{section:max-diagram}. Instead, in Fig. \ref{fig:gci-detail} the color is obtained with a linear interpolation.
+We compare the \textit{constant Gaussian curvature per vertex} (Fig. \ref{fig:gc-detail}) with the \textit{Gouraud Gaussian curvature} (Fig. \ref{fig:gci-detail}).
+In Fig. \ref{fig:gc-detail} each vertex area is colored applying the method \textit{max diagram}. Instead, in Fig. \ref{fig:gci-detail} the color is obtained with a linear interpolation.
 Visualization of the principal curvatures of the model as colors from blue (highest values of curvature) to red (lower values of curvature) in Fig. \ref{fig:comparison-gc-gci} highlighs the geometry of meshes.
 These changes of curvature, positive (blue), flat (green) and negative regions (red), better emphasizes the 3-dimensionality of the model.
-\textit{Gouraud Gaussian curvature} is more smoothed that causes a loss of small details, this is particularly evident in armadillo's legs mesh. Instead, \textit{constant Gaussian curvature per vertex} generates sharped edges that less emphasizes the general lines of the model causing a small loss of 3-dimensionality.
-\textit{Constant Gaussian curvature per vertex} better shows the muscle constrasts given a more detailed character to models.
+\textit{Gouraud Gaussian curvature} is smoother, which results in a loss of small details. This is particularly evident in armadillo's legs mesh. Instead, \textit{constant Gaussian curvature per vertex} generates sharper edges with piecewise-flat regions which slightly degrades the 3-dimensional perception of the model.
+On the other hand, \textit{Constant Gaussian curvature per vertex} preserves the details of the given geometry, which can be particularly useful for data visualization purposes.
 
 \begin{figure}[H]
     \centering
