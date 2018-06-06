@@ -1,6 +1,4 @@
-%TODO: from there!
-A program that runs on GPU is called \textit{shader}. Shaders are principally used to modify the representation and the behaviour of 3D objects. They are also used to create lighting effects. Shaders can perform tasks efficiently thanks to the GPU. That guarantee faster results than CPU since GPU is designed to work in parallel.
-These shader programs are written in \textit{GLSL}.
+A program that runs on GPU is called \textit{shader}. Shaders are principally used to modify the representation and the behaviour of 3D objects. They are also used to create lighting effects. Shaders can perform tasks efficiently thanks to the GPU. That guarantees faster results than CPU since GPU is designed to work in parallel.
 
 \subsection{GPU pipeline}
 A program will allow us to control the rendering pipeline since by default there is no pipeline set in OpenGL. It takes a set of vertices as input, then the \textit{vertex shader} transforms them (translation, rotation, projection...) and passes the transformed vertices to the \textit{geometry shader}. This shader takes vertices to create primitive shapes and then it rasterizes them. These rasterized flat images are then passed as input to the \textit{fragment shader} that adds the lighting, apply textures and color these images (Fig. \ref{fig:gpu-pipeline}).
