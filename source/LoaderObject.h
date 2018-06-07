@@ -59,7 +59,6 @@ struct edge
     int index_v2;
     Point3d n1;
     Point3d n2;
-    // Point3d n_edge;
     float value_mean_curvature;
     float cot_alpha;
     float cot_beta;
