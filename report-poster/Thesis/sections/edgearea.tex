@@ -93,6 +93,9 @@ These values are then interpolated using the automatic OpenGL interpolation rese
 
 
 \subsection{Evaluation and Comparison between mean curvature per edge and mean curvature per vertex}
+\textit{Constant mean curvature} is a curvature per
+edge that return a constant color around each edge
+using the min diagram algorithm. The result is a noisy and sharped mesh that emphasizes edge. This visualization could be helpfull to show the quality of mesh triangulation and flows around surfaces. These last are observable because edge are directed allowing the user to better analyze curvatures (see Fig. \ref{fig:armadillo-mean-edge}). \textit{Gouraud mean curvature}, on the other hand, return blurry meshes than the ones obtained with  \textit{Gouraud Gaussian curvature}. This smooth is caused by the fact that we are averaging per vertex, mean curvature would be calculated per edge but in this case, we had applied it on vertices opposite to edges, this result in a losing of data (see Fig. \ref{fig:armadillo-mean-vertex}).
 \begin{figure}[!h]
     \centering
     \minipage[b]{.5\linewidth}
@@ -133,5 +136,5 @@ These values are then interpolated using the automatic OpenGL interpolation rese
     \includegraphics[scale=0.42]{images/horse-mcv.png}
     \endminipage\hfill
     \caption{On the left: Mean curvature per edge. On the right: Mean curvature per vertex.}
-    \label{fig:comparison-gc-gci}
+    \label{fig:comparison-mce-mcv}
 \end{figure}
