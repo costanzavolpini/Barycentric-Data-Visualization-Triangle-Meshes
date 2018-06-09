@@ -1,3 +1,4 @@
+\label{section:edge-area-chapter}
 As the section before, we want now to show extensions where we split the surface of the triangle mesh likewise into regions around  edges and we draw all pixels in these regions with the same colour (see Figure \ref{fig:edge-area}). This results in rhombus-shaped areas with constant color around each edge.
 
 \begin{figure}[H]
@@ -14,30 +15,13 @@ As the section before, we want now to show extensions where we split the surface
     \endminipage
 \end{figure}
 
-\subsection{Min diagram - Edge area} \label{section:max-diagram}
+\subsection{Min diagram - Edge area} \label{section:min-diagram}
 For each point in a triangle, we can easily determine its closest edge, which we use as a cue for coloring.
 A different approach from interpolating, can be found coloring vertex areas based on the minimum barycentric coordinate.
-The color is given by the region farthest from a vertex (Fig. \ref{fig:min-diagram}, Pseudocode \color{red}{insert Pseudocode}\color{black}).
+The color is given by the region farthest from a vertex (Fig. \ref{fig:min-diagram}, Pseudocode \ref{appendix:min-diagram}).
 
-\subsection{Mean Curvature}
-Access to mesh edges requires to set up a list of edges over triangles. To avoid redundant datas we have decided to use the convention that an edge would be count only if it goes from a lower to higher vertex. An edge structure contains:
-\begin{lstlisting}[caption={Edge structure}]
-    struct edge
-    {
-        float norm_edge;
-        int index_v1;
-        int index_v2;
-        Point3d n1;
-        Point3d n2;
-        float value_mean_curvature;
-        float cot_alpha;
-        float cot_beta;
-        float area_t1;
-        float area_t2;
-    };
-\end{lstlisting} \label{Pseudocode:edge}
-
-indexes vertices, length of edge, normals of triangles, cotangents of opposite angles to the edge ($\cot \alpha,\; \cot \beta$), areas of triangles. (See edge struct \ref{Pseudocode:edge}).
+\subsection{Mean Curvature} \label{section:edge-struct} \label{section:mc-curvature}
+Access to mesh edges requires to set up a list of edges over triangles. To avoid redundant datas we have decided to use the convention that an edge would be count only if it goes from a lower to higher vertex. An edge structure looks like the one in the pseudocode \ref{Pseudocode:edge}, where index\_v1 and index\_v2 are the indexes vertices, norm\_edge is the length of edge, n1 and n2 are the normals of triangles, cot\_alpha and cot\_beta are the cotangents of opposite angles to the edge, area\_t1 and area\_t2 are the areas of triangles.
 
 \subsection{Constant Mean Curvature}
 \textit{Constant mean Curvature} returns a constant color around each edge (See Fig. \ref{fig:armadillo-mean-edge}). It first calculate the mean curvature for each edge:
