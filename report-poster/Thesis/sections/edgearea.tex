@@ -14,7 +14,7 @@ As the section before, we want now to show extensions where we split the surface
     \endminipage
 \end{figure}
 
-\subsection{Min diagram - Edge based area} \label{section:max-diagram}
+\subsection{Min diagram - Edge area} \label{section:max-diagram}
 For each point in a triangle, we can easily determine its closest edge, which we use as a cue for coloring.
 A different approach from interpolating, can be found coloring vertex areas based on the minimum barycentric coordinate.
 The color is given by the region farthest from a vertex (Fig. \ref{fig:min-diagram}, Pseudocode \color{red}{insert Pseudocode}\color{black}).
@@ -39,8 +39,8 @@ Access to mesh edges requires to set up a list of edges over triangles. To avoid
 
 indexes vertices, length of edge, normals of triangles, cotangents of opposite angles to the edge ($\cot \alpha,\; \cot \beta$), areas of triangles. (See edge struct \ref{Pseudocode:edge}).
 
-\subsection{Mean Curvature per edge}
-\textit{Mean Curvature per edge} returns a constant color around each edge (See Fig. \ref{fig:armadillo-mean-edge}). It first calculate the mean curvature for each edge:
+\subsection{Constant Mean Curvature}
+\textit{Constant mean Curvature} returns a constant color around each edge (See Fig. \ref{fig:armadillo-mean-edge}). It first calculate the mean curvature for each edge:
 $$H(E) = || E|| (\theta_E /2)$$
 where $\theta_E$ is the angle between the two normals of $T_1$ and $T_2$ (See Fig. \ref{fig:mean-edge}).
 \begin{figure}[H]
@@ -63,11 +63,11 @@ columns ($e$ is the edge $[W, V]$, $n_1$ is the normal of $T_1$ and $n_2$ is the
     \centering
     \includegraphics[scale=1.0]{images/mean-curvature-edge-detail.png}
     \endminipage
-    \caption{Mean curvature per edge} \label{fig:armadillo-mean-edge}
+    \caption{Constant mean curvature} \label{fig:armadillo-mean-edge}
 \end{figure}
 
-\subsection{Mean Curvature per vertex}
-\textit{Mean Curvature per vertex} returns an interpolated color around each vertex. The main idea is to calculate the mean curvature $H(V)$ for each vertex $V$. In a mesh, every edge has two opposite angles (let us denominate these with $\alpha$ and $\beta$), the mean curvature per vertex is defined as:
+\subsection{Gouraud Mean Curvature}
+\textit{Gouraud mean Curvature} returns an interpolated color around each vertex. The main idea is to calculate the mean curvature $H(V)$ for each vertex $V$. In a mesh, every edge has two opposite angles (let us denominate these with $\alpha$ and $\beta$), the mean curvature per vertex is defined as:
 $$H(V) = \frac{1}{2\mathcal{A}_{Mixed}} \sum_{i=1}^{n}(\cot \alpha_i + \cot \beta_i) (V - V_i)$$
 where $V_i$ is one of the endpoints of the edge $E_i$ (see Fig. \ref{fig:mean-edge-cot}).
 \begin{figure}[H]
@@ -88,11 +88,11 @@ These values are then interpolated using the automatic OpenGL interpolation rese
     \centering
     \includegraphics[scale=0.5]{images/mean-curvature-vertex-detail.png}
     \endminipage
-    \caption{Mean curvature per vertex} \label{fig:armadillo-mean-vertex}
+    \caption{Gouraud mean curvature} \label{fig:armadillo-mean-vertex}
 \end{figure}
 
 
-\subsection{Evaluation and Comparison between mean curvature per edge and mean curvature per vertex}
+\subsection{Evaluation and Comparison between constant mean curvature and gouraud mean curvature}
 \textit{Constant mean curvature} is a curvature per
 edge that return a constant color around each edge
 using the min diagram algorithm. The result is a noisy and sharped mesh that emphasizes edge. This visualization could be helpfull to show the quality of mesh triangulation and flows around surfaces. These last are observable because edge are directed allowing the user to better analyze curvatures (see Fig. \ref{fig:armadillo-mean-edge}). \textit{Gouraud mean curvature}, on the other hand, return blurry meshes than the ones obtained with  \textit{Gouraud Gaussian curvature}. This smooth is caused by the fact that we are averaging per vertex, mean curvature would be calculated per edge but in this case, we had applied it on vertices opposite to edges, this result in a losing of data (see Fig. \ref{fig:armadillo-mean-vertex}).
@@ -135,6 +135,6 @@ using the min diagram algorithm. The result is a noisy and sharped mesh that emp
     \centering
     \includegraphics[scale=0.42]{images/horse-mcv.png}
     \endminipage\hfill
-    \caption{On the left: Mean curvature per edge. On the right: Mean curvature per vertex.}
+    \caption{On the left: Mean curvature per edge. On the right: Gouraud mean curvature.}
     \label{fig:comparison-mce-mcv}
 \end{figure}

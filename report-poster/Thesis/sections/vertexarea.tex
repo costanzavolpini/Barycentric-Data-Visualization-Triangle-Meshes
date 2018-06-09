@@ -20,7 +20,7 @@ This section shows alternative methods to extend the idea of flat shading from t
 
 %%%%%%%%%%%%%
 
-\subsection{Max diagram - Vertex based area} \label{section:max-diagram}
+\subsection{Max diagram - Vertex area} \label{section:max-diagram}
 Passing barycentric coordinates to the \textit{fragment shader} will clearly demonstrate that we can get results different from the classic color interpolation.\cite{WEBSITE:redbloggames}
 %----------
 There are various approaches to color interpolation focusing on the distance from vertices. For each point in a triangle, we can easily determine its closest vertex, which we use as a cue for coloring.
@@ -160,8 +160,8 @@ $$K(V) = (2\pi - \sum_j \theta_j)/\mathcal{A}_{Mixed}$$
 
 %%%%%%%%
 
-\subsection{Constant Gaussian curvature per vertex}
-\textit{Constant Gaussian curvature per vertex} returns a constant color around each vertex (Fig. \ref{fig:gc-angle}, Pseudocode \ref{appendix:vs-gaussiancurvature}). Calculating the \textit{Gaussian curvature} per vertex, this value is mapped into a color range to get the curvature color (see Fig. \ref{fig:color-range-curvature}). This process is made separately for each vertex of the triangle and consequently, using the technique of max-diagram explained above (See section \ref{section:max-diagram}), the final resulting constant color is returned.
+\subsection{Constant Gaussian curvature}
+\textit{Constant Gaussian curvature} returns a constant color around each vertex using the max diagram algorithm(Fig. \ref{fig:gc-angle}, Pseudocode \ref{appendix:vs-gaussiancurvature}). Calculating the \textit{Gaussian curvature} per vertex, this value is mapped into a color range to get the curvature color (see Fig. \ref{fig:color-range-curvature}). This process is made separately for each vertex of the triangle and consequently, using the technique of max-diagram explained above (See section \ref{section:max-diagram}), the final resulting constant color is returned.
 \begin{figure}[!h]
     \centering
     \includegraphics[scale=1.2]{images/gradient-curvature.png}
@@ -179,13 +179,13 @@ $$K(V) = (2\pi - \sum_j \theta_j)/\mathcal{A}_{Mixed}$$
     \centering
     \includegraphics[scale=0.4]{images/gc-detail-armadillo-top.png}
     \endminipage
-    \caption{Constant Gaussian curvature per vertex} \label{fig:gc-detail}
+    \caption{Constant Gaussian curvature} \label{fig:gc-detail}
 \end{figure}
 
 
 
 \subsection{Gouraud Gaussian curvature}
-\textit{Gouraud Gaussian curvature} returns an interpolated color per vertex. The idea is to calculate the \textit{Gaussian curvature} as explained above (mapping the color into a color range to get the corresponding color per vertex) but instead of returning the constant color using a max-diagram approach, we just return the interpolation of values obtained for each triangle.
+\textit{Gouraud Gaussian curvature} computes the curvature per vertex, convert it to color, and linearly interpolate it. The idea is to calculate the \textit{Gaussian curvature} as explained above (mapping the color into a color range to get the corresponding color per vertex) but instead of returning the constant color using a max-diagram approach, we just return the interpolation of values obtained for each triangle.
 
 \begin{figure}[!h]
     \centering
@@ -202,12 +202,12 @@ $$K(V) = (2\pi - \sum_j \theta_j)/\mathcal{A}_{Mixed}$$
 
 
 \subsection{Evaluation and Comparison between constant Gaussian curvature per vertex and Gouraud Gaussian curvature}
-We compare the \textit{constant Gaussian curvature per vertex} (Fig. \ref{fig:gc-detail}) with the \textit{Gouraud Gaussian curvature} (Fig. \ref{fig:gci-detail}).
+We compare the \textit{constant Gaussian curvature} (Fig. \ref{fig:gc-detail}) with the \textit{Gouraud Gaussian curvature} (Fig. \ref{fig:gci-detail}).
 In Fig. \ref{fig:gc-detail} each vertex area is colored applying the method \textit{max diagram}. Instead, in Fig. \ref{fig:gci-detail} the color is obtained with a linear interpolation.
 Visualization of the principal curvatures of the model as colors from blue (highest values of curvature) to red (lower values of curvature) in Fig. \ref{fig:comparison-gc-gci} highlighs the geometry of meshes.
 These changes of curvature, positive (blue), flat (green) and negative regions (red), better emphasizes the 3-dimensionality of the model.
-\textit{Gouraud Gaussian curvature} is smoother, which results in a loss of small details. This is particularly evident in armadillo's legs mesh. Instead, \textit{constant Gaussian curvature per vertex} generates sharper edges with piecewise-flat regions which slightly degrades the 3-dimensional perception of the model.
-On the other hand, \textit{Constant Gaussian curvature per vertex} preserves the details of the given geometry, which can be particularly useful for data visualization purposes.
+\textit{Gouraud Gaussian curvature} is smoother, which results in a loss of small details. This is particularly evident in armadillo's legs mesh. Instead, \textit{constant Gaussian curvature} generates sharper edges with piecewise-flat regions which slightly degrades the 3-dimensional perception of the model.
+On the other hand, \textit{Constant Gaussian curvature} preserves the details of the given geometry, which can be particularly useful for data visualization purposes.
 
 \begin{figure}[!h]
     \centering
@@ -243,7 +243,7 @@ On the other hand, \textit{Constant Gaussian curvature per vertex} preserves the
     \centering
     \includegraphics[scale=0.75]{images/gci-horse.png}
     \endminipage
-    \caption{On the left: Constant Gaussian curvature per vertex. On the right: Gouraud Gaussian curvature.}
+    \caption{On the left: Constant Gaussian curvature. On the right: Gouraud Gaussian curvature.}
     \label{fig:comparison-gc-gci}
 \end{figure}
 

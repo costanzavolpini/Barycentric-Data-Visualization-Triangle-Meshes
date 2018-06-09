@@ -231,8 +231,8 @@ int main(int argc, char *argv[])
         glViewport(0, 0, current_width, current_height); // Render on the whole framebuffer, complete from the lower left corner to the upper right
 
         // render colours
-        // glClearColor(0.0f, 0.0f, 0.0f, 1.0f);               //black screen
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // white for poster and report
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);               //black screen
+        // glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // white for poster and report
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the depth buffer before each render iteration (otherwise the depth information of the previous frame stays in the buffer).
 
         projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 10.f);
@@ -624,15 +624,14 @@ void zoom_settings()
 
 void set_shader()
 {
-    // TODO: rename shading
     ImGui::TextWrapped("Set a shader experiment to see how the model looks like:\n\n");
-    ImGui::RadioButton("Flat Shading", &shader_set, 0);
-    ImGui::RadioButton("Flat Shading per vertex", &shader_set, 1);
-    ImGui::RadioButton("Gouraud Shading", &shader_set, 2);
-    ImGui::RadioButton("Constant Gaussian curvature per vertex", &shader_set, 3);
+    ImGui::RadioButton("Triangle flat shading", &shader_set, 0);
+    ImGui::RadioButton("Vertex flat shading", &shader_set, 1);
+    ImGui::RadioButton("Triangle Gouraud shading", &shader_set, 2);
+    ImGui::RadioButton("Constant Gaussian curvature", &shader_set, 3);
     ImGui::RadioButton("Gouraud Gaussian curvature", &shader_set, 4);
-    ImGui::RadioButton("Mean Curvature per edge", &shader_set, 5);
-    ImGui::RadioButton("Mean Curvature per vertex", &shader_set, 6);
+    ImGui::RadioButton("Constant mean curvature", &shader_set, 5);
+    ImGui::RadioButton("Gouraud mean curvature", &shader_set, 6);
 
     set_parameters_shader(shader_set);
 }

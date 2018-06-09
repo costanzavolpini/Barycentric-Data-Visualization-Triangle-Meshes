@@ -21,16 +21,27 @@ For example, the armadillo model has $15002$ vertices and $30000$ triangles, the
 
 Making computation per edge would also be more efficient, because edges are shared between $2$ triangles in a mesh.
 
-\subsection{Program}
-imgui screenshot e cosa puoi fare
+\subsection{Software}
+A software for alternative data visualization using the power of barycentric coordinates and GPU programming.
+\begin{figure}[!h]
+    \includegraphics[scale=0.4]{images/program.png}
+    \caption{Software}
+    \label{fig:software}
+\end{figure}
+It allows the user to upload different models, choose different shaders, zoom or rotate the model.
+On Fig. \ref{fig:software}, a \textit{constant Gaussian curvature} shader is set on the model using a $90 \; percentile$, on the right graphs plot Gaussian curvature values obtained for each vertex. The first graph shows the real values of Gaussian curvature without removing the outliers. The second graph shows just the values in the $90 \; percentile$ (then all the outliers were discarded).
 
 \subsection{Architecture}
-imgui opengl librerie esterne
+The software was developed in c++, for the real-time graphics programming (e.g. create the scene viewer, enabling the manipulation of 3D scenes) I have used OpenGL $3.3$ and GLSL.
 
+As graphical user interface I have used \textit{Dear ImGui} since it has no external dependencies and it is designed to create content creation tools and visualization/debug tools. It is suited to integration in games engine (for tooling), real-time 3D applications, fullscreen applications, embedded applications,or any applications on consoles platforms where operating system features are non-standard.
+
+To allow the creation of an OpenGL context, the defination of window parameters and to handle user input I have used the library \textit{GLFW3}.
+
+There are different versions of OpenGL drivers, to retrieve the location of the functions required and to store them in function pointers for later use, I have used the library \textit{GLAD} that load all relevant OpenGL functions according to that version at compile-time.
 
 \subsection{Comparison with meshlab}
 mettere tabelle
 
-% scrivere del fatto che #triangle > #vertices
-vertex shading is around half of calculations of triangle shading (more efficient)
+
 
