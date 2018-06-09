@@ -1,4 +1,4 @@
-\begin{lstlisting}[caption={Max diagram - Vertex area (Section: \ref{section:max-diagram})\label{appendix:max-diagram}}]
+\begin{lstlisting}[caption={Fragment Shader using max diagram - Vertex area (Section: \ref{section:max-diagram})\label{appendix:max-diagram}}]
     #version 330 core
 
     in vec3 coords;
@@ -6,7 +6,7 @@
     out vec4 fragColor;
 
     void main()
-    {
+    { // MAX DIAGRAM
             if (coords[0] > coords[1]) {
                 if (coords[0] > coords[2]) { // 0 > 1 && 0 > 2
                     fragColor = wedge_color[0];
@@ -28,14 +28,14 @@
 
 \vspace{10pt}
 
-\begin{lstlisting}[caption={Min diagram - Edge area (Section: \ref{section:min-diagram})\label{appendix:min-diagram}}]
+\begin{lstlisting}[caption={Fragment Shader using min diagram - Edge area (Section: \ref{section:min-diagram})\label{appendix:min-diagram}}]
     #version 330 core
     in vec3 coords;
     in vec4 wedge_color[3]; // an array of 3 vectors of size 4 (since it is a triangle)
     out vec4 fragColor;
 
     void main()
-    {
+    { // MIN DIAGRAM
         if (coords[0] < coords[1]) {
             if (coords[0] < coords[2]) {
                 fragColor = wedge_color[0];
@@ -53,10 +53,10 @@
             }
         }
     }
-\end{lstlisting}
+\end{lstlisting} \label{appendix:fragment-shader-min}
 \vspace{10pt}
 
-\begin{lstlisting}[caption={Edge structure} (Section \ref{section:edge-struct})]
+\begin{lstlisting}[caption={Edge structure} (Section \ref{section:edge-struct}\label{Pseudocode:edge})]
     struct edge
     {
         float norm_edge;
@@ -70,7 +70,7 @@
         float area_t1;
         float area_t2;
     };
-\end{lstlisting} \label{Pseudocode:edge}
+\end{lstlisting}
 
 \vspace{10pt}
 
@@ -174,7 +174,7 @@
 
 \vspace{10pt}
 
-\begin{lstlisting}[caption={Vertex Shader for constant/Gouraud Gaussian curvature and constant/Gouraud mean curvature (Sections: \ref{section:gc-curvature} and \ref{section:mc-curvature})}]
+\begin{lstlisting}[caption={Vertex Shader for constant/Gouraud Gaussian curvature and constant/Gouraud mean curvature (Sections: \ref{section:gc-curvature} and \ref{section:mc-curvature} \label{appendix:vs-curvature})}]
     #version 330 core
     layout (location = 0) in vec3 aPos;
     layout (location = 2) in vec3 gaussian_curvature;
@@ -235,7 +235,7 @@
     }
 \end{lstlisting}
 
-\begin{lstlisting}[caption={Geometry Shader for triangle flat shading, vertex flat shading, constant gaussian curvature, constant mean curvature (Sections: \ref{section:section:vertex-area-chapter} and \ref{section:edge-area-chapter})}]
+\begin{lstlisting}[caption={Geometry Shader for triangle flat shading, vertex flat shading, constant gaussian curvature, constant mean curvature (Sections: \ref{section:section:vertex-area-chapter} and \ref{section:edge-area-chapter}\label{appendix:geometry-shader})}]
     #version 330 core
 
     layout (triangles) in;
