@@ -125,7 +125,7 @@
         vec3 reflect_direction = - normalize(reflect(light_direction, normal));
         float specular_intensity = pow(max(dot(reflect_direction, view_direction), 0.0), shininess);
 
-        // get resulting colour
+        // get resulting color
         return light.specular * specular_intensity;
     }
 

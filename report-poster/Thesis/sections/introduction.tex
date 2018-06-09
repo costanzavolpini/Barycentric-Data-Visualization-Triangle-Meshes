@@ -86,21 +86,21 @@ Linear interpolation is a method that will return equal spacing between the inte
 $$ n = n_1 + t (n_2 - n_1)$$
 
 
-The standard linear interpolated visualisation is made passing three attributes (colours) to each vertex of a triangle. OpenGL will interpolate these colors linearly thanks to the barycentric coordinates that will tell how much of each color is being mixed at any position.
+The standard linear interpolated visualisation is made passing three attributes (colors) to each vertex of a triangle. OpenGL will interpolate these colors linearly thanks to the barycentric coordinates that will tell how much of each color is being mixed at any position.
 Given a triangle $[p_1, p_2, p_3]$, where the color blue is passed to vertex $p_1$, red to $p_2$, and green to $p_3$, let be $w_1$ the blue area, $w_2$ the red area and $w_3$ the green area (See Fig. \ref{fig:barycentric-coord}). Let us define the value at $p$ as a \textit{barycentric interpolation} $$(w_1p_1 + w_2p_2 + w_3p_3)/W$$ where $W$ is the area of the triangle $[p_1, p_2, p_3]$.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{Flat Shading}
-\textit{Flat shading} is a way to compute the colour at each pixel (at a corner or the barycentre) using the triangle normal.
-Given a triangle $[p_1, p_2, p_3]$, the lighting is computed using the normal $n$ $$\widehat{n} = (p_2 - p_1) \times (p_3 - p_1) \;\;\;\;\;\;\;\; n = \frac{ \widehat{n} } { ||\widehat{n}|| } $$ at $p= (p_1 + p_2 + p_3)/3$. This colour is then used for all pixels. Flat shading gives objects with flat facets.
+\textit{Flat shading} is a way to compute the color at each pixel (at a corner or the barycentre) using the triangle normal.
+Given a triangle $[p_1, p_2, p_3]$, the lighting is computed using the normal $n$ $$\widehat{n} = (p_2 - p_1) \times (p_3 - p_1) \;\;\;\;\;\;\;\; n = \frac{ \widehat{n} } { ||\widehat{n}|| } $$ at $p= (p_1 + p_2 + p_3)/3$. This color is then used for all pixels. Flat shading gives objects with flat facets.
 \cite{SLIDE:ICORSI}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{Gouraud Shading}
-\textit{Gouraud Shading} is a way to compute the colour at each pixel assigning a normal to each corner of a triangle and after having computed the color for each corner it linearly interpolates these colour values (see Sections \ref{section:barycentric-coord} and \ref{section:linear-interpolation}).
+\textit{Gouraud Shading} is a way to compute the color at each pixel assigning a normal to each corner of a triangle and after having computed the color for each corner it linearly interpolates these color values (see Sections \ref{section:barycentric-coord} and \ref{section:linear-interpolation}).
 Given a triangle $[p_1, p_2, p_3]$ and the normal at each corner $n_1, n_2, n_3$.
-The lighting is computed at $p_i$ using normal $n_i$ this applied to each corner return the colour values $c_1, c_2, c_3$.
+The lighting is computed at $p_i$ using normal $n_i$ this applied to each corner return the color values $c_1, c_2, c_3$.
 These colors are then linearly interpolate $c = {\mu}_1 c_1 + {\mu}_2 c_2 + {\mu}_3 c_3$. Gouraud shading gives objects that appear more smooth. \cite{SLIDE:ICORSI}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
