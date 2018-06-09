@@ -1,5 +1,5 @@
 \label{section:vertex-area-chapter}
-This section shows alternative methods to extend the idea of flat shading from triangles to vertices. The idea of flat shading is to draw all the pixels of a triangle with the same color. The extension of this approach is to split the surface of the triangle mesh likewise into regions around vertices and draw all pixels in these regions with the same color (Fig. \ref{fig:vertex-area}), thus visualizing data given at the vertices of the mesh in a piecewise constant, not necessarily continuous way, resembles the classical triangle flat shading. The aforementioned regions can easily be defined using barycentric coordinates and a simple GPU fragment program (Fig. \ref{fig:max-diagram}) can be used for each pixel to find out to which region it belongs and which color it should be painted with. At the end of the section is presented another interesting alternative data visualization technique given by the Gaussian curvature.
+This section shows alternative methods to extend the idea of flat shading from triangles to vertices. The idea of flat shading is to draw all the pixels of a triangle with the same color. The extension of this approach is to split the surface of the triangle mesh likewise into regions around vertices and draw all pixels in these regions with the same color (Fig. \ref{fig:max-diagram-vertex-area}), thus visualizing data given at the vertices of the mesh in a piecewise constant, not necessarily continuous way, resembles the classical triangle flat shading. The aforementioned regions can easily be defined using barycentric coordinates and a simple GPU fragment program (Fig. \ref{fig:max-diagram-vertex-area}) can be used for each pixel to find out to which region it belongs and which color it should be painted with. At the end of the section is presented another interesting alternative data visualization technique given by the Gaussian curvature.
 
 %%%%%%%%%%%%%
 
@@ -9,13 +9,20 @@ This section shows alternative methods to extend the idea of flat shading from t
     \minipage[b]{.5\linewidth}
     \centering
     \includegraphics[scale=0.15]{images/max.png}
-    \caption{Max diagram}\label{fig:max-diagram}
     \endminipage\hfill
-    \minipage[b]{.5\linewidth}
+    \minipage[b]{.555\linewidth}
     \centering
-    \includegraphics[scale=0.15]{images/vertex-area.png}
-    \caption{Region around a vertex}\label{fig:vertex-area}
+    \scalebox{0.5}{\begin{tikzpicture}
+        \coordinate (J) at (3.8,3.6);
+        \node[anchor=south west,inner sep=0] at (0,0) {\includegraphics[scale=0.25]{images/vertex-area.png}};
+        \draw (J) node [below left] {$j$};
+        \filldraw (3.5,2.7) circle (2pt);
+        \begin{scope}[line width=0.4mm, line cap=round]
+            \draw (3.9,2.2) arc (295:360:0.7cm) node[near start,right] {$\theta_j$};
+        \end{scope}
+    \end{tikzpicture}}
     \endminipage
+    \caption{On the left: Application of max diagram algorithm on a triangle. On the right: region around a vertex, angle defect is denoted with $\theta_j$.} \label{fig:max-diagram-vertex-area}
 \end{figure}
 
 %%%%%%%%%%%%%
@@ -25,7 +32,7 @@ Passing barycentric coordinates to the \textit{fragment shader} will clearly dem
 %----------
 There are various approaches to color interpolation focusing on the distance from vertices. For each point in a triangle, we can easily determine its closest vertex, which we use as a cue for coloring.
 Another approach, different from the above, can be defined as coloring vertex areas based on the maximum barycentric coordinate.
-The color is given by the region closest to a vertex (Fig. \ref{fig:max-diagram}, Pseudocode \ref{appendix:max-diagram}).
+The color is given by the region closest to a vertex (Fig. \ref{fig:max-diagram-vertex-area}, Pseudocode \ref{appendix:max-diagram}).
 
 %%%%%%%%%%%%%
 
@@ -40,7 +47,7 @@ In order to return the resulting color using the \textit{max diagram} algorithm,
     \centering
     \minipage[b]{.3\linewidth}
     \centering
-    \includegraphics[scale=0.3]{images/armadillo-extendfs.png}
+    \includegraphics[scale=0.355]{images/armadillo-extendfs.png}
     \endminipage\hfill
     \minipage[b]{.3\linewidth}
     \centering
@@ -139,34 +146,19 @@ The standard approaches: \textit{triangle flat shading} and \textit{triangle Gou
 \subsection{Gaussian curvature}
 \label{section:vertex-area-gaussian-curvature}
 Another interesting alternative data visualization technique is given computing the \textit{Gaussian curvature} per vertex. That can be done summing up, for each vertex, angles at this vertex with adjacent triangles and then subtracting this value from $2\pi$.
-Having obtained this value, called \textit{angle defect} (Fig. \ref{fig:gc-angle}), we map it linearly to a color range.
+Having obtained this value, called \textit{angle defect} (Fig. \ref{fig:max-diagram-vertex-area}), we map it linearly to a color range.
 The resulting color will be the vertex flat shading visualisation of \textit{Gaussian curvature} (See Section \ref{section:localaveraging} and \ref{section:gaussian-curvature-intro}).
 $$K(V) = (2\pi - \sum_j \theta_j)/\mathcal{A}_{Mixed}$$
-%%
-\begin{figure}[!h]
-    \centering
-    \scalebox{0.65}{\begin{tikzpicture}
-        \coordinate (J) at (3.8,3.6);
-        \node[anchor=south west,inner sep=0] at (0,0) {\includegraphics[scale=0.25]{images/vertex-area.png}};
-        \draw (J) node [below left] {$j$};
-        \filldraw (3.5,2.7) circle (2pt);
-        \begin{scope}[line width=0.4mm, line cap=round]
-            \draw (3.9,2.2) arc (295:360:0.7cm) node[near start,right] {$\theta_j$};
-        \end{scope}
-    \end{tikzpicture}}
-    \caption{On the left: angle defect is denoted with $\theta_j$.}\label{fig:gc-angle}
-\end{figure}
-%%
 
 %%%%%%%%
 
 \subsection{Constant Gaussian curvature}
 \label{section:gc-curvature}
-\textit{Constant Gaussian curvature} returns a constant color around each vertex using the max diagram algorithm (Fig. \ref{fig:gc-angle}, pseudocode \ref{appendix:vs-curvature}). The value $K(V)$ is mapped into a color range to get the corresponding curvature color (see Fig. \ref{fig:color-range-curvature}). This process is made separately for each vertex of the triangle and consequently, using the technique of max-diagram explained above (see section \ref{section:max-diagram}), the final resulting constant color is returned.
+\textit{Constant Gaussian curvature} returns a constant color around each vertex using the max diagram algorithm (Fig. \ref{fig:max-diagram-vertex-area}, pseudocode \ref{appendix:vs-curvature}). The value $K(V)$ is mapped into a color range to get the corresponding curvature color (see Fig. \ref{fig:color-range-curvature}). This process is made separately for each vertex of the triangle and consequently, using the technique of max-diagram explained above (see section \ref{section:max-diagram}), the final resulting constant color is returned.
 \begin{figure}[!h]
     \centering
     \includegraphics[scale=0.4]{images/gradient-curvature.png}
-    \caption{Color bar showing respective colors for negative, flat and positive curvatures. Negative curvatures are mapped to red, flat curvatures to green and positive curvatures to blue.} \label{fig:color-range-curvature}
+    \caption{Color bar showing respective colors for negative, flat and positive curvatures. Negative curvatures are mapped to red, flat curvatures to green and positive curvatures to blue on a Gouraud Gaussian curvature.} \label{fig:color-range-curvature}
 \end{figure}
 
 
