@@ -81,7 +81,9 @@ class Object
             return;
         }
 
-        cout << _path << endl;
+        // cout << _path << endl;
+        // cout << "GC ["<<  *min_element(triangle_gc.begin(), triangle_gc.end()) << ", " << *max_element(triangle_gc.begin(), triangle_gc.end()) << "]" << endl;
+        // cout << "MC ["<< *min_element(triangle_mc_vertex.begin(), triangle_mc_vertex.end()) <<", " <<  *max_element(triangle_mc_vertex.begin(), triangle_mc_vertex.end()) << "]"<< endl;
     }
 
     // Function to initialize VBO and VAO
