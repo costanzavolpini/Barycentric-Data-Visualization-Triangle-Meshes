@@ -21,7 +21,7 @@ A different approach from interpolating, can be found coloring vertex areas base
 The color is given by the region farthest from a vertex (Fig. \ref{fig:min-diagram}, Pseudocode \ref{appendix:min-diagram}).
 
 \subsection{Mean Curvature} \label{section:edge-struct} \label{section:mc-curvature}
-Access to mesh edges requires to set up a list of edges over triangles. To avoid redundant datas we have decided to use the convention that an edge would be count only if it goes from a lower to higher vertex. An edge structure looks like the one in the pseudocode \ref{Pseudocode:edge}, where index\_v1 and index\_v2 are the indexes vertices, norm\_edge is the length of edge, n1 and n2 are the normals of triangles, cot\_alpha and cot\_beta are the cotangents of opposite angles to the edge, area\_t1 and area\_t2 are the areas of triangles.
+Access to mesh edges requires to set up a list of edges over triangles. To avoid redundant datas we have apply the convention that an edge would be count only if it goes from a lower to higher vertex. An edge structure looks like the one in the pseudocode \ref{Pseudocode:edge}, where index\_v1 and index\_v2 are the indexes vertices, norm\_edge is the length of edge, n1 and n2 are the normals of triangles, cot\_alpha and cot\_beta are the cotangents of opposite angles to the edge, area\_t1 and area\_t2 are the areas of triangles.
 
 \subsection{Constant Mean Curvature}
 \textit{Constant mean Curvature} returns a constant color around each edge (See Fig. \ref{fig:armadillo-mean-edge}). It first calculate the mean curvature for each edge:
@@ -34,7 +34,7 @@ where $\theta_E$ is the angle between the two normals of $T_1$ and $T_2$ (See Fi
 \end{figure}
 The mean curvature for each vertex $V$ of a mesh is defined as:
 $$H(E) = \frac{1}{2\mathcal{A}_{Barycentre}} \sum_{i = 1}^n ||E_i||(\theta_E/2)$$
-This value is then normalized since it is an integral value. Every value is then mapped to positive or negative curvature, depending if the mesh at this edge is convex or concave, testing the $3D$ determinant of the 3-by-3 matrix $M = [e, n_1, n_2]$ with those three vectors as
+This value is then normalized since it is an integral value. Every value is then mapped to positive or negative curvature, depending if the mesh at this edge is convex or concave, this can be known testing the $3D$ determinant of the 3-by-3 matrix $M = [e, n_1, n_2]$ with those three vectors as
 columns ($e$ is the edge $[W, V]$, $n_1$ is the normal of $T_1$ and $n_2$ is the normal of $T_2$). If $det(M) > 0$ then the mesh is convex at $[W, V]$ and the mean curvature would be positive, else the mesh is concave and the mean curvature would be negative. This technique of edge flat shading represents an alternative to the classic triangle flat shading.
 
 \begin{figure}[!h]

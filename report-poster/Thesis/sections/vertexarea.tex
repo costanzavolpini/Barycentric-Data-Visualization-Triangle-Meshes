@@ -1,5 +1,5 @@
 \label{section:vertex-area-chapter}
-This section shows alternative methods to extend the idea of flat shading from triangles to vertices. The idea of flat shading is to draw all the pixels of a triangle with the same color. The extension of this approach is to split the surface of the triangle mesh likewise into regions around vertices and draw all pixels in these regions with the same color (Fig. \ref{fig:vertex-area}), thus visualizing data given at the vertices of the mesh in a piecewise constant, not necessarily continuous way, resembling the classical triangle flat shading. The aforementioned regions can easily be defined using barycentric coordinates and a simple GPU fragment program (Fig. \ref{fig:max-diagram}) can be used for each pixel to find out to which region it belongs and which color it should be painted with.
+This section shows alternative methods to extend the idea of flat shading from triangles to vertices. The idea of flat shading is to draw all the pixels of a triangle with the same color. The extension of this approach is to split the surface of the triangle mesh likewise into regions around vertices and draw all pixels in these regions with the same color (Fig. \ref{fig:vertex-area}), thus visualizing data given at the vertices of the mesh in a piecewise constant, not necessarily continuous way, resembles the classical triangle flat shading. The aforementioned regions can easily be defined using barycentric coordinates and a simple GPU fragment program (Fig. \ref{fig:max-diagram}) can be used for each pixel to find out to which region it belongs and which color it should be painted with.
 
 %%%%%%%%%%%%%
 
@@ -21,7 +21,7 @@ This section shows alternative methods to extend the idea of flat shading from t
 %%%%%%%%%%%%%
 
 \subsection{Max diagram - Vertex area} \label{section:max-diagram}
-Passing barycentric coordinates to the \textit{fragment shader} will clearly demonstrate that we can get results different from the classic color interpolation.\cite{WEBSITE:redbloggames}
+Passing barycentric coordinates to the \textit{fragment shader} will clearly demonstrate that we can get different results from the classic color interpolation. \cite{WEBSITE:redbloggames}
 %----------
 There are various approaches to color interpolation focusing on the distance from vertices. For each point in a triangle, we can easily determine its closest vertex, which we use as a cue for coloring.
 Another approach, different from the above, can be defined as coloring vertex areas based on the maximum barycentric coordinate.
@@ -34,7 +34,7 @@ An extension of \textit{flat shading} would be to have each vertex area to be in
 The color will then be computed as in \textit{Gouraud shading}.
 The idea is to compute the color per vertex but instead of linearly interpolating it in each triangle (as \textit{Gouraud shading} does) we color regions around a vertex with that constant color (using the GPU fragment program: max diagram \ref{section:max-diagram}).
 To implement this approach, the barycentric coordinates, the vertex color, the normal at the vertex and the lighting calculations must be passed to the \textit{fragment shader}.
-We want to avoid the automatic interpolation of colors. In order to return the resulting color using the \textit{max diagram}, we have used a \textit{Geometry shader} that has access to all three vertex colors in \textit{fragment shader}. (Pseudocodes: \ref{appendix:vs-flat-shading-lighting}, \ref{appendix:gs-flat-shading-lighting}, \ref{appendix:fs-flat-shading-lighting})
+We want to avoid the automatic interpolation of colors provided by OpenGL. In order to return the resulting color using the \textit{max diagram} algorithm, we have used a \textit{Geometry shader} that has access to all three vertex colors in \textit{fragment shader}. (Pseudocodes: \ref{appendix:vs-flat-shading-lighting}, \ref{appendix:gs-flat-shading-lighting}, \ref{appendix:fs-flat-shading-lighting})
 
 \begin{figure}[!h]
     \centering
@@ -138,7 +138,7 @@ The standard approaches: \textit{triangle flat shading} and \textit{triangle Gou
 %%%
 \subsection{Gaussian curvature}
 \label{section:vertex-area-gaussian-curvature}
-Another interesting alternative data visualization technique is to compute the \textit{Gaussian curvature} per vertex. That can be done summing up, for each vertex, angles at this vertex with adjacent triangles and then subtracting this value from $2\pi$.
+Another interesting alternative data visualization technique is given computing the \textit{Gaussian curvature} per vertex. That can be done summing up, for each vertex, angles at this vertex with adjacent triangles and then subtracting this value from $2\pi$.
 Having obtained this value, called \textit{angle defect} (Fig. \ref{fig:gc-angle}), we map it linearly to a color range.
 The resulting color will be the vertex flat shading visualisation of \textit{Gaussian curvature} (See Section \ref{section:localaveraging} and \ref{section:gaussian-curvature-intro}).
 $$K(V) = (2\pi - \sum_j \theta_j)/\mathcal{A}_{Mixed}$$
@@ -162,11 +162,11 @@ $$K(V) = (2\pi - \sum_j \theta_j)/\mathcal{A}_{Mixed}$$
 
 \subsection{Constant Gaussian curvature}
 \label{section:gc-curvature}
-\textit{Constant Gaussian curvature} returns a constant color around each vertex using the max diagram algorithm(Fig. \ref{fig:gc-angle}, Pseudocode \ref{appendix:vs-gaussiancurvature}). Calculating the \textit{Gaussian curvature} per vertex, this value is mapped into a color range to get the curvature color (see Fig. \ref{fig:color-range-curvature}). This process is made separately for each vertex of the triangle and consequently, using the technique of max-diagram explained above (See section \ref{section:max-diagram}), the final resulting constant color is returned.
+\textit{Constant Gaussian curvature} returns a constant color around each vertex using the max diagram algorithm(Fig. \ref{fig:gc-angle}, Pseudocode \ref{appendix:vs-gaussiancurvature}). The value $K(V)$ is mapped into a color range to get the corresponding curvature color (see Fig. \ref{fig:color-range-curvature}). This process is made separately for each vertex of the triangle and consequently, using the technique of max-diagram explained above (See section \ref{section:max-diagram}), the final resulting constant color is returned.
 \begin{figure}[!h]
     \centering
-    \includegraphics[scale=1.2]{images/gradient-curvature.png}
-    \caption{Color bar showing respective colors for negative, flat and positive curvatures. Negative curvatures are colored in red, flat curvatures in green and positive curvatures in blue.} \label{fig:color-range-curvature}
+    \includegraphics[scale=0.4]{images/gradient-curvature.png}
+    \caption{Color bar showing respective colors for negative, flat and positive curvatures. Negative curvatures are mapped to red, flat curvatures to green and positive curvatures to blue.} \label{fig:color-range-curvature}
 \end{figure}
 
 
@@ -204,8 +204,8 @@ $$K(V) = (2\pi - \sum_j \theta_j)/\mathcal{A}_{Mixed}$$
 
 \subsection{Evaluation and Comparison between constant Gaussian curvature per vertex and Gouraud Gaussian curvature}
 We compare the \textit{constant Gaussian curvature} (Fig. \ref{fig:gc-detail}) with the \textit{Gouraud Gaussian curvature} (Fig. \ref{fig:gci-detail}).
-In Fig. \ref{fig:gc-detail} each vertex area is colored applying the method \textit{max diagram}. Instead, in Fig. \ref{fig:gci-detail} the color is obtained with a linear interpolation.
-Visualization of the principal curvatures of the model as colors from blue (highest values of curvature) to red (lower values of curvature) in Fig. \ref{fig:comparison-gc-gci} highlighs the geometry of meshes.
+In Fig. \ref{fig:gc-detail} each vertex area is colored applying the \textit{max diagram} algorithm. Instead, in Fig. \ref{fig:gci-detail} the color is obtained with a linear interpolation.
+Visualization of the principal curvatures of the model as colors from blue (highest values of curvature) to red (lower values of curvature) highlighs the geometry of meshes in Fig. \ref{fig:comparison-gc-gci}.
 These changes of curvature, positive (blue), flat (green) and negative regions (red), better emphasizes the 3-dimensionality of the model.
 \textit{Gouraud Gaussian curvature} is smoother, which results in a loss of small details. This is particularly evident in armadillo's legs mesh. Instead, \textit{constant Gaussian curvature} generates sharper edges with piecewise-flat regions which slightly degrades the 3-dimensional perception of the model.
 On the other hand, \textit{Constant Gaussian curvature} preserves the details of the given geometry, which can be particularly useful for data visualization purposes.
