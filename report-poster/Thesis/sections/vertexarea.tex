@@ -8,11 +8,11 @@ This section shows alternative methods to extend the idea of flat shading from t
     \centering
     \minipage[b]{.5\linewidth}
     \centering
-    \includegraphics[scale=0.15]{images/max.png}
+    \includegraphics[scale=0.13]{images/max.png}
     \endminipage\hfill
     \minipage[b]{.5\linewidth}
     \centering
-    \scalebox{0.53}{\begin{tikzpicture}
+    \scalebox{0.45}{\begin{tikzpicture}
         \coordinate (J) at (3.8,3.6);
         \node[anchor=south west,inner sep=0] at (0,0) {\includegraphics[scale=0.25]{images/vertex-area.png}};
         \draw (J) node [below left] {$j$};
@@ -139,7 +139,7 @@ The standard approaches: \textit{triangle flat shading} and \textit{triangle Gou
     \includegraphics[scale=0.39]{images/horse-efs.png}
     \endminipage\hfill
     \caption{On the left: Triangle flat shading. On the center: Triangle Gouraud shading. On the right: Vertex flat shading.}
-    \label{fig:comparison-gc-gci}
+    \label{fig:comparison-fs-efs-gs}
 \end{figure}
 
 %%%
@@ -157,7 +157,7 @@ $$K(V) = (2\pi - \sum_j \theta_j)/\mathcal{A}_{Mixed}$$
 \textit{Constant Gaussian curvature} returns a constant color around each vertex using the max diagram algorithm (Fig. \ref{fig:max-diagram-vertex-area}, pseudocode \ref{appendix:vs-curvature}). The value $K(V)$ is mapped into a color range to get the corresponding curvature color (see Fig. \ref{fig:color-range-curvature}). This process is made separately for each vertex of the triangle and consequently, using the technique of max-diagram explained above (see section \ref{section:max-diagram}), the final resulting constant color is returned.
 \begin{figure}[!h]
     \centering
-    \includegraphics[scale=0.4]{images/gradient-curvature.png}
+    \includegraphics[width=6cm]{images/gradient-curvature.png}
     \caption{Color bar showing respective colors for negative, flat and positive curvatures. Negative curvatures are mapped to red, flat curvatures to green and positive curvatures to blue on a Gouraud Gaussian curvature.} \label{fig:color-range-curvature}
 \end{figure}
 

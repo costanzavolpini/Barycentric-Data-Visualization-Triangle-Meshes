@@ -1,7 +1,7 @@
 \subsection{Normals}
 For each triangle $T=[p_1, p_2, p_3]$ of a triangle mesh, the normal is defined as
 $$n(T) = \frac{(p_2 - p_1) \times (p_3 - p_1)}{||(p_2 - p_1) \times (p_3 - p_1)||}$$
-The normal along each edge $E$ is the halfway between the normals of two adjacent triangles $T_1$ and $T_2$
+The normal along each edge $E$ is halfway between the normals of two adjacent triangles $T_1$ and $T_2$
 $$n(E) = \frac{n(T_1) + n(T_2)}{||n(T_1) + n(T_2)||}$$
 The normal at vertex $V$ is obtained averaging the normals of the $n$ adjacent triangles
 $$n(V) = \frac{\sum_{i =1}^n \gamma_i n(T_i)}{||\sum_{i =1}^n \gamma_i n(T_i)||}$$
@@ -13,14 +13,13 @@ where $\gamma_i$ can be a constant value, equals to the triangle area or equals 
 Let assume that a mesh is a piecewise linear approximation of a smooth surface.
 A mesh can be constructed either as the limit of a family of smooth surfaces or as a linear approximation of an arbitrary surface. For each vertex of the neighbouring triangles (\textit{one-ring}), we can choose an associated surface patch over which the average of geometric properties will be computed.
 Let $\mathcal{A}_{Barycenter}$ be the area formed using barycenters and $\mathcal{A}_{Voronoi}$ the one formed using \textit{Voronoi} cell. The general case is represented by a point that can be anywhere, let's denote this surface area $\mathcal{A}_M$.
-
 \begin{figure}[!h]
     \centering
     \includegraphics[scale=0.35]{images/localregions.png}
     \caption{Local averaging regions used for computing discrete differential operators associated with the center vertex of the one-ring neighborhood. $c_i$ corresponds to: the barycentre of the triangle in the Barycentric cell, the circumcenter of the triangle in the Voronoi cell. Let denominate $\theta$ the angle between $c_i$ and $c_{i+1}$. If $\theta < \frac{\pi}{2}$ then $c_i$ is on the circumcenter of triangle $[v_i, v, v_{i+1}]$, else $c_i$ is the midpoint of the edge $[v, v_{i+1}]$ in mixed Voronoi cell.  \cite{polygonmeshprocessing}} \label{fig:localregions}
 \end{figure}
-\textit{Voronoi} cell of each vertex is an appropriate local region that provide a stable error bounds.
-The \textit{Voronoi} region for a point $P$ of a non-obtuse triangle $[P, Q, R]$ is expressed as $\frac{1}{8}(| PR|^2 cot \angle Q + |PQ |^2 cot \angle R)$. The sum of these areas for the whole \textit{1-ring neighborhood} gives the non-obtuse \textit{Voronoi} area for a vertex. The above expression for the \textit{Voronoi} finite-volume area does not hold in case of obtuse angles. Let's define a new surface area for each vertex denoted $\mathcal{A}_{Mixed}$. Essentially the idea is to use the circumcenter point for each non-obtuse triangle and to use the midpoint of the edge opposite to the obtuse angle in case of an obtuse triangle. (See Fig. \ref{fig:localregions} and pseudocode \ref{appendix:localaveraging}). \cite{meshlab}
+\textit{Voronoi} cell of each vertex is an appropriate local region that provides a stable error bounds.
+The \textit{Voronoi} region for a point $P$ of a non-obtuse triangle $[P, Q, R]$ is expressed as $\frac{1}{8}(| PR|^2 cot \angle Q + |PQ |^2 cot \angle R)$. The sum of these areas for the whole \textit{1-ring neighborhood} gives the non-obtuse \textit{Voronoi} area for a vertex. The above expression for the \textit{Voronoi} finite-volume area does not hold in case of obtuse angles. Let's define a new surface area for each vertex denoted $\mathcal{A}_{Mixed}$. Essentially the idea is to use the circumcenter point for each non-obtuse triangle and to use the midpoint of the edge opposite to the obtuse angle in case of an obtuse triangle. (see Fig. \ref{fig:localregions} and pseudocode \ref{appendix:localaveraging}). \cite{meshlab}
 
 \subsection{Gaussian Curvature} \label{section:gaussian-curvature-intro}
 The \textit{Gaussian curvature} $K$ is defined as the product of the principal curvatures:
@@ -51,7 +50,7 @@ angle between the normals of adjacent triangles (see Fig. \ref{fig:mean-curvatur
 
 \begin{figure}[!h]
   \centering
-\includegraphics[scale=0.5]{images/mean_curvature_paper.png}
+\includegraphics[width=11.5cm]{images/mean_curvature_paper.png}
 \caption{A vertex $V$ with its neighbouring vertices $V_i$ and adjacent triangles $T_i$. Angles opposite the edge $E_i$ are denoted by $\alpha_i$ and $\beta_i$. The
 angle between the normals of adjacent triangles $T_1$ and $T_2$ with positive or negative sign is denoted as ${\theta}_E$. \cite{geometryprocessing}}\label{fig:mean-curvature}
 \end{figure}
@@ -63,9 +62,9 @@ The \textit{mean curvature} at the vertex $V$ is defined as $$H(V) = \frac{1}{2}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{Mean Curvature Vector}
-Let be $H = H n$ the surface normal vector scaled by the \textit{mean curvature} to derive the discrete mean curvature vector associated to the mesh edge $E=[V, W]$:
-$$ H(E) = \int_{C(E)} HdA = \frac{1}{2} (V-W) \times (n(T_1) - n(T_2))$$
-The length of $H(E)$ gives the edge mean curvature $H(E) = ||H(E) || = ||E|| sin(\theta_E/2)$. The discrete mean curvature vector associated to $V$ can be obtained averaging $H(E)$ over the edges adjacent to a vertex $V$
-$$H(V) = \frac{1}{2} \sum_{i=1}^{n} H(E_i) = \frac{1}{4}\sum_{i=1}^n (\cot \alpha_i + \cot \beta_i)(V - V_i)$$
+Let $\bm{H} = H n$ be the surface normal vector scaled by the \textit{mean curvature}. We can integrate it over the $C(E)$ to derive the discrete mean curvature vector associated to the mesh edge $E=[V, W]$:
+$$ \bm{H}(E) = \int_{C(E)} \bm{H}dA = \frac{1}{2} (V-W) \times (n(T_1) - n(T_2))$$
+The length of $H(E)$ gives the edge mean curvature $H(E) = ||\bm{H}(E) || = ||E|| sin(\theta_E/2)$. The discrete mean curvature vector associated to $V$ can be obtained averaging $\bm{H}(E)$ over the edges adjacent to a vertex $V$
+$$\bm{H}(V) = \frac{1}{2} \sum_{i=1}^{n} \bm{H}(E_i) = \frac{1}{4}\sum_{i=1}^n (\cot \alpha_i + \cot \beta_i)(V - V_i)$$
 where $\alpha_i$ and $\beta_i$ are angles opposite to $E_i$ (see Fig. \ref{fig:mean-curvature}).
 \cite{geometryprocessing}
