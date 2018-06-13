@@ -49,15 +49,15 @@ It provides a set of tools for editing, cleaning, healing, inspecting, rendering
     \centering
 \begin{tabular}{l*{6}{c}r}
     \centering
-    Model              & our software &  meshlab \\
+    Model              & our software &  meshlab   & absolute difference\\
     \hline
-    Armadillo          & [-33034.2, 90017.9] & [-33033.843750, 90019.632812] \\
-    Eight              & [-116.89, 58.3357] & [-116.889397, 58.335678] \\
-    Genus3             & [-1753.2, 209.183] & [-1753.197632, 209.180344]  \\
-    Horse              & [-321731, 1.93041e+06] &  [-4177.138184, 4853.229004]\\
-    Icosahedron\_1      &  [1.06991, 1.07979] & [1.069908, 1.079790] \\
-    Icosahedron\_2      &  [1.01461, 1.02012] & [1.014615, 1.020121] \\
-    Icosahedron\_3      & [1.00291, 1.00519] &  [1.002954, 1.005204]
+    Armadillo          & [-33034.2, 90017.9] & [-33033.843750, 90019.632812] & [0.35625, 1.732812] \\
+    Eight              & [-116.89, 58.3357] & [-116.889397, 58.335678] & [0, 0] \\
+    Genus3             & [-1753.2, 209.183] & [-1753.197632, 209.180344] & [0, 0]  \\
+    Horse              & [-321731, 1.93041e+06] &  [-4177.138184, 4853.229004] & [317,553.86 1,925,556.77]\\
+    Icosahedron\_1      &  [1.06991, 1.07979] & [1.069908, 1.079790] & [0, 0] \\
+    Icosahedron\_2      &  [1.01461, 1.02012] & [1.014615, 1.020121] & [0, 0] \\
+    Icosahedron\_3      & [1.00291, 1.00519] &  [1.002954, 1.005204] & [0, 0]
 \end{tabular}
 \caption{Comparative table: our Gouraud Gaussian curvature values ([min, max]) and meshlab Gouraud Gaussian curvature values ([min, max])}
 \label{table:table-gaussian-meshlab}
@@ -69,15 +69,15 @@ It provides a set of tools for editing, cleaning, healing, inspecting, rendering
     \centering
 \begin{tabular}{l*{6}{c}r}
     \centering
-    Model              & our software &  meshlab \\
+    Model              & our software &  meshlab  & absolute difference\\
     \hline
-    Armadillo          & [-289.74, 392.54] & [-289.739105, 392.536896] \\
-    Eight              & [1.34736, 10.9581] & [1.347356, 10.958117] \\
-    Genus3             & [-7.02334, 117.345] & [-7.023277, 117.344765]  \\
-    Horse              & [-500.961, 1202.51] &  [-500.956573, 1202.507446]\\
-    Icosahedron\_1      &  [0.999998, 1] & [0.999998, 1.000002] \\
-    Icosahedron\_2      &  [0.999989, 1.00009] & [0.999989, 1.000094] \\
-    Icosahedron\_3      & [0.99993, 1.00007] &  [0.999930, 1.000075]
+    Armadillo          & [-289.74, 392.54] & [-289.739105, 392.536896] & [0, 0]\\
+    Eight              & [1.34736, 10.9581] & [1.347356, 10.958117] & [0, 0]\\
+    Genus3             & [-7.02334, 117.345] & [-7.023277, 117.344765] & [0, 0] \\
+    Horse              & [-500.961, 1202.51] &  [-500.956573, 1202.507446] & [0, 0]\\
+    Icosahedron\_1      &  [0.999998, 1] & [0.999998, 1.000002] & [0, 0]\\
+    Icosahedron\_2      &  [0.999989, 1.00009] & [0.999989, 1.000094]& [0, 0] \\
+    Icosahedron\_3      & [0.99993, 1.00007] &  [0.999930, 1.000075] & [0, 0]
 \end{tabular}
 \caption{Comparative table: our Gouraud mean curvature values ([min, max]) and meshlab Gouraud mean curvature values ([min, max])}
 \label{table:table-mean-meshlab}
