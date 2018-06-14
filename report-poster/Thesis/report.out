@@ -1,0 +1,38 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [2][-]{subsection.1.1}{Barycentric coordinates}{section.1}% 2
+\BOOKMARK [2][-]{subsection.1.2}{Triangle meshes}{section.1}% 3
+\BOOKMARK [2][-]{subsection.1.3}{Lighting - Phong lighting model}{section.1}% 4
+\BOOKMARK [2][-]{subsection.1.4}{Linear interpolation}{section.1}% 5
+\BOOKMARK [2][-]{subsection.1.5}{Flat Shading}{section.1}% 6
+\BOOKMARK [2][-]{subsection.1.6}{Gouraud Shading}{section.1}% 7
+\BOOKMARK [1][-]{section.2}{Discrete differential geometry}{}% 8
+\BOOKMARK [2][-]{subsection.2.1}{Normals}{section.2}% 9
+\BOOKMARK [2][-]{subsection.2.2}{Local averaging regions}{section.2}% 10
+\BOOKMARK [2][-]{subsection.2.3}{Gaussian Curvature}{section.2}% 11
+\BOOKMARK [2][-]{subsection.2.4}{Mean Curvature}{section.2}% 12
+\BOOKMARK [2][-]{subsection.2.5}{Mean Curvature Vector}{section.2}% 13
+\BOOKMARK [1][-]{section.3}{GPU program}{}% 14
+\BOOKMARK [2][-]{subsection.3.1}{GPU pipeline}{section.3}% 15
+\BOOKMARK [2][-]{subsection.3.2}{Vertex Shader}{section.3}% 16
+\BOOKMARK [2][-]{subsection.3.3}{Geometry Shader}{section.3}% 17
+\BOOKMARK [2][-]{subsection.3.4}{Fragment Shader}{section.3}% 18
+\BOOKMARK [1][-]{section.4}{Vertex area based}{}% 19
+\BOOKMARK [2][-]{subsection.4.1}{Max diagram - Vertex area}{section.4}% 20
+\BOOKMARK [2][-]{subsection.4.2}{Vertex Flat Shading}{section.4}% 21
+\BOOKMARK [2][-]{subsection.4.3}{Comparison between triangle flat shading, triangle Gouraud shading and vertex flat shading}{section.4}% 22
+\BOOKMARK [2][-]{subsection.4.4}{Gaussian curvature}{section.4}% 23
+\BOOKMARK [2][-]{subsection.4.5}{Constant Gaussian curvature}{section.4}% 24
+\BOOKMARK [2][-]{subsection.4.6}{Gouraud Gaussian curvature}{section.4}% 25
+\BOOKMARK [2][-]{subsection.4.7}{Evaluation and Comparison between constant Gaussian curvature per vertex and Gouraud Gaussian curvature}{section.4}% 26
+\BOOKMARK [1][-]{section.5}{Edge area based}{}% 27
+\BOOKMARK [2][-]{subsection.5.1}{Min diagram - Edge area}{section.5}% 28
+\BOOKMARK [2][-]{subsection.5.2}{Mean Curvature}{section.5}% 29
+\BOOKMARK [2][-]{subsection.5.3}{Constant Mean Curvature}{section.5}% 30
+\BOOKMARK [2][-]{subsection.5.4}{Gouraud Mean Curvature}{section.5}% 31
+\BOOKMARK [2][-]{subsection.5.5}{Evaluation and Comparison between constant mean curvature and gouraud mean curvature}{section.5}% 32
+\BOOKMARK [1][-]{section.6}{Conclusions}{}% 33
+\BOOKMARK [2][-]{subsection.6.1}{Application Software}{section.6}% 34
+\BOOKMARK [2][-]{subsection.6.2}{Architecture}{section.6}% 35
+\BOOKMARK [2][-]{subsection.6.3}{Comparison with meshlab}{section.6}% 36
+\BOOKMARK [1][-]{section.7}{References}{}% 37
+\BOOKMARK [1][-]{appendix.A}{Pseudocodes}{}% 38

@@ -1,21 +1,21 @@
-Making computation per vertex (e.g. \textit{Flat Shading}) is more efficient because in general, a model has fewer vertices than triangles (see Table \ref{table:model-table-vertices}).
+Making computation per vertex (e.g. \textit{Flat Shading}) is more efficient because in general, a model has fewer vertices than triangles as shown in table \ref{table:model-table-vertices}.
 For example, the armadillo model has $15002$ vertices and $30000$ triangles, then make calculation per vertex instead of triangle results in half of the computations.
 
 \begin{table}[!h]
     \centering
 \begin{tabular}{l*{6}{c}r}
     \centering
-    Model              & \#vertices & \#triangles \\
+    Model              & \#vertices & \#triangles & Improvement\\
     \hline
-    Armadillo          & 15002 & 30000 \\
-    Eight              & 766 & 1536 \\
-    Genus3             & 6652 & 13312  \\
-    Horse              & 48485 &  96966\\
-    Icosahedron\_1      &  42 & 80 \\
-    Icosahedron\_2      &  162 & 320 \\
-    Icosahedron\_3      & 642 &  1280
+    Armadillo          & 15002 & 30000 & 49\%\\
+    Eight              & 766 & 1536 & 50\% \\
+    Genus3             & 6652 & 13312 & 50\% \\
+    Horse              & 48485 &  96966 & 49\%\\
+    Icosahedron\_1      &  42 & 80 & 47\%\\
+    Icosahedron\_2      &  162 & 320 & 49\% \\
+    Icosahedron\_3      & 642 &  1280 & 50\%
 \end{tabular}
-\caption{Number of vertices and triangles in models.}
+\caption{Number of vertices and triangles in models. Making computations per vertex result in an efficiency improvement of 50\%.}
 \label{table:model-table-vertices}
 \end{table}
 
