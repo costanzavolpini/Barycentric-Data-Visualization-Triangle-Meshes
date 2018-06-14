@@ -33,7 +33,7 @@ The curvature of a surface is characterized by the principal curvatures \cite{WE
 \end{figure}
 Surfaces that have a zero Gaussian curvature are called \textit{developable surfaces} because they can be flattened out into the plane without any stretching. \textit{Gaussian curvature} is zero inside each mesh triangle and the same along edges since it can be flattened symmetrically into the plane. Consequently the \textit{Gaussian curvature} is concentrated at vertices of a triangle and it is defined as the \textit{angle defect}
 $$K(V) = 2 \pi - \sum_{i=1}^n \theta_i$$
-where $\theta_i$ is the angles of the triangle $T_i$ adjacent to the vertex $V$ at $V$. This should be seen as the integral of the Gaussian curvature over a certain region $S(V)$ around $V$, where these $S(V)$ form a partition of the surface of the entire mesh.
+where $\theta_i$ are the angles of the triangle $T_i$ adjacent to the vertex $V$ at $V$. This should be seen as the integral of the Gaussian curvature over a certain region $S(V)$ around $V$, where these $S(V)$ form a partition of the surface of the entire mesh.
 $$ K(V) = \int_{S(V)} KdA  $$
 \textit{Negative curvature} can be recognized by the fact that external directions curve in opposite directions, \textit{zero curvature} has one external direction that has zero curvature, \textit{positive curvature} has external directions that curve in the same direction (Fig. \ref{fig:curvature-gaussian}).
 The \textit{Theorema Egregium}, discovered by C.F. Gauss in 1827, states that the \textit{Gaussian curvature} is an intrinsic property of the surface that does not depend on the space, despite the fact that it is defined as the product of the principal curvatures (whose value depends on how the surface is immersed in the space).
@@ -49,7 +49,7 @@ angle between the normals of adjacent triangles (see Fig. \ref{fig:mean-curvatur
   \centering
 \includegraphics[width=11.5cm]{images/mean_curvature_paper.png}
 \caption{A vertex $V$ with its neighbouring vertices $V_i$ and adjacent triangles $T_i$. Angles opposite the edge $E_i$ are denoted by $\alpha_i$ and $\beta_i$. The
-angle between the normals of adjacent triangles $T_1$ and $T_2$ with positive or negative sign is denoted as ${\theta}_E$ \cite{geometryprocessing}}\label{fig:mean-curvature}.
+angle between the normals of adjacent triangles $T_1$ and $T_2$ with positive or negative sign is denoted as ${\theta}_E$ \cite{geometryprocessing}.}\label{fig:mean-curvature}
 \end{figure}
 Let us think of an edge as a cylindrical patch $C(E)$ with a radius $r$ that touches the planes defined by adjacent triangles. The \textit{mean curvature} at any point of the cylindrical patch is defined as $1/(2r)$ and the area of $C(E)$ is $r||E||\theta_E$
 $$H(E) = \int_{C(E)} HdA$$
