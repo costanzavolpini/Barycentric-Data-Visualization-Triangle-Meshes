@@ -1,6 +1,5 @@
 \subsection{Barycentric coordinates}\label{section:barycentric-coord}
-Barycentric coordinates, discovered by M\"obius in 1827, represent one of the most progessive area of research in computer graphics and mathematics thanks to the numerous applications in image and geometry processing.
-\cite{REPORT:localbarycentricoordsepfl}
+Barycentric coordinates, discovered by M\"obius in 1827, represent one of the most progessive area of research in computer graphics and mathematics thanks to the numerous applications in image and geometry processing \cite{REPORT:localbarycentricoordsepfl}.
 % ------
 The position of any point in a triangle can be expressed using a linear combination of barycentric coordinates:
 $$ p = \lambda_1 p_1 + \lambda_2 p_2 + \lambda_3 p_3$$
@@ -16,10 +15,9 @@ respect the following barycentric coordinates properties:
 \end{itemize}
 
 % -------
-A point is inside the triangle if and only if $0 \leq \lambda_1, \lambda_2, \lambda_3 \leq 1$. If a barycentric coordinate is less than zero or greater than one, the point is outside the triangle. \cite{SLIDE:ICORSI}
+A point is inside the triangle if and only if $0 \leq \lambda_1, \lambda_2, \lambda_3 \leq 1$. If a barycentric coordinate is less than zero or greater than one, the point is outside the triangle \cite{SLIDE:ICORSI}.
 % -------
-Barycentric coordinates allow the interpolation of values, from a set of control points over the interior of a domain, using weighted combinations of values associated with the control points (Fig. \ref{fig:barycentric-coord}).
-\cite{REPORT:localbarycentricoordsepfl}
+Barycentric coordinates allow the interpolation of values, from a set of control points over the interior of a domain, using weighted combinations of values associated with the control points \cite{REPORT:localbarycentricoordsepfl}, as shown in Fig. \ref{fig:barycentric-coord}.
 % ------
 \begin{figure}[h!]
   \centering
@@ -53,8 +51,7 @@ Barycentric coordinates allow the interpolation of values, from a set of control
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{Triangle meshes}
-A collection of triangles without any particular mathematical structure is called \textit{triangle mesh} (see example in Fig. \ref{fig:mesh-3d-armadillo}). To derive a global parameterization for an entire triangle mesh we can define a 2D position for each vertex. Let $\mathcal{M}$ be a triangle mesh that consists of a geometric and topological component represented by a graph structure with a set of vertices $\mathcal{V} = \{ v_1, ..., v_V \}$ and a set of triangular faces connecting them $\mathcal{F} = \{ f_1, ... , f_F \}$ with $f_i \in \mathcal{V} \times \mathcal{V} \times \mathcal{V}$. The connectivity of a triangle mesh can be expressed in terms of the edges of the respective graph $\mathcal{E} = \{ e_1, ..., e_E \}$ where $e_i \in \mathcal{V} \times \mathcal{V}$.
-\cite{polygonmeshprocessing}
+A piecewise linear surface in 3D with triangular faces is called \textit{triangle mesh} (see example in Fig. \ref{fig:mesh-3d-armadillo}). Let $\mathcal{M}$ be a triangle mesh that consists of a geometric and topological component represented by a graph structure with a set of vertices $\mathcal{V} = \{ v_1, ..., v_V \}$ and a set of triangular faces connecting them $\mathcal{F} = \{ f_1, ... , f_F \}$ with $f_i \in \mathcal{V} \times \mathcal{V} \times \mathcal{V}$. The connectivity of a triangle mesh can be expressed in terms of the edges of the respective graph $\mathcal{E} = \{ e_1, ..., e_E \}$ where $e_i \in \mathcal{V} \times \mathcal{V}$ \cite{polygonmeshprocessing}.
 \begin{figure}[h!]
   \centering
   \minipage[b]{.33\linewidth}
@@ -66,7 +63,7 @@ A collection of triangles without any particular mathematical structure is calle
   \centering
   \includegraphics[width=5cm]{images/armadillo-white205}
   \endminipage
-\caption{On the left: a 3D triangle mesh filled by face shading. On the right: structure of 3D triangle meshes where you can see the connectivity of a triangle mesh.}\label{fig:mesh-3d-armadillo}
+\caption{Example of a triangle, visualized with flat shading (left) and in \emph{wireframe mode}, to show the edges (right).}\label{fig:mesh-3d-armadillo}
 \end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -76,39 +73,49 @@ A collection of triangles without any particular mathematical structure is calle
 \begin{figure}[h!]
   \centering
   \includegraphics[width=7cm]{images/lighting}
-\caption{Phong lighting model. $p$ is the point illuminated by the ray ($l-p$). $v$ represents the view position and $l$ the lighting source. \cite{SLIDE:ICORSI}} \label{figure:lighting}
+\caption{Phong lighting model. $p$ is the point illuminated by the ray ($l-p$). $v$ represents the view position and $l$ the ligh source \cite{SLIDE:ICORSI}.} \label{figure:lighting}
 \end{figure}
 Given a light source at position $l$ with intensity $I_l$ and a surface point at position $p$ with normal $n$,
-we can define the angle between the incident light ($l-p$) and the normal $n$ as $\varphi$.
-Let $r$ be our reflected light vector defined as $r = 2 n \; \cdot <n, l - p> - (l-p)$ and $\alpha$ the angle between that vector and the view direction $(v - p)$ as depicted in Figure \ref{figure:lighting}.
+we can define the angle between the light vector ($l-p$) and the normal $n$ as $\varphi$.
+Let $r$ be the reflected light vector defined as $r = 2 n \; \cdot <n, l - p> - (l-p)$ and $\alpha$ the angle between that vector and the view direction $(v - p)$ as depicted in Figure \ref{figure:lighting}.
 
 The \textit{Phong lighting model} is defined as the sum of the self-emitting intensity, ambient term, diffuse reflection and specular reflection.
-$$ I = I_e + {\rho}_a \cdot I_A + \sum_{j=1}^n ({\rho}_d \cdot cos {\varphi}_j + {\rho}_s \cdot cos_{\alpha_j}^k) \cdot I_j$$ where $I_e$ is the self-emitting intensity, ${\rho}_a, {\rho}_d, {\rho}_s$ are the reflection constants (surface properties), $n$ is the number of lights sources with intensities $I_j$ and $k$ is the shininess.
-\cite{SLIDE:ICORSI}
+$$ I = I_e + {\rho}_a \cdot I_A + \sum_{j=1}^n ({\rho}_d \cdot cos {\varphi}_j + {\rho}_s \cdot cos_{\alpha_j}^k) \cdot I_j$$ where $I_e$ is the self-emitting intensity, ${\rho}_a, {\rho}_d, {\rho}_s$ are the reflection constants (surface properties), $n$ is the number of lights sources with intensities $I_j$ and $k$ is the shininess \cite{SLIDE:ICORSI}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{Linear interpolation}\label{section:linear-interpolation}
-Linear interpolation is a method that returns equal spacing between the interpolated values. Given two numbers $n_1$ and $n_2$ (the start and final values of the interpolant), a linear interpolation can be carried out using a parameter $t$ ($t \in [0,1]$). \cite{WEBSITE:interpolation}
-
+Given two numbers $n_1$ and $n_2$ (the start and final values of the interpolant), a linear interpolation can be carried out using a parameter $t\in[0,1]$ (see \cite{WEBSITE:interpolation}):
 $$ n = n_1 + t (n_2 - n_1)$$
-
-
-The standard linearly interpolated visualization is carried out by passing three attributes (colors) to each vertex of a triangle. OpenGL will interpolate these colors linearly by exploiting the barycentric coordinates that tell us how much of each color is being mixed at any position.
-Given a triangle $[p_1, p_2, p_3]$, where the color blue is passed to vertex $p_1$, red to $p_2$, and green to $p_3$, let $w_1$ be the blue area, $w_2$ the red area and $w_3$ the green area (see Fig. \ref{fig:barycentric-coord}). Let us compute the value at $p$ using \textit{barycentric interpolation} $$(w_1p_1 + w_2p_2 + w_3p_3)/W$$ where $W$ is the area of the triangle $[p_1, p_2, p_3]$.
+\begin{figure}[!h]
+  \centering
+  \scalebox{0.6}{\begin{tikzpicture}
+    \coordinate (n1) at (0.5,0.9);
+    \coordinate (n2) at (7.1,0.9);
+    \coordinate (t) at (4.1,0.9);
+    \node[anchor=south west,inner sep=0] at (0,0) {\includegraphics[scale=4.5]{images/interpolation-2.png}};
+    \draw (n1) node [below left] {$n_1$};
+    \draw (n2) node [below left] {$n_2$};
+    \draw (t) node [below left] {$t$};
+  \end{tikzpicture}}
+  \caption{The further $t$ is from the red point, the more blue we want. The further $t$ is from the blue point, the more red we want.} %%%%DA QUI
+\end{figure}
+\\
+This should be read as the percent of blue color ("length of blue segment/total length") plus the percent of red color ("length of red segment/total length"). In case we want to make an interpolation given three values ($n_1$, $n_2$ and $n_3$) instead of referring to ratio of lengths we refer to barycentric coordinates using the following equation (\textit{barycentric interpolation)}:
+$$ n = \lambda_1n_1 + \lambda_2n_2 + \lambda_3n_3$$
+where $\lambda_1$, $\lambda_2$ and $\lambda_3$ are the barycentric coordinates.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{Flat Shading}
 \textit{Flat shading} is a way to compute the color at each pixel (at a corner or at the barycentre) using the triangle normal.
-Given a triangle $[p_1, p_2, p_3]$, the lighting is computed using the normal $n$: $$\widehat{n} = (p_2 - p_1) \times (p_3 - p_1) \;\;\;\;\;\;\;\; n = \frac{ \widehat{n} } { ||\widehat{n}|| } $$ at $p= (p_1 + p_2 + p_3)/3$. This color is then used for all pixels of the triangle. Flat shading gives objects with flat facets.
-\cite{SLIDE:ICORSI}
+Given a triangle $[p_1, p_2, p_3]$, the lighting is computed using the normal $n$: $$\widehat{n} = (p_2 - p_1) \times (p_3 - p_1) \;\;\;\;\;\;\;\; n = \frac{ \widehat{n} } { ||\widehat{n}|| } $$ at $p= (p_1 + p_2 + p_3)/3$. This color is then used for all pixels of the triangle. Flat shading gives objects with flat facets \cite{SLIDE:ICORSI}.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{Gouraud Shading}
 \textit{Gouraud Shading} is a way to compute the color at each pixel assigning a normal to each corner of a triangle. After having computed the color for each corner it linearly interpolates these color values (see Sections \ref{section:barycentric-coord} and \ref{section:linear-interpolation}).
 Given a triangle $[p_1, p_2, p_3]$ and its normal at each corner $n_1, n_2, n_3$, the lighting is computed at $p_i$ using the normal $n_i$. This, applied to each corner, returns the color values $c_1, c_2, c_3$ respectively for $p_1, p_2$ and $p_3$.
-These colors are then linearly interpolated $c = {\mu}_1 c_1 + {\mu}_2 c_2 + {\mu}_3 c_3$. Gouraud shading gives objects that appear more smooth. \cite{SLIDE:ICORSI}
+These colors are then linearly interpolated $c = {\mu}_1 c_1 + {\mu}_2 c_2 + {\mu}_3 c_3$, where ${\mu}_1$, ${\mu}_2$ and ${\mu}_3$ are the barycentric coordinates. Gouraud shading gives objects that appear more smooth \cite{SLIDE:ICORSI}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

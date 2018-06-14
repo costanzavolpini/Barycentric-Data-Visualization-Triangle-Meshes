@@ -11,7 +11,7 @@ As the section before, we now want to show extensions where we split the surface
     \centering
     \includegraphics[scale=0.53]{images/edge-area.png}
     \endminipage
-    \caption{On the left: Application of min diagram algorithm on a triangle. On the right: regions around edges.} \label{fig:min-area-edge}
+    \caption{On the left: Application of the min diagram algorithm on a triangle. On the right: regions around edges.} \label{fig:min-area-edge}
 \end{figure}
 
 \subsection{Min diagram - Edge area} \label{section:min-diagram}
@@ -20,7 +20,7 @@ A different approach from interpolating, can be found coloring vertex areas base
 The color is given by the region farthest from a vertex (Fig. \ref{fig:min-area-edge}, Pseudocode \ref{appendix:min-diagram}).
 
 \subsection{Mean Curvature} \label{section:edge-struct} \label{section:mc-curvature}
-Access to mesh edges requires to set up a list of edges over triangles. To avoid redundant data we have applied the convention that an edge would be counted only if it goes from a vertex with lower index into vertex with higher index in the list. A possible edge structure could look like the one in the pseudocode \ref{Pseudocode:edge}, where index\_v1 and index\_v2 are the vertex indices, norm\_edge is the length of edge, n1 and n2 are normals of adjacent triangles, cot\_alpha and cot\_beta are the cotangents of angles opposite to the edge, area\_t1 and area\_t2 are the areas of adjacent triangles.
+Access to mesh edges requires to set up a list of edges over triangles. To avoid redundant data we have applied the convention that an edge would be counted only if it goes from a vertex with lower index to a vertex with higher index in the list. A possible edge structure could look like the one in the pseudocode \ref{Pseudocode:edge}, where index\_v1 and index\_v2 are the vertex indices, norm\_edge is the length of edge, n1 and n2 are normals of adjacent triangles, cot\_alpha and cot\_beta are the cotangents of angles opposite to the edge, area\_t1 and area\_t2 are the areas of adjacent triangles.
 
 \subsection{Constant Mean Curvature}
 \textit{Constant mean Curvature} returns a constant color around each edge (see Fig. \ref{fig:armadillo-mean-edge}). Firstly it calculates the mean curvature for each edge $E$:
@@ -66,7 +66,7 @@ These values are then interpolated using the automatic OpenGL interpolation rese
 \subsection{Evaluation and Comparison between constant mean curvature and gouraud mean curvature}
 \textit{Constant mean curvature} is a curvature per
 edge that returns a constant color around each edge
-using the min diagram algorithm. The result is a noisy and sharped mesh with emphasized edges. This visualization could be helpful to show the quality of mesh triangulation and flows around surfaces. The flows are observable because edges are directed allowing the user to better analyze curvatures (see Fig. \ref{fig:armadillo-mean-edge}). \textit{Gouraud mean curvature}, on the other hand, returns more blurred meshes compared to the ones obtained with  \textit{Gouraud Gaussian curvature}. This smoothing is caused by the fact that mean curvature would be calculated per edge but in this case, we are averaging per vertex, this results in a loss of data (see Fig. \ref{fig:armadillo-mean-vertex} comparated to Fig. \ref{fig:armadillo-mean-edge}).
+using the min diagram algorithm. The result is a noisy and sharped mesh with emphasized edges. This visualization could be helpful to show the quality of mesh triangulation and flows around surfaces. The flows are observable because edges are directed allowing the user to better analyze curvatures (see Fig. \ref{fig:armadillo-mean-edge}). \textit{Gouraud mean curvature}, on the other hand, returns more blurred meshes compared to the ones obtained with  \textit{constant mean curvature}. This smoothing is caused by the fact that mean curvature would be calculated per edge but in this case, we are averaging per vertex, this results in a loss of data (see Fig. \ref{fig:armadillo-mean-vertex} comparated to Fig. \ref{fig:armadillo-mean-edge}).
 \begin{figure}[!h]
     \centering
     \minipage[b]{.5\linewidth}

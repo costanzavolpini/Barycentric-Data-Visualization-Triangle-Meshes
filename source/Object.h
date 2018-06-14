@@ -226,6 +226,8 @@ class Object
             to the corresponding pixels on the final screen, resulting in fragments for the fragment shader to use.
             + Clipping (discards all fragments that are outside your view, increasing performance).
         */
+
+       cout << triangle_vertices.size() << endl;
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, triangle_vertices.size());
         glBindVertexArray(0);

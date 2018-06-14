@@ -27,7 +27,6 @@ using namespace std;
 LoaderObject.h
 Comment:  This file load the mesh using an .OFF file.
 ***************************************************************************/
-
 // ----- SET UP DATA AND VERTICES -----
 vector<Point3d> v; // vector of vertices
 
@@ -609,19 +608,22 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
     for (int k = 0; k < num_triangles; k++)
     {
         // vertex 0
-        out_gc.push_back(((2 * M_PI) - value_angle_defeact_sum[t[k].v[0]]) / area_mixed[t[k].v[0]]);
-        out_gc.push_back(((2 * M_PI) - value_angle_defeact_sum[t[k].v[0]]) / area_mixed[t[k].v[0]]);
-        out_gc.push_back(((2 * M_PI) - value_angle_defeact_sum[t[k].v[0]]) / area_mixed[t[k].v[0]]);
+        float current_gc = ((2 * M_PI) - value_angle_defeact_sum[t[k].v[0]]) / area_mixed[t[k].v[0]];
+        out_gc.push_back(current_gc);
+        out_gc.push_back(current_gc);
+        out_gc.push_back(current_gc);
 
         // vertex 1
-        out_gc.push_back(((2 * M_PI) - value_angle_defeact_sum[t[k].v[1]]) / area_mixed[t[k].v[1]]);
-        out_gc.push_back(((2 * M_PI) - value_angle_defeact_sum[t[k].v[1]]) / area_mixed[t[k].v[1]]);
-        out_gc.push_back(((2 * M_PI) - value_angle_defeact_sum[t[k].v[1]]) / area_mixed[t[k].v[1]]);
+        current_gc = ((2 * M_PI) - value_angle_defeact_sum[t[k].v[1]]) / area_mixed[t[k].v[1]];
+        out_gc.push_back(current_gc);
+        out_gc.push_back(current_gc);
+        out_gc.push_back(current_gc);
 
         // vertex 2
-        out_gc.push_back(((2 * M_PI) - value_angle_defeact_sum[t[k].v[2]]) / area_mixed[t[k].v[2]]);
-        out_gc.push_back(((2 * M_PI) - value_angle_defeact_sum[t[k].v[2]]) / area_mixed[t[k].v[2]]);
-        out_gc.push_back(((2 * M_PI) - value_angle_defeact_sum[t[k].v[2]]) / area_mixed[t[k].v[2]]);
+        current_gc = ((2 * M_PI) - value_angle_defeact_sum[t[k].v[2]]) / area_mixed[t[k].v[2]];
+        out_gc.push_back(current_gc);
+        out_gc.push_back(current_gc);
+        out_gc.push_back(current_gc);
 
         // -------------- end Gaussian curvature --------------
 
@@ -746,14 +748,11 @@ bool load(const char *path, vector<float> &out_vertices, vector<float> &out_norm
         mc_triangle_size_edge.push_back((value_mean_curvature_edge));
     }
 
-    cout << map_edge.size() << endl;
-
     // ofstream file_output;
     // string path_name = path;
     // file_output.open (path_name + ".txt");
     for (int k = 0; k < num_vertices; k++)
     {
-
         // gc_vertex_size lenght = vertices
         gc_vertex_size.push_back(((2 * M_PI) - value_angle_defeact_sum[k]) / area_mixed[k]);
         float current_mean_curvature_value = (((1.0f / (2 * area_mixed[k])) * mean_curvature_vertex_sum[k]).norm()) / 2.0f;
