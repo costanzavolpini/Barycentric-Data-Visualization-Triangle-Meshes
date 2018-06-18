@@ -109,7 +109,6 @@ void set_parameters_shader(int selected_shader);
 void swap_gaussian_curvature();
 static double global_min_gc;
 static double global_max_gc;
-double user_minimum_gc, user_maximum_gc;
 
 // ------- END IMGUI -------------
 
@@ -315,31 +314,6 @@ int main(int argc, char *argv[])
                 ourShader.setMat4("projection", projection);
                 ourShader.setMat4("view", rotated_view);
                 ourShader.setMat4("model", rotated_model);
-
-                // cout << "view " << glm::to_string(rotated_view) << endl;
-                // cout << "model " << glm::to_string(rotated_model) << endl;
-                // cout << "projection " << glm::to_string(projection) << endl;
-
-                // armadillo: for screenshot (make a screenshot of all white image)
-                // rotated_view = glm::mat4{glm::vec4(-0.336114, 0.169931, 0.926364, 0.000000), glm::vec4(0.374466, 0.926613, -0.034108, 0.000000), glm::vec4(-0.864177, 0.335428, -0.375081, 0.000000), glm::vec4(0.000000, 0.000000, -5.830953, 1.000000)};
-                // rotated_model = glm::mat4{glm::vec4(0.365809, -0.365534, 0.855902, 0.000000), glm::vec4(-0.128588, 0.890972, 0.435470, 0.000000), glm::vec4(-0.921764, -0.269357, 0.278922, 0.000000), glm::vec4(0.000000, 0.000000, 0.000000, 1.000000)};
-                // projection = glm::mat4{glm::vec4(2.818707, 0.000000, 0.000000, 0.000000), glm::vec4(0.000000, 3.758276, 0.000000, 0.000000), glm::vec4(0.000000, 0.000000, -1.020202, -1.000000), glm::vec4(0.000000, 0.000000, -0.202020, 0.000000)};
-                // ourShader.setMat4("projection", projection);
-                // ourShader.setMat4("view", rotated_view);
-                // ourShader.setMat4("model", rotated_model);
-
-                // // zoom image screenshot (square + trasparent + trim)
-                // rotated_model = glm::translate(rotated_model, glm::vec3(0.4, -0.4, 0));
-                // rotated_view = glm::translate(rotated_view, glm::vec3(0.4, -0.4, 0));
-                // ourShader.setMat4("view", rotated_view);
-                // ourShader.setMat4("model", rotated_model);
-
-                // Zoom = 7;
-                // projection = glm::perspective(glm::radians(Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 10.f);
-                // ourShader.setMat4("projection", projection);
-
-                // cout << Zoom << endl;
-
                 break;
 
         }
@@ -826,30 +800,6 @@ void analyse_gaussian_curvature(GLFWwindow *window)
     ImGui::PlotMultiLines("##Used 90 Percentile", 2, names_auto, colors_auto, func, datas_auto, display_count, percentile_minimum_gc, percentile_maximum_gc, ImVec2(0, 80));
 
     // section where the user can set its own minimum and maximum value for gaussian curvature
-    ImGui::TextWrapped("\n");
-    ImGui::RadioButton("Manual bounds", &gc_set, 3);
-
-    // TODO: solve possibility to rewrite value after first time
-    static char buf1[sizeof(double)] = "";
-    static char buf2[sizeof(double)] = "";
-
-    ImGui::InputText("min value", buf1, sizeof(double), ImGuiInputTextFlags_CharsDecimal);
-
-    // if (gc_set == 3) ImGui::SetKeyboardFocusHere();
-    ImGui::InputText("max value", buf2, sizeof(double), ImGuiInputTextFlags_CharsDecimal);
-
-    bool saved = false;
-
-    ImGui::TextWrapped("\n");
-    saved = ImGui::SmallButton("Render");
-
-    if(saved){
-        user_minimum_gc = strtod(buf1, NULL);
-        user_maximum_gc = strtod(buf2, NULL);
-
-        global_min_gc = user_minimum_gc;
-        global_max_gc = user_maximum_gc;
-    }
 
     if (prev_gc != gc_set)
     {
@@ -857,11 +807,6 @@ void analyse_gaussian_curvature(GLFWwindow *window)
             case 1:
                 global_min_gc = minimum_gc;
                 global_max_gc = maximum_gc;
-                break;
-
-            case 3:
-                global_min_gc = user_minimum_gc;
-                global_max_gc = user_maximum_gc;
                 break;
 
             default:
@@ -904,9 +849,7 @@ void initialize_texture_object(GLFWwindow *window, bool reload_mesh)
             case 1:
                 global_min_gc = object.get_minimum_gaussian_curvature_value();
                 global_max_gc = object.get_maximum_gaussian_curvature_value();
-            case 3:
-                global_min_gc = user_minimum_gc;
-                global_max_gc = user_maximum_gc;
+
             default:
                 global_min_gc = object.get_best_values_gc()[0];
                 global_max_gc = object.get_best_values_gc()[1];
