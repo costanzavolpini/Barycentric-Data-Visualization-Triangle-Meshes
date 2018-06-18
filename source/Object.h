@@ -78,10 +78,6 @@ class Object
             cout << "error loading file" << endl;
             return;
         }
-
-        // cout << _path << endl;
-        // cout << "GC ["<<  *min_element(triangle_gc.begin(), triangle_gc.end()) << ", " << *max_element(triangle_gc.begin(), triangle_gc.end()) << "]" << endl;
-        // cout << "MC ["<< *min_element(triangle_mc_vertex.begin(), triangle_mc_vertex.end()) <<", " <<  *max_element(triangle_mc_vertex.begin(), triangle_mc_vertex.end()) << "]"<< endl;
     }
 
     // Function to initialize VBO and VAO
@@ -225,7 +221,6 @@ class Object
             + Clipping (discards all fragments that are outside your view, increasing performance).
         */
 
-       cout << triangle_vertices.size() << endl;
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, triangle_vertices.size());
         glBindVertexArray(0);

@@ -104,8 +104,6 @@ static int mc_set_vertex = 2;
 static int listbox_item_current = 0;
 static int listbox_item_prev = 0;
 
-void analyse_gaussian_curvature();
-
 void set_parameters_shader(int selected_shader);
 
 void swap_gaussian_curvature();
@@ -506,8 +504,6 @@ void show_window(bool *p_open, GLFWwindow *window)
 
     ImGui::SetColumnOffset(1, size_x * 2);
 
-    //TODO: enable arcball just in the column not in the window, otherwise when we set the sample in GC everything will be moved (same for zoom)
-
     // const bool itemHovered = ImGui::IsItemHovered() && ImGui::IsWindowHovered();
     // cout << ImGui::IsItemHovered(ImGuiHoveredFlags_Default) << endl;
 
@@ -536,10 +532,20 @@ void show_window(bool *p_open, GLFWwindow *window)
     ImGui::Text("Analyse\n\n");
     if (imgui_isGaussianCurvature)
     {
-        int prev_gc = gc_set;
-        int minimum_gc = object.get_minimum_gaussian_curvature_value();
-        int maximum_gc = object.get_maximum_gaussian_curvature_value();
-        analyse_gaussian_curvature(window, prev_gc, "Gaussian Curvature plots\n\n", minimum_gc, maximum_gc, object.triangle_gc.size(), "GC", object.triangle_gc, "Gaussian Curvature untouched", "##Gaussian Curvature", object.get_best_values_gc()[0], object.get_best_values_gc()[1]);
+            int prev = gc_set;
+            int minimum = object.get_minimum_gaussian_curvature_value();
+            int maximum = object.get_maximum_gaussian_curvature_value();
+            analyse_gaussian_curvature(window, prev, "Gaussian Curvature plots", minimum, maximum, object.triangle_gc.size(), "GC", object.triangle_gc, "Gaussian Curvature untouched", "##Gaussian Curvature", object.get_best_values_gc()[0], object.get_best_values_gc()[1]);
+    } else if(imgui_isMeanCurvatureEdgeShading){
+        int prev = mc_set_edge;
+        int minimum = object.get_minimum_mean_curvature_value();
+        int maximum = object.get_maximum_mean_curvature_value();
+        analyse_gaussian_curvature(window, prev, "Mean Curvature plots", minimum, maximum, object.triangle_mc.size(), "MC", object.triangle_mc, "Mean Curvature untouched", "##Mean Curvature", object.get_best_values_mc()[0], object.get_best_values_mc()[1]);
+    } else if(imgui_isMeanCurvatureVertexShading){
+        int prev = mc_set_vertex;
+        int minimum = object.get_min_mean_vertex();
+        int maximum = object.get_max_mean_vertex();
+        analyse_gaussian_curvature(window, prev, "Mean Curvature plots", minimum, maximum, object.triangle_mc_vertex.size(), "MC", object.triangle_mc_vertex, "Mean Curvature untouched", "##Mean Curvature", object.get_best_values_mc_vertex()[0], object.get_best_values_mc_vertex()[1]);
     }
 
     ImGui::SetCursorPosY(io.DisplaySize.y - 18.0f); // columns end at the end of window
@@ -744,10 +750,6 @@ void analyse_gaussian_curvature(GLFWwindow *window, int prev, const char* title,
     ImVec4 white = ImColor(255, 255, 255, 255);
     ImVec4 red = ImColor(255, 0, 0, 255);
 
-    static int values_offset = 0;
-    static int display_count = 70;
-    ImGui::SliderInt("Sample count", &display_count, 1, vector_values_size);
-
     // Gaussian curvature
     const char *names[] = {type_curvature, "ZERO"};
     const ImColor colors[2] = {green, red};
@@ -788,7 +790,7 @@ void analyse_gaussian_curvature(GLFWwindow *window, int prev, const char* title,
     else if(imgui_isMeanCurvatureVertexShading)
         ImGui::RadioButton(untouched_name, &mc_set_vertex, 1);
 
-    ImGui::PlotMultiLines(percentile_name, 2, names, colors, func, datas, display_count, minimum, maximum, ImVec2(0, 80));
+    ImGui::PlotMultiLines(percentile_name, 2, names, colors, func, datas, vector_values_size, minimum, maximum, ImVec2(0, 80));
 
     // automatic Gaussian Curvature
     const char *names_auto[] = {type_curvature, "ZERO"};
@@ -819,10 +821,7 @@ void analyse_gaussian_curvature(GLFWwindow *window, int prev, const char* title,
     else if(imgui_isMeanCurvatureVertexShading)
         ImGui::RadioButton("Used 90 Percentile", &mc_set_vertex, 2);
 
-    ImGui::PlotMultiLines("##Used 90 Percentile", 2, names_auto, colors_auto, func, datas_auto, display_count, percentile_minimum, percentile_maximum, ImVec2(0, 80));
-
-    // section where the user can set its own minimum and maximum value for gaussian curvature
-
+    ImGui::PlotMultiLines("##Used 90 Percentile", 2, names_auto, colors_auto, func, datas_auto, vector_values_size, percentile_minimum, percentile_maximum, ImVec2(0, 80));
 
     if(imgui_isGaussianCurvature){
         if (prev != gc_set){
