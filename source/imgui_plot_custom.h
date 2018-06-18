@@ -49,7 +49,7 @@ static void PlotMultiEx(
     const ImRect inner_bb(frame_bb.Min + style.FramePadding, frame_bb.Max - style.FramePadding);
     const ImRect total_bb(frame_bb.Min, frame_bb.Max + ImVec2(label_size.x > 0.0f ? style.ItemInnerSpacing.x + label_size.x : 0.0f, 0));
     ItemSize(total_bb, style.FramePadding.y);
-    if (!ItemAdd(total_bb, NULL))
+    if (!ItemAdd(total_bb, 0))
         return;
 
     // Determine scale from values if not specified

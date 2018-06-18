@@ -63,7 +63,6 @@ static void mouse_button_callback(GLFWwindow *window, int button, int action, in
 static void cursor_position_callback(GLFWwindow *window, double xpos, double ypos);
 static void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 
-
 // ------- TRANSFORMATION -------
 static glm::mat4 transform_shader = glm::mat4(1.0f);
 glm::mat4 rotated_model;
@@ -77,16 +76,15 @@ void rotation_settings();
 void zoom_settings();
 void set_shader();
 void select_model(GLFWwindow *window);
-void analyse_gaussian_curvature(GLFWwindow *window, int prev, const char* title, int minimum, int maximum, int vector_values_size, const char* type_curvature, vector<float> vector_values, const char* untouched_name, const char* percentile_name, double percentile_minimum, double percentile_maximum);
+void analyse_gaussian_curvature(GLFWwindow *window, int prev, const char *title, int minimum, int maximum, int vector_values_size, const char *type_curvature, vector<float> vector_values, const char *untouched_name, const char *percentile_name, double percentile_minimum, double percentile_maximum);
 void initialize_texture_object(GLFWwindow *window, bool reload_mesh);
-
 
 // set-up parameter imgui
 static float angle = 180.0f;                // angle of rotation - must be the same of transform_shader
 static float axis_x = 0.0f;                 // axis of rotation - must be the same of transform_shader
 static float axis_y = 1.0f;                 // axis of rotation - must be the same of transform_shader
 static float axis_z = 0.0f;                 // axis of rotation - must be the same of transform_shader
-static int rotation_set = 0; // 0 mouse - 1 auto - 2 manual
+static int rotation_set = 0;                // 0 mouse - 1 auto - 2 manual
 static bool last_time_was_animated = false; // if was moving and now we have stopped it
 
 static ImVec4 color_imgui = ImColor(0, 0, 0, 255);
@@ -129,7 +127,6 @@ int imgui_isMeanCurvatureVertexShading;
 string name_file = "models/armadillo.off"; //default armadillo
 
 float min_val, max_val;
-
 
 // ----------- END SETTINGS SHADERS ----------
 
@@ -240,7 +237,7 @@ int main(int argc, char *argv[])
         glViewport(0, 0, current_width, current_height); // Render on the whole framebuffer, complete from the lower left corner to the upper right
 
         // render colours
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);               //black screen
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f); //black screen
         // glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // white for poster and report
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the depth buffer before each render iteration (otherwise the depth information of the previous frame stays in the buffer).
 
@@ -264,7 +261,7 @@ int main(int argc, char *argv[])
             ourShader.setVec3("light.specular", 0.2f, 0.2f, 0.2f);
             ourShader.setFloat("shininess", 12.0f);
 
-            if(imgui_isFlatShading)
+            if (imgui_isFlatShading)
                 ourShader.setBool("isFlat", true);
         }
         else if (imgui_isGaussianCurvature)
@@ -273,14 +270,16 @@ int main(int argc, char *argv[])
             ourShader.setBool("isGaussian", true);
             ourShader.setFloat("min_curvature", global_min_gc);
             ourShader.setFloat("max_curvature", global_max_gc);
-
-        } else if (imgui_isMeanCurvatureEdgeShading){
+        }
+        else if (imgui_isMeanCurvatureEdgeShading)
+        {
             ourShader.setBool("isMeanCurvatureEdge", true);
             ourShader.setBool("isGaussian", false);
             ourShader.setFloat("min_curvature", object.get_best_values_mc()[0]);
             ourShader.setFloat("max_curvature", object.get_best_values_mc()[1]);
-
-        } else if(imgui_isMeanCurvatureVertexShading) {
+        }
+        else if (imgui_isMeanCurvatureVertexShading)
+        {
             ourShader.setBool("isGaussian", false);
             ourShader.setBool("isMeanCurvatureEdge", false);
             ourShader.setFloat("min_curvature", object.get_best_values_mc_vertex()[0]);
@@ -290,42 +289,42 @@ int main(int argc, char *argv[])
 
         // ------ ROTATION ------
         // imgui rotation
-        switch(rotation_set){
-            case 1: // auto
-                if (!last_time_was_animated)
-                    count_angle = 0;
+        switch (rotation_set)
+        {
+        case 1: // auto
+            if (!last_time_was_animated)
+                count_angle = 0;
 
-                angle = count_angle;
+            angle = count_angle;
 
-                if (count_angle > 360)
-                    count_angle = 0;
-                count_angle++;
+            if (count_angle > 360)
+                count_angle = 0;
+            count_angle++;
 
-                transform_shader = glm::rotate(glm::mat4(1.0f), glm::radians((float)angle), glm::vec3(axis_x, axis_y, axis_z));
-                last_time_was_animated = true;
-                ourShader.setMat4("model", transform_shader);
-                ourShader.setMat4("view", view);
-                ourShader.setMat4("projection", projection);
-                break;
+            transform_shader = glm::rotate(glm::mat4(1.0f), glm::radians((float)angle), glm::vec3(axis_x, axis_y, axis_z));
+            last_time_was_animated = true;
+            ourShader.setMat4("model", transform_shader);
+            ourShader.setMat4("view", view);
+            ourShader.setMat4("projection", projection);
+            break;
 
-            case 2: // manual
-                transform_shader = glm::rotate(glm::mat4(1.0f), glm::radians((float)angle), glm::vec3(axis_x, axis_y, axis_z));
-                ourShader.setMat4("view", view);
-                ourShader.setMat4("projection", projection);
-                ourShader.setMat4("model", transform_shader);
-                break;
+        case 2: // manual
+            transform_shader = glm::rotate(glm::mat4(1.0f), glm::radians((float)angle), glm::vec3(axis_x, axis_y, axis_z));
+            ourShader.setMat4("view", view);
+            ourShader.setMat4("projection", projection);
+            ourShader.setMat4("model", transform_shader);
+            break;
 
-            default: // mouse
-                // arcball
-                // TODO: enable movement mouse when the user is moving into the second column of imgui + trim photoshop
-                rotated_view = view * arcball.rotation_matrix_view();
-                rotated_model = model * arcball.rotation_matrix_model(rotated_view);
+        default: // mouse
+            // arcball
+            // TODO: enable movement mouse when the user is moving into the second column of imgui + trim photoshop
+            rotated_view = view * arcball.rotation_matrix_view();
+            rotated_model = model * arcball.rotation_matrix_model(rotated_view);
 
-                ourShader.setMat4("projection", projection);
-                ourShader.setMat4("view", rotated_view);
-                ourShader.setMat4("model", rotated_model);
-                break;
-
+            ourShader.setMat4("projection", projection);
+            ourShader.setMat4("view", rotated_view);
+            ourShader.setMat4("model", rotated_model);
+            break;
         }
 
         object.draw(); // draw
@@ -532,16 +531,20 @@ void show_window(bool *p_open, GLFWwindow *window)
     ImGui::Text("Analyse\n\n");
     if (imgui_isGaussianCurvature)
     {
-            int prev = gc_set;
-            int minimum = object.get_minimum_gaussian_curvature_value();
-            int maximum = object.get_maximum_gaussian_curvature_value();
-            analyse_gaussian_curvature(window, prev, "Gaussian Curvature plots", minimum, maximum, object.triangle_gc.size(), "GC", object.triangle_gc, "Gaussian Curvature untouched", "##Gaussian Curvature", object.get_best_values_gc()[0], object.get_best_values_gc()[1]);
-    } else if(imgui_isMeanCurvatureEdgeShading){
+        int prev = gc_set;
+        int minimum = object.get_minimum_gaussian_curvature_value();
+        int maximum = object.get_maximum_gaussian_curvature_value();
+        analyse_gaussian_curvature(window, prev, "Gaussian Curvature plots", minimum, maximum, object.triangle_gc.size(), "GC", object.triangle_gc, "Gaussian Curvature untouched", "##Gaussian Curvature", object.get_best_values_gc()[0], object.get_best_values_gc()[1]);
+    }
+    else if (imgui_isMeanCurvatureEdgeShading)
+    {
         int prev = mc_set_edge;
         int minimum = object.get_minimum_mean_curvature_value();
         int maximum = object.get_maximum_mean_curvature_value();
         analyse_gaussian_curvature(window, prev, "Mean Curvature plots", minimum, maximum, object.triangle_mc.size(), "MC", object.triangle_mc, "Mean Curvature untouched", "##Mean Curvature", object.get_best_values_mc()[0], object.get_best_values_mc()[1]);
-    } else if(imgui_isMeanCurvatureVertexShading){
+    }
+    else if (imgui_isMeanCurvatureVertexShading)
+    {
         int prev = mc_set_vertex;
         int minimum = object.get_min_mean_vertex();
         int maximum = object.get_max_mean_vertex();
@@ -565,7 +568,6 @@ void rotation_settings()
     ImGui::RadioButton("Rotate automatically", &rotation_set, 1);
     ImGui::RadioButton("Set rotation parameters", &rotation_set, 2);
 
-    float prev_angle, prev_axis_x, prev_axis_y, prev_axis_z;
 
     if (last_time_was_animated && rotation_set != 1)
     {
@@ -576,45 +578,41 @@ void rotation_settings()
         last_time_was_animated = false;
     }
 
-    switch (rotation_set)
+    if (rotation_set == 2)
     {
-        case 2:
-            prev_angle = angle;
-            prev_axis_x = axis_x;
-            prev_axis_y = axis_y;
-            prev_axis_z = axis_z;
+        float prev_angle, prev_axis_x, prev_axis_y, prev_axis_z;
+        prev_angle = angle;
+        prev_axis_x = axis_x;
+        prev_axis_y = axis_y;
+        prev_axis_z = axis_z;
 
-            ImGui::Text("Set the angle of rotation:");
-            ImGui::SliderFloat("angle", &angle, 0.0f, 360.0f); // Edit 1 angle from 0 to 360
+        ImGui::Text("Set the angle of rotation:");
+        ImGui::SliderFloat("angle", &angle, 0.0f, 360.0f); // Edit 1 angle from 0 to 360
 
-            ImGui::Text("Set axis of rotation:");
+        ImGui::Text("Set axis of rotation:");
 
-            ImGui::InputFloat("x", &axis_x, 0.01f, 1.0f);
-            ImGui::InputFloat("y", &axis_y, 0.01f, 1.0f);
-            ImGui::InputFloat("z", &axis_z, 0.01f, 1.0f);
-            break;
+        ImGui::InputFloat("x", &axis_x, 0.01f, 1.0f);
+        ImGui::InputFloat("y", &axis_y, 0.01f, 1.0f);
+        ImGui::InputFloat("z", &axis_z, 0.01f, 1.0f);
 
-        default:
-            break;
+        if ((prev_angle != angle) || (prev_axis_x != axis_x) || (prev_axis_y != axis_y) || (prev_axis_z != axis_z))
+            transform_shader = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(axis_x, axis_y, axis_z));
     }
-
-    if ((prev_angle != angle) || (prev_axis_x != axis_x) || (prev_axis_y != axis_y) || (prev_axis_z != axis_z))
-        transform_shader = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(axis_x, axis_y, axis_z));
 }
 
 // function to set zoom into imgui window
 void zoom_settings()
 {
-    switch(rotation_set){
-        case 0:
-            ImGui::TextWrapped("Scroll to zoom in/out");
-            break;
-        default:
-            ImGui::Text("Zoom-in/out:");
-            ImGui::SliderFloat("zoom", &Zoom, 100, 1); // Zoom
-            break;
+    switch (rotation_set)
+    {
+    case 0:
+        ImGui::TextWrapped("Scroll to zoom in/out");
+        break;
+    default:
+        ImGui::Text("Zoom-in/out:");
+        ImGui::SliderFloat("zoom", &Zoom, 100, 1); // Zoom
+        break;
     }
-
 }
 
 void set_shader()
@@ -660,7 +658,6 @@ void set_parameters_shader(int selected_shader)
         imgui_isExtendFlatShading = 1;
         break;
 
-
         // Alternative effect (normal triangle + max diagram) -- Decomment if you want to see it
         // vertex_shader = "vertexShader.vs";
         // geometry_shader = "geometryShader.gs";
@@ -696,7 +693,6 @@ void set_parameters_shader(int selected_shader)
 
         imgui_isMeanCurvatureEdgeShading = 1;
         break;
-
 
     case 6: // mean curvature vertex (like Gouraud Shading)
         vertex_shader = "vertexShaderCurvature.vs";
@@ -742,12 +738,11 @@ void select_model(GLFWwindow *window)
 /**
  * Plots about Gaussian Curvature
  */
-void analyse_gaussian_curvature(GLFWwindow *window, int prev, const char* title, int minimum, int maximum, int vector_values_size, const char* type_curvature, vector<float> vector_values, const char* untouched_name, const char* percentile_name, double percentile_minimum, double percentile_maximum)
+void analyse_gaussian_curvature(GLFWwindow *window, int prev, const char *title, int minimum, int maximum, int vector_values_size, const char *type_curvature, vector<float> vector_values, const char *untouched_name, const char *percentile_name, double percentile_minimum, double percentile_maximum)
 {
-    ImGui::TextWrapped(title);
+    ImGui::TextWrapped("%s", title);
 
     ImColor green = ImColor(0, 255, 0, 255);
-    ImVec4 white = ImColor(255, 255, 255, 255);
     ImVec4 red = ImColor(255, 0, 0, 255);
 
     // Gaussian curvature
@@ -769,11 +764,11 @@ void analyse_gaussian_curvature(GLFWwindow *window, int prev, const char* title,
     vector<float> normalized_values;
 
     copy(vector_values.begin(), vector_values.end(), back_inserter(normalized_values));
-    for_each (normalized_values.begin(), normalized_values.end(), [&minimum, &maximum](int i){
-        if(i < 0)
-            i = i/minimum;
+    for_each(normalized_values.begin(), normalized_values.end(), [&minimum, &maximum](int i) {
+        if (i < 0)
+            i = i / minimum;
         else
-            i = i/maximum;
+            i = i / maximum;
     });
 
     const float **datas_initialize = new const float *[2];
@@ -783,11 +778,11 @@ void analyse_gaussian_curvature(GLFWwindow *window, int prev, const char* title,
     const float *const *datas = datas_initialize;
     ImGui::TextWrapped("\n");
 
-    if(imgui_isGaussianCurvature)
+    if (imgui_isGaussianCurvature)
         ImGui::RadioButton(untouched_name, &gc_set, 1);
-    else if(imgui_isMeanCurvatureEdgeShading)
+    else if (imgui_isMeanCurvatureEdgeShading)
         ImGui::RadioButton(untouched_name, &mc_set_edge, 1);
-    else if(imgui_isMeanCurvatureVertexShading)
+    else if (imgui_isMeanCurvatureVertexShading)
         ImGui::RadioButton(untouched_name, &mc_set_vertex, 1);
 
     ImGui::PlotMultiLines(percentile_name, 2, names, colors, func, datas, vector_values_size, minimum, maximum, ImVec2(0, 80));
@@ -801,11 +796,11 @@ void analyse_gaussian_curvature(GLFWwindow *window, int prev, const char* title,
     vector<float> normalized_percentile_values;
 
     copy(vector_values.begin(), vector_values.end(), back_inserter(normalized_percentile_values));
-    for_each (normalized_percentile_values.begin(), normalized_percentile_values.end(), [&percentile_minimum, &percentile_maximum](int i){
-        if(i < 0)
-            i = i/percentile_minimum;
+    for_each(normalized_percentile_values.begin(), normalized_percentile_values.end(), [&percentile_minimum, &percentile_maximum](int i) {
+        if (i < 0)
+            i = i / percentile_minimum;
         else
-            i = i/percentile_maximum;
+            i = i / percentile_maximum;
     });
     datas_initialize_auto[0] = &normalized_percentile_values[0];
     datas_initialize_auto[1] = &zeros[0];
@@ -814,55 +809,66 @@ void analyse_gaussian_curvature(GLFWwindow *window, int prev, const char* title,
 
     ImGui::TextWrapped("\n");
 
-    if(imgui_isGaussianCurvature)
-       ImGui::RadioButton("Used 90 Percentile", &gc_set, 2);
-    else if(imgui_isMeanCurvatureEdgeShading)
+    if (imgui_isGaussianCurvature)
+        ImGui::RadioButton("Used 90 Percentile", &gc_set, 2);
+    else if (imgui_isMeanCurvatureEdgeShading)
         ImGui::RadioButton("Used 90 Percentile", &mc_set_edge, 2);
-    else if(imgui_isMeanCurvatureVertexShading)
+    else if (imgui_isMeanCurvatureVertexShading)
         ImGui::RadioButton("Used 90 Percentile", &mc_set_vertex, 2);
 
     ImGui::PlotMultiLines("##Used 90 Percentile", 2, names_auto, colors_auto, func, datas_auto, vector_values_size, percentile_minimum, percentile_maximum, ImVec2(0, 80));
 
-    if(imgui_isGaussianCurvature){
-        if (prev != gc_set){
-            switch(gc_set){
-                case 1:
-                    global_min_gc = minimum;
-                    global_max_gc = maximum;
-                    break;
+    if (imgui_isGaussianCurvature)
+    {
+        if (prev != gc_set)
+        {
+            switch (gc_set)
+            {
+            case 1:
+                global_min_gc = minimum;
+                global_max_gc = maximum;
+                break;
 
-                default:
-                    global_min_gc = percentile_minimum;
-                    global_max_gc = percentile_maximum;
-                    break;
+            default:
+                global_min_gc = percentile_minimum;
+                global_max_gc = percentile_maximum;
+                break;
             }
         }
-    } else if(imgui_isMeanCurvatureEdgeShading){
-        if (prev != mc_set_edge){
-            switch(mc_set_edge){
-                case 1:
-                    global_min_mc_edge = minimum;
-                    global_max_mc_edge = maximum;
-                    break;
+    }
+    else if (imgui_isMeanCurvatureEdgeShading)
+    {
+        if (prev != mc_set_edge)
+        {
+            switch (mc_set_edge)
+            {
+            case 1:
+                global_min_mc_edge = minimum;
+                global_max_mc_edge = maximum;
+                break;
 
-                default:
-                    global_min_mc_edge = percentile_minimum;
-                    global_max_mc_edge = percentile_maximum;
-                    break;
+            default:
+                global_min_mc_edge = percentile_minimum;
+                global_max_mc_edge = percentile_maximum;
+                break;
             }
         }
-    } else if(imgui_isMeanCurvatureVertexShading){
-        if (prev != mc_set_vertex){
-            switch(mc_set_vertex){
-                case 1:
-                    global_min_mc_vertex = minimum;
-                    global_max_mc_vertex = maximum;
-                    break;
+    }
+    else if (imgui_isMeanCurvatureVertexShading)
+    {
+        if (prev != mc_set_vertex)
+        {
+            switch (mc_set_vertex)
+            {
+            case 1:
+                global_min_mc_vertex = minimum;
+                global_max_mc_vertex = maximum;
+                break;
 
-                default:
-                    global_min_mc_vertex = percentile_minimum;
-                    global_max_mc_vertex = percentile_maximum;
-                    break;
+            default:
+                global_min_mc_vertex = percentile_minimum;
+                global_max_mc_vertex = percentile_maximum;
+                break;
             }
         }
     }
@@ -894,36 +900,38 @@ void initialize_texture_object(GLFWwindow *window, bool reload_mesh)
         object.set_file(name_file); //load mesh
     object.init();
 
-    switch(gc_set){
-            case 1:
-                global_min_gc = object.get_minimum_gaussian_curvature_value();
-                global_max_gc = object.get_maximum_gaussian_curvature_value();
+    switch (gc_set)
+    {
+    case 1:
+        global_min_gc = object.get_minimum_gaussian_curvature_value();
+        global_max_gc = object.get_maximum_gaussian_curvature_value();
 
-            default:
-                global_min_gc = object.get_best_values_gc()[0];
-                global_max_gc = object.get_best_values_gc()[1];
+    default:
+        global_min_gc = object.get_best_values_gc()[0];
+        global_max_gc = object.get_best_values_gc()[1];
     }
 
-    switch(mc_set_edge){
-            case 1:
-                global_min_mc_edge = object.get_minimum_mean_curvature_value();
-                global_max_mc_edge = object.get_maximum_mean_curvature_value();
+    switch (mc_set_edge)
+    {
+    case 1:
+        global_min_mc_edge = object.get_minimum_mean_curvature_value();
+        global_max_mc_edge = object.get_maximum_mean_curvature_value();
 
-            default:
-                global_min_mc_edge = object.get_best_values_mc()[0];
-                global_max_mc_edge = object.get_best_values_mc()[1];
+    default:
+        global_min_mc_edge = object.get_best_values_mc()[0];
+        global_max_mc_edge = object.get_best_values_mc()[1];
     }
 
-    switch(mc_set_vertex){
-            case 1:
-                global_min_mc_vertex = object.get_min_mean_vertex();
-                global_max_mc_vertex = object.get_max_mean_vertex();
+    switch (mc_set_vertex)
+    {
+    case 1:
+        global_min_mc_vertex = object.get_min_mean_vertex();
+        global_max_mc_vertex = object.get_max_mean_vertex();
 
-            default:
-                global_min_mc_vertex = object.get_best_values_mc_vertex()[0];
-                global_max_mc_vertex = object.get_best_values_mc_vertex()[1];
+    default:
+        global_min_mc_vertex = object.get_best_values_mc_vertex()[0];
+        global_max_mc_vertex = object.get_best_values_mc_vertex()[1];
     }
-
 
     /**
         IMPORTANT FOR TRANSFORMATION:

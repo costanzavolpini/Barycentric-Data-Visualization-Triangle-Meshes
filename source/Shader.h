@@ -77,8 +77,6 @@ class Shader
 
         // 2. compile shaders
         unsigned int vertexShader, fragmentShader;
-        int success;
-        char infoLog[512];
 
         // Vertex Shader: takes as input a single vertex and return normalized device coordinates
         vertexShader = glCreateShader(GL_VERTEX_SHADER);
