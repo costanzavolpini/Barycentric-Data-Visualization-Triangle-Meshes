@@ -77,7 +77,7 @@ void rotation_settings();
 void zoom_settings();
 void set_shader();
 void select_model(GLFWwindow *window);
-void analyse_gaussian_curvature(GLFWwindow *window);
+void analyse_gaussian_curvature(GLFWwindow *window, int prev, const char* title, int minimum, int maximum, int vector_values_size, const char* type_curvature, vector<float> vector_values, const char* untouched_name, const char* percentile_name, double percentile_minimum, double percentile_maximum);
 void initialize_texture_object(GLFWwindow *window, bool reload_mesh);
 
 
@@ -97,6 +97,8 @@ bool decrease_angle = false;
 // imgui shaders
 static int shader_set = 3; // default 0
 static int gc_set = 2;
+static int mc_set_edge = 2;
+static int mc_set_vertex = 2;
 
 // imgui listbox models
 static int listbox_item_current = 0;
@@ -109,6 +111,10 @@ void set_parameters_shader(int selected_shader);
 void swap_gaussian_curvature();
 static double global_min_gc;
 static double global_max_gc;
+static double global_min_mc_edge;
+static double global_max_mc_edge;
+static double global_min_mc_vertex;
+static double global_max_mc_vertex;
 
 // ------- END IMGUI -------------
 
@@ -207,6 +213,12 @@ int main(int argc, char *argv[])
     initialize_texture_object(window, true);
     global_min_gc = object.get_best_values_gc()[0];
     global_max_gc = object.get_best_values_gc()[1];
+
+    global_min_mc_edge = object.get_best_values_mc()[0];
+    global_max_mc_edge = object.get_best_values_mc()[1];
+
+    global_min_mc_vertex = object.get_best_values_mc_vertex()[0];
+    global_max_mc_vertex = object.get_best_values_mc_vertex()[1];
 
     /**
         application to keep drawing images and handling user input until the program has been explicitly told to stop
@@ -524,7 +536,10 @@ void show_window(bool *p_open, GLFWwindow *window)
     ImGui::Text("Analyse\n\n");
     if (imgui_isGaussianCurvature)
     {
-        analyse_gaussian_curvature(window);
+        int prev_gc = gc_set;
+        int minimum_gc = object.get_minimum_gaussian_curvature_value();
+        int maximum_gc = object.get_maximum_gaussian_curvature_value();
+        analyse_gaussian_curvature(window, prev_gc, "Gaussian Curvature plots\n\n", minimum_gc, maximum_gc, object.triangle_gc.size(), "GC", object.triangle_gc, "Gaussian Curvature untouched", "##Gaussian Curvature", object.get_best_values_gc()[0], object.get_best_values_gc()[1]);
     }
 
     ImGui::SetCursorPosY(io.DisplaySize.y - 18.0f); // columns end at the end of window
@@ -721,22 +736,20 @@ void select_model(GLFWwindow *window)
 /**
  * Plots about Gaussian Curvature
  */
-void analyse_gaussian_curvature(GLFWwindow *window)
+void analyse_gaussian_curvature(GLFWwindow *window, int prev, const char* title, int minimum, int maximum, int vector_values_size, const char* type_curvature, vector<float> vector_values, const char* untouched_name, const char* percentile_name, double percentile_minimum, double percentile_maximum)
 {
-    int prev_gc = gc_set;
-    ImGui::TextWrapped("Gaussian Curvature plots\n\n");
-    int minimum_gc = object.get_minimum_gaussian_curvature_value();
-    int maximum_gc = object.get_maximum_gaussian_curvature_value();
+    ImGui::TextWrapped(title);
+
     ImColor green = ImColor(0, 255, 0, 255);
     ImVec4 white = ImColor(255, 255, 255, 255);
     ImVec4 red = ImColor(255, 0, 0, 255);
 
     static int values_offset = 0;
     static int display_count = 70;
-    ImGui::SliderInt("Sample count", &display_count, 1, object.triangle_gc.size());
+    ImGui::SliderInt("Sample count", &display_count, 1, vector_values_size);
 
     // Gaussian curvature
-    const char *names[] = {"GC", "ZERO"};
+    const char *names[] = {type_curvature, "ZERO"};
     const ImColor colors[2] = {green, red};
 
     struct Funcs
@@ -749,73 +762,110 @@ void analyse_gaussian_curvature(GLFWwindow *window)
 
     float (*func)(const float *data, int idx) = Funcs::function;
 
-    const int size = object.triangle_gc.size();
+    std::vector<float> zeros(vector_values_size, 0.0f);
 
-    std::vector<float> zeros(size, 0.0f);
+    vector<float> normalized_values;
 
-    vector<float> normalized_triangle_gc;
-
-    copy(object.triangle_gc.begin(), object.triangle_gc.end(), back_inserter(normalized_triangle_gc));
-    for_each (normalized_triangle_gc.begin(), normalized_triangle_gc.end(), [&minimum_gc, &maximum_gc](int i){
+    copy(vector_values.begin(), vector_values.end(), back_inserter(normalized_values));
+    for_each (normalized_values.begin(), normalized_values.end(), [&minimum, &maximum](int i){
         if(i < 0)
-            i = i/minimum_gc;
+            i = i/minimum;
         else
-            i = i/maximum_gc;
+            i = i/maximum;
     });
 
     const float **datas_initialize = new const float *[2];
-    datas_initialize[0] = &normalized_triangle_gc[0];
+    datas_initialize[0] = &normalized_values[0];
     datas_initialize[1] = &zeros[0];
 
     const float *const *datas = datas_initialize;
     ImGui::TextWrapped("\n");
-    ImGui::RadioButton("Gaussian Curvature untouched", &gc_set, 1);
-    ImGui::PlotMultiLines("##Gaussian Curvature", 2, names, colors, func, datas, display_count, minimum_gc, maximum_gc, ImVec2(0, 80));
+
+    if(imgui_isGaussianCurvature)
+        ImGui::RadioButton(untouched_name, &gc_set, 1);
+    else if(imgui_isMeanCurvatureEdgeShading)
+        ImGui::RadioButton(untouched_name, &mc_set_edge, 1);
+    else if(imgui_isMeanCurvatureVertexShading)
+        ImGui::RadioButton(untouched_name, &mc_set_vertex, 1);
+
+    ImGui::PlotMultiLines(percentile_name, 2, names, colors, func, datas, display_count, minimum, maximum, ImVec2(0, 80));
 
     // automatic Gaussian Curvature
-    const char *names_auto[] = {"GC", "ZERO"};
+    const char *names_auto[] = {type_curvature, "ZERO"};
     const ImColor colors_auto[2] = {green, red};
 
     const float **datas_initialize_auto = new const float *[2];
 
-    double percentile_minimum_gc = object.get_best_values_gc()[0];
-    double percentile_maximum_gc = object.get_best_values_gc()[1];
+    vector<float> normalized_percentile_values;
 
-    vector<float> modified_triangle_gc;
-
-    copy(object.triangle_gc.begin(), object.triangle_gc.end(), back_inserter(modified_triangle_gc));
-    for_each (modified_triangle_gc.begin(), modified_triangle_gc.end(), [&percentile_minimum_gc, &percentile_maximum_gc](int i){
+    copy(vector_values.begin(), vector_values.end(), back_inserter(normalized_percentile_values));
+    for_each (normalized_percentile_values.begin(), normalized_percentile_values.end(), [&percentile_minimum, &percentile_maximum](int i){
         if(i < 0)
-            i = i/percentile_minimum_gc;
+            i = i/percentile_minimum;
         else
-            i = i/percentile_maximum_gc;
+            i = i/percentile_maximum;
     });
-    datas_initialize_auto[0] = &modified_triangle_gc[0];
+    datas_initialize_auto[0] = &normalized_percentile_values[0];
     datas_initialize_auto[1] = &zeros[0];
 
     const float *const *datas_auto = datas_initialize_auto;
 
     ImGui::TextWrapped("\n");
-    ImGui::RadioButton("Used 90 Percentile", &gc_set, 2);
-    ImGui::PlotMultiLines("##Used 90 Percentile", 2, names_auto, colors_auto, func, datas_auto, display_count, percentile_minimum_gc, percentile_maximum_gc, ImVec2(0, 80));
+
+    if(imgui_isGaussianCurvature)
+       ImGui::RadioButton("Used 90 Percentile", &gc_set, 2);
+    else if(imgui_isMeanCurvatureEdgeShading)
+        ImGui::RadioButton("Used 90 Percentile", &mc_set_edge, 2);
+    else if(imgui_isMeanCurvatureVertexShading)
+        ImGui::RadioButton("Used 90 Percentile", &mc_set_vertex, 2);
+
+    ImGui::PlotMultiLines("##Used 90 Percentile", 2, names_auto, colors_auto, func, datas_auto, display_count, percentile_minimum, percentile_maximum, ImVec2(0, 80));
 
     // section where the user can set its own minimum and maximum value for gaussian curvature
 
-    if (prev_gc != gc_set)
-    {
-        switch(gc_set){
-            case 1:
-                global_min_gc = minimum_gc;
-                global_max_gc = maximum_gc;
-                break;
 
-            default:
-                global_min_gc = percentile_minimum_gc;
-                global_max_gc = percentile_maximum_gc;
-                break;
+    if(imgui_isGaussianCurvature){
+        if (prev != gc_set){
+            switch(gc_set){
+                case 1:
+                    global_min_gc = minimum;
+                    global_max_gc = maximum;
+                    break;
+
+                default:
+                    global_min_gc = percentile_minimum;
+                    global_max_gc = percentile_maximum;
+                    break;
+            }
         }
+    } else if(imgui_isMeanCurvatureEdgeShading){
+        if (prev != mc_set_edge){
+            switch(mc_set_edge){
+                case 1:
+                    global_min_mc_edge = minimum;
+                    global_max_mc_edge = maximum;
+                    break;
 
-        cout << "changed " << global_min_gc << endl;
+                default:
+                    global_min_mc_edge = percentile_minimum;
+                    global_max_mc_edge = percentile_maximum;
+                    break;
+            }
+        }
+    } else if(imgui_isMeanCurvatureVertexShading){
+        if (prev != mc_set_vertex){
+            switch(mc_set_vertex){
+                case 1:
+                    global_min_mc_vertex = minimum;
+                    global_max_mc_vertex = maximum;
+                    break;
+
+                default:
+                    global_min_mc_vertex = percentile_minimum;
+                    global_max_mc_vertex = percentile_maximum;
+                    break;
+            }
+        }
     }
 }
 
@@ -853,6 +903,26 @@ void initialize_texture_object(GLFWwindow *window, bool reload_mesh)
             default:
                 global_min_gc = object.get_best_values_gc()[0];
                 global_max_gc = object.get_best_values_gc()[1];
+    }
+
+    switch(mc_set_edge){
+            case 1:
+                global_min_mc_edge = object.get_minimum_mean_curvature_value();
+                global_max_mc_edge = object.get_maximum_mean_curvature_value();
+
+            default:
+                global_min_mc_edge = object.get_best_values_mc()[0];
+                global_max_mc_edge = object.get_best_values_mc()[1];
+    }
+
+    switch(mc_set_vertex){
+            case 1:
+                global_min_mc_vertex = object.get_min_mean_vertex();
+                global_max_mc_vertex = object.get_max_mean_vertex();
+
+            default:
+                global_min_mc_vertex = object.get_best_values_mc_vertex()[0];
+                global_max_mc_vertex = object.get_best_values_mc_vertex()[1];
     }
 
 

@@ -39,8 +39,6 @@ class Object
     double best_min_mc_vertex;
     double best_max_mc_vertex;
 
-    int type_gc = 2;
-
     KPercentile k_percentile_gc = KPercentile();
     KPercentile k_percentile_mc = KPercentile();
     KPercentile k_percentile_mc_vertex = KPercentile();
