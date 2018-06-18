@@ -517,7 +517,7 @@ void show_window(bool *p_open, GLFWwindow *window)
     double width_image = ImGui::GetCursorScreenPos().x + io.DisplaySize.x / 2;
     double height_image = ImGui::GetCursorScreenPos().y + io.DisplaySize.y / 2;
 
-    ImGui::GetWindowDrawList()->AddImage((void *)object.getVAO(),
+    ImGui::GetWindowDrawList()->AddImage((void *)(size_t)object.getVAO(),
                                          ImVec2(ImGui::GetCursorScreenPos()),
                                          ImVec2(width_image,
                                                 height_image),
